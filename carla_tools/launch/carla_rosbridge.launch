@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<launch>
+  <node pkg="carla_tools" type="carla_rosbridge.py" name="carla_rosbridge" output="screen">
+      <param name="carla_logfile" value="$(find carla_tools)/carla_logs/test4.log"/>
+  </node>
+</launch>
