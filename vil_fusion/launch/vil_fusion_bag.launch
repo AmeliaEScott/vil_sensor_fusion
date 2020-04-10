@@ -1,0 +1,19 @@
+<launch>
+
+	<arg name="bagfile" />
+
+	<node pkg="rosbag" type="play" name="rosbag_player" args="$(arg bagfile)" />
+
+    <include file="$(find vil_fusion)/launch/vil_fusion.launch" />
+
+    <!--node pkg="rovio" type="rovio_rosbag_loader" name="rovio" output="screen">
+        <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
+        <param name="camera0_config" value="$(find vil_fusion)/cfg/airsim.yaml"/>
+        <param name="camera1_config" value="$(find vil_fusion)/cfg/airsim.yaml"/>
+        <param name="rosbag_filename" value="$(arg bagfile)"/>
+        <param name="imu_topic_name" value="/airsim_rosbridge/imu"/>
+        <param name="cam0_topic_name" value="/airsim_rosbridge/cam0/image_raw"/>
+        <param name="cam1_topic_name" value="/airsim_rosbridge/cam1/image_raw"/>
+    </node-->
+
+</launch>

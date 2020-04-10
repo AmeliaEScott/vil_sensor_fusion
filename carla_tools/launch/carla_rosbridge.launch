@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <launch>
+  <arg name="recording" />
+  <arg name="bagname" default="$(arg recording).bag"/>
+  <arg name="record" default="false" />
+
   <node pkg="carla_tools" type="carla_rosbridge.py" name="carla_rosbridge" output="screen">
-      <param name="carla_logfile" value="$(find carla_tools)/carla_logs/test4.log"/>
+      <rosparam command="load" file="$(find carla_tools)/config/params.yaml" />
+      <param name="carla_logfile" value="$(find carla_tools)/carla_logs/$(arg recording)"/>
   </node>
+
+  <node if="$(arg record)" pkg="rosbag" type="record" name="carla_rosbag_record" args="
+    record -o $(find carla_tools)/rosbags/$(arg bagname).bag
+    /carla_rosbridge/cam0/image_raw
+    /carla_rosbridge/imu0
+  " />
 </launch>

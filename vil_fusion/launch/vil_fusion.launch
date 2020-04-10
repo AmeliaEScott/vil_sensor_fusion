@@ -1,0 +1,14 @@
+<launch>
+
+	<node pkg="image_proc" type="image_proc" name="image_proc" ns="/carla_rosbridge/cam0">
+
+    </node>
+
+    <remap from="cam0/image_raw" to="/carla_rosbridge/cam0/image_mono" />
+    <remap from="imu0" to="/carla_rosbridge/imu0" />
+    <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
+        <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
+        <param name="camera0_config" value="$(find vil_fusion)/cfg/airsim.yaml"/>
+    </node>
+
+</launch>
