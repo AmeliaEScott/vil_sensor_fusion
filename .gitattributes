@@ -1,0 +1,2 @@
+*.bag filter=lfs diff=lfs merge=lfs -text
+carla_tools/carla_logs/*.log filter=lfs diff=lfs merge=lfs -text
