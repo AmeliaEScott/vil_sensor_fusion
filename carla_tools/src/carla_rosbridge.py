@@ -17,6 +17,7 @@ class CarlaRosbridge:
 
         self.should_do_depth = rospy.get_param("~should_do_depth")
         self.camera_params = rospy.get_param("~camera_params")
+        self.recording_length = rospy.get_param("~recording_length")
 
         self.carla_logfile = rospy.get_param("~carla_logfile")
         self.imu0_transform = rospy.get_param("~imu0_transform")
@@ -37,7 +38,7 @@ class CarlaRosbridge:
 
         self.carla_client = carla.Client(hostname, port)
 
-        print(self.carla_client.replay_file(self.carla_logfile, 0, 30, 0))
+        print(self.carla_client.replay_file(self.carla_logfile, 0, self.recording_length, 0))
 
         self.carla_world: carla.World = self.carla_client.get_world()
         settings = self.carla_world.get_settings()
