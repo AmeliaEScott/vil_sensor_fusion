@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import os
 import time
@@ -56,14 +56,21 @@ control_proc = subprocess.Popen(
 
 time.sleep(2)
 
-#input("Press enter to begin recording... ")
-
 # RECORD
 client = carla.Client("localhost", 2000)
 world = client.get_world()
 settings = world.get_settings()
-settings.fixed_delta_seconds = 0.005
+settings.fixed_delta_seconds = 0.004
 world.apply_settings(settings)
+
+while True:
+    try:
+        actors = world.get_actors()
+        ego_vehicle_actor = next(filter(lambda a: a.attributes.get('role_name') == 'hero', actors).__iter__())
+        break
+    except StopIteration:
+        print("Waiting for hero vehicle to spawn...")
+        time.sleep(1)
 
 client.start_recorder(args.output)
 

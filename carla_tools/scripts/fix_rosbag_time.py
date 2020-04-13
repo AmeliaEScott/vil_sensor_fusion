@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 # Taken directly from http://wiki.ros.org/rosbag/Cookbook
 # This script is used to convert real time to simulated time on a ROS bag.
 # When recording and replaying a ROS bag, the headers in the messages will be ignored. Instead, rosbag

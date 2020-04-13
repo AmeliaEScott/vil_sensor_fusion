@@ -12,8 +12,9 @@
   </node>
 
   <node if="$(arg record)" pkg="rosbag" type="record" name="carla_rosbag_record" args="
-    record -o $(find carla_tools)/rosbags/$(arg bagname).bag
+    record -O $(find carla_tools)/rosbags/$(arg bagname).bag
     /carla_rosbridge/cam0/image_raw
     /carla_rosbridge/imu0
+    /tf
   " />
 </launch>

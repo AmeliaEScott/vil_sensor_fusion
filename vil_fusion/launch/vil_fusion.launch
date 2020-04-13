@@ -8,7 +8,7 @@
     <remap from="imu0" to="/carla_rosbridge/imu0" />
     <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
         <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
-        <param name="camera0_config" value="$(find vil_fusion)/cfg/airsim.yaml"/>
+        <param name="camera0_config" value="$(find vil_fusion)/cfg/carla.yaml"/>
     </node>
 
 </launch>
