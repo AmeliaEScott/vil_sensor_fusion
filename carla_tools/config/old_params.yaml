@@ -1,5 +1,3 @@
-# This is the frequency of the original simulation recording
-base_freq: 250
 # An image will be captured every this many simulation ticks.
 # The FPS of the camera is base_freq / camera_period
 camera_period: 10

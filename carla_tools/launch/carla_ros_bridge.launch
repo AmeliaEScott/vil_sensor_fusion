@@ -1,10 +1,51 @@
 <!-- -->
 <launch>
 
-  <include file="$(find carla_ros_bridge)/launch/carla_ros_bridge.launch">
-    <param name="carla/synchronous_mode" value="true" />
-    <param name="carla/fixed_delta_seconds" value="0.005" />
-    <param name="carla/synchronous_mode_wait_for_vehicle_control_command" value="false" />
-  </include>
+    <arg name="bagname" />
+    <arg name="bag_start_delay" default="20.0" />
+
+    <rosparam command="load" file="$(find carla_tools)/config/carla_ros_bridge_settings.yaml" />
+    <!--param name="carla_log" value="$(find carla_tools)/carla_logs/$(arg carla_log)" /-->
+
+    <include file="$(find carla_ros_bridge)/launch/carla_ros_bridge.launch">
+<!--         <param name="carla/synchronous_mode" value="true" /> -->
+<!--         <param name="carla/fixed_delta_seconds" value="0.005" /> -->
+<!--         <param name="carla/synchronous_mode_wait_for_vehicle_control_command" value="false" /> -->
+    </include>
+
+    <include file="$(find carla_ego_vehicle)/launch/carla_ego_vehicle.launch">
+        <arg name="vehicle_filter" value="vehicle.*" />
+        <arg name="sensor_definition_file" value="$(find carla_tools)/config/sensors.json" />
+    </include>
+
+    <node pkg="carla_tools" type="custom_manual_control.py" name="custom_manual_control" output="screen">
+        <param name="role_name" value="ego_vehicle"/>
+    </node>
+
+    <node pkg="carla_tools" type="carla_imu_rovio_transform.py" name="carla_imu_rovio_transform" output="screen">
+        <remap from="/carla_imu_rovio_transform/imu_carla" to="/carla/ego_vehicle/imu" />
+    </node>
+
+    <!--node pkg="carla_tools" type="carla_sensors.py" name="carla_sensors" output="screen">
+        <param name="recording_length" value="$(arg recording_length)" />
+    </node-->
+
+    <rosparam command="load" file="$(find carla_tools)/config/carla_ros_bridge_settings.yaml" />
+
+    <node pkg="rosbag" type="record" name="carla_rosbag_record" launch-prefix="bash -c 'sleep $(arg bag_start_delay); $0 $@' " args="
+    record -O $(find carla_tools)/rosbags/$(arg bagname).bag
+    /cam0/camera_info
+    /cam0/image_raw
+    /imu0
+    /lidar0
+    /simulation_groundtruth
+    /tf
+    " >
+        <remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front/camera_info" />
+        <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front/image_color" />
+        <remap from="/lidar0" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
+        <remap from="/imu0" to="/carla_imu_rovio_transform/imu_rovio" />
+        <remap from="/simulation_groundtruth" to="/carla/ego_vehicle/vehicle_status" />
+    </node>
     
 </launch>

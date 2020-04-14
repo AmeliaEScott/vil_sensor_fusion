@@ -1,14 +1,31 @@
 <launch>
 
-	<node pkg="image_proc" type="image_proc" name="image_proc" ns="/carla_rosbridge/cam0">
+    <arg name="rovio" default="true" />
+    <arg name="loam" default="true" />
+    <arg name="rviz" default="false" />
 
-    </node>
+    <group if="$(arg rovio)" >
+        <node pkg="image_proc" type="image_proc" name="image_proc" ns="/cam0">
 
-    <remap from="cam0/image_raw" to="/carla_rosbridge/cam0/image_mono" />
-    <remap from="imu0" to="/carla_rosbridge/imu0" />
-    <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
-        <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
-        <param name="camera0_config" value="$(find vil_fusion)/cfg/carla.yaml"/>
-    </node>
+        </node>
+
+        <remap from="cam0/image_raw" to="cam0/image_mono" />
+        <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
+            <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
+            <param name="camera0_config" value="$(find vil_fusion)/cfg/carla.yaml"/>
+        </node>
+    </group>
+
+    <!--
+    Subscriptions:
+ * /imu/data [unknown type]
+ * /velodyne_points [unknown type]
+
+    -->
+    <remap from="/imu/data" to="/imu0" />
+
+    <include if="$(arg loam)" file="$(find loam_velodyne)/launch/loam_velodyne.launch">
+        <arg name="rviz" value="$(arg rviz)" />
+    </include>
 
 </launch>

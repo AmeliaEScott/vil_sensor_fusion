@@ -1,10 +1,19 @@
 <launch>
 
 	<arg name="bagfile" />
+	<arg name="rovio" default="true" />
+    <arg name="loam" default="true" />
+    <arg name="rviz" default="false" />
 
-	<node pkg="rosbag" type="play" name="rosbag_player" args="$(arg bagfile)" />
+	<node pkg="rosbag" type="play" name="rosbag_player" args="-l $(arg bagfile)" >
+	<remap to="/velodyne_points" from="/lidar0" />
+	</node>
 
-    <include file="$(find vil_fusion)/launch/vil_fusion.launch" />
+    <include file="$(find vil_fusion)/launch/vil_fusion.launch">
+        <arg name="rovio" value="$(arg rovio)" />
+        <arg name="loam" value="$(arg loam)" />
+        <arg name="rviz" value="$(arg rviz)" />
+    </include>
 
     <!--node pkg="rovio" type="rovio_rosbag_loader" name="rovio" output="screen">
         <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>

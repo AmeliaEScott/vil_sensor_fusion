@@ -183,44 +183,50 @@ class World(object):
         self.recording_start = 0
 
     def restart(self):
-        self.player_max_speed = 1.589
-        self.player_max_speed_fast = 3.713
-        # Keep same camera config if the camera manager exists.
+        # self.player_max_speed = 1.589
+        # self.player_max_speed_fast = 3.713
+        # # Keep same camera config if the camera manager exists.
         cam_index = self.camera_manager.index if self.camera_manager is not None else 0
         cam_pos_index = self.camera_manager.transform_index if self.camera_manager is not None else 0
-        # Get a random blueprint.
-        blueprint = random.choice(self.world.get_blueprint_library().filter(self._actor_filter))
-        blueprint.set_attribute('role_name', self.actor_role_name)
-        if blueprint.has_attribute('color'):
-            color = random.choice(blueprint.get_attribute('color').recommended_values)
-            blueprint.set_attribute('color', color)
-        if blueprint.has_attribute('driver_id'):
-            driver_id = random.choice(blueprint.get_attribute('driver_id').recommended_values)
-            blueprint.set_attribute('driver_id', driver_id)
-        if blueprint.has_attribute('is_invincible'):
-            blueprint.set_attribute('is_invincible', 'true')
-        # set the max speed
-        if blueprint.has_attribute('speed'):
-            self.player_max_speed = float(blueprint.get_attribute('speed').recommended_values[1])
-            self.player_max_speed_fast = float(blueprint.get_attribute('speed').recommended_values[2])
-        else:
-            print("No recommended values for 'speed' attribute")
-        # Spawn the player.
-        if self.player is not None:
-            spawn_point = self.player.get_transform()
-            spawn_point.location.z += 2.0
-            spawn_point.rotation.roll = 0.0
-            spawn_point.rotation.pitch = 0.0
-            self.destroy()
-            self.player = self.world.try_spawn_actor(blueprint, spawn_point)
-        while self.player is None:
-            if not self.map.get_spawn_points():
-                print('There are no spawn points available in your map/town.')
-                print('Please add some Vehicle Spawn Point to your UE4 scene.')
-                sys.exit(1)
-            spawn_points = self.map.get_spawn_points()
-            spawn_point = random.choice(spawn_points) if spawn_points else carla.Transform()
-            self.player = self.world.try_spawn_actor(blueprint, spawn_point)
+        # # Get a random blueprint.
+        # blueprint = random.choice(self.world.get_blueprint_library().filter(self._actor_filter))
+        # blueprint.set_attribute('role_name', self.actor_role_name)
+        # if blueprint.has_attribute('color'):
+        #     color = random.choice(blueprint.get_attribute('color').recommended_values)
+        #     blueprint.set_attribute('color', color)
+        # if blueprint.has_attribute('driver_id'):
+        #     driver_id = random.choice(blueprint.get_attribute('driver_id').recommended_values)
+        #     blueprint.set_attribute('driver_id', driver_id)
+        # if blueprint.has_attribute('is_invincible'):
+        #     blueprint.set_attribute('is_invincible', 'true')
+        # # set the max speed
+        # if blueprint.has_attribute('speed'):
+        #     self.player_max_speed = float(blueprint.get_attribute('speed').recommended_values[1])
+        #     self.player_max_speed_fast = float(blueprint.get_attribute('speed').recommended_values[2])
+        # else:
+        #     print("No recommended values for 'speed' attribute")
+        # # Spawn the player.
+        # if self.player is not None:
+        #     spawn_point = self.player.get_transform()
+        #     spawn_point.location.z += 2.0
+        #     spawn_point.rotation.roll = 0.0
+        #     spawn_point.rotation.pitch = 0.0
+        #     self.destroy()
+        #     self.player = self.world.try_spawn_actor(blueprint, spawn_point)
+        # while self.player is None:
+        #     if not self.map.get_spawn_points():
+        #         print('There are no spawn points available in your map/town.')
+        #         print('Please add some Vehicle Spawn Point to your UE4 scene.')
+        #         sys.exit(1)
+        #     spawn_points = self.map.get_spawn_points()
+        #     spawn_point = random.choice(spawn_points) if spawn_points else carla.Transform()
+        #     self.player = self.world.try_spawn_actor(blueprint, spawn_point)
+        actors = self.world.get_actors()
+        self.player = next(
+            filter(
+                lambda a: a.attributes.get('role_name') == self.actor_role_name,
+                actors
+            ).__iter__())
         # Set up the sensors.
         self.collision_sensor = CollisionSensor(self.player, self.hud)
         self.lane_invasion_sensor = LaneInvasionSensor(self.player, self.hud)
@@ -229,6 +235,7 @@ class World(object):
         self.camera_manager = CameraManager(self.player, self.hud, self._gamma)
         self.camera_manager.transform_index = cam_pos_index
         self.camera_manager.set_sensor(cam_index, notify=False)
+
         actor_type = get_actor_display_name(self.player)
         self.hud.notification(actor_type)
 

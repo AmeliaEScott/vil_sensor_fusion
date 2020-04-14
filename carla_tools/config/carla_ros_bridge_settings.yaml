@@ -1,11 +1,11 @@
-use_sim_time: true
+use_sim_time: false
 carla:
   # the network connection for the python connection to CARLA
   host: localhost
   port: 2000
   # enable/disable synchronous mode. If enabled ros-bridge waits until
   # expected data is received for all sensors
-  synchronous_mode: true
+  synchronous_mode: false
   # within synchronous mode: wait for a vehicle control command before next tick?
   synchronous_mode_wait_for_vehicle_control_command: false
   # set the fixed timestep length
@@ -16,3 +16,64 @@ carla:
     # Only the vehicles within this list are controllable from within ROS.
     # (the vehicle from CARLA is selected which has the attribute 'role_name' set to this value)
     role_name: ["hero", "ego_vehicle"]
+
+carla_sensors:
+  # An image will be captured every this many simulation ticks.
+  # The FPS of the camera is base_freq / camera_period
+  camera_period: 10
+  lidar_period: 20
+
+  should_do_depth: false
+  carla_hostname: localhost
+  carla_port: 2000
+
+  camera_params:
+    fov: 90  # Field of view in degrees
+    width: 720
+    height: 480
+
+  # All transforms are in the conventional ROS coordinate frame
+  #  (according to https://www.ros.org/reps/rep-0103.html#coordinate-frame-conventions):
+  #  - x: Forward
+  #  - y: Left
+  #  - z: Up (along optical axis of camera)
+  # Rotations are in degrees:
+  #  - roll: Positive right (Around +x axis)
+  #  - pitch: Positive down (Around +y axis)
+  #  - yaw: Positive left (Around +z axis)
+
+  # Transform from camera to IMU
+  imu0_transform:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    roll: 0
+    pitch: 0
+    yaw: 0
+
+  # Transform from vehicle frame to Camera frame
+  camera_transform:
+    x: 2.5
+    y: 0.0
+    z: 1.8
+    roll: 0
+    pitch: 0
+    yaw: 0
+
+  # Transform from vehicle frame to IMU1
+  imu1_transform:
+    x: 2.5
+    y: 0.0
+    z: 1.8
+    roll: 0
+    pitch: 0
+    yaw: 0
+
+  # Transform from vehicle frame to Lidar
+  lidar_transform:
+    x: 2.5
+    y: 0.0
+    z: 1.8
+    roll: 0
+    pitch: 0
+    yaw: 0
