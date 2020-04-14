@@ -65,7 +65,12 @@ class CarlaRosbridge:
                 self.carla_world.tick()
                 print("No Hero vehicle found.")
 
-        self.initial_transform = None
+        # for i in range(0, 100):
+        #     self.carla_world.tick()
+        #
+        # self.initial_transform = None
+        self.pose_offset = None
+        self.orientation_offset = None
         self.carla_world.on_tick(self.tick_listener)
 
         self.rgb_camera = self.setup_camera()
@@ -100,7 +105,8 @@ class CarlaRosbridge:
 
     @staticmethod
     def convert_carla_to_ros(t):
-        location = (t.location.x, -t.location.y, t.location.z)
+        #location = (t.location.x, -t.location.y, t.location.z)
+        location = (-t.location.y, -t.location.x, t.location.z)
         rpy = (math.radians(t.rotation.roll), math.radians(-t.rotation.pitch), math.radians(-t.rotation.yaw))
         #print("Carla loc: {}, Ros loc: {}\nCarla rot: {}, Ros rot: {}".format((t.location.x, t.location.y, t.location.z), location, (t.rotation.roll, t.rotation.pitch, t.rotation.yaw), rpy))
         return location, tf.transformations.quaternion_from_euler(*rpy)
@@ -171,19 +177,22 @@ class CarlaRosbridge:
         carla_pose = self.ego_vehicle_actor.get_transform()
         ros_location, ros_quaternion = self.convert_carla_to_ros(carla_pose)
 
-        if self.initial_transform is None:
-            self.initial_transform = (
-                (-ros_location[0], -ros_location[1], -ros_location[2]),
-                tf.transformations.quaternion_inverse(ros_quaternion)
-            )
-
-        self.pub_gt_transform.sendTransform(
-            self.initial_transform[0],
-            self.initial_transform[1],
-            rospy.Time.from_sec(event.timestamp.elapsed_seconds),
-            "/carla_world",
-            "/world"
-        )
+        # if self.initial_transform is None:
+        #     self.initial_transform = (
+        #         (-ros_location[0], -ros_location[1], -ros_location[2]),
+        #         tf.transformations.quaternion_inverse(ros_quaternion)
+        #     )
+        #
+        # self.pub_gt_transform.sendTransform(
+        #     self.initial_transform[0],
+        #     self.initial_transform[1],
+        #     rospy.Time.from_sec(event.timestamp.elapsed_seconds),
+        #     "/carla_world",
+        #     "/world"
+        # )
+        if self.pose_offset is None:
+            self.pose_offset = ros_location
+            self.orientation_offset = ros_quaternion
 
         for pose, frame in zip([
             self.ego_vehicle_actor.get_transform(),
@@ -197,12 +206,14 @@ class CarlaRosbridge:
             '/cam0_gt'
         ]):
             ros_location, ros_quaternion = self.convert_carla_to_ros(pose)
+            ros_location = [a - b for a, b in zip(ros_location, self.pose_offset)]
+            ros_quaternion = tf.transformations.quaternion_multiply(tf.transformations.quaternion_inverse(self.orientation_offset), ros_quaternion)
             self.pub_gt_transform.sendTransform(
                 ros_location,
                 ros_quaternion,
                 rospy.Time.from_sec(event.timestamp.elapsed_seconds),
                 frame,
-                "/carla_world"
+                "/world"
             )
 
     def camera_listener(self, img):

@@ -1,0 +1,10 @@
+<!-- -->
+<launch>
+
+  <include file="$(find carla_ros_bridge)/launch/carla_ros_bridge.launch">
+    <param name="carla/synchronous_mode" value="true" />
+    <param name="carla/fixed_delta_seconds" value="0.005" />
+    <param name="carla/synchronous_mode_wait_for_vehicle_control_command" value="false" />
+  </include>
+    
+</launch>
