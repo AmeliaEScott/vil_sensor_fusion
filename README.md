@@ -30,8 +30,21 @@ The following commands are all run within `carla_tools` as the working directory
 
  1. Launch the Carla simulator
    - `./opt/carla/bin/CarlaUE4.sh`
+   - This is only the simulator server. It provides a spectator camera, but does not set up a vehicle or sensors
+     or anything else. That is all done by the ROS bridge in the next step.
  2. `roslaunch carla_tools carla_ros_bridge.launch bag_name:=data`
-   - This will store the resulting data in `carla_tools/rosbags/data.bag`
+   - This will perform a few important steps:
+     - Spawn a vehicle with sensors into Carla
+     - Open up a window for manual control of that vehicle
+     - Store the resulting data in `carla_tools/rosbags/data.bag`
+   - To control the vehicle:
+     - Use WASD keys for manual control
+     - For autopilot, first disable manual control with `B`, then enable autopilot with `P`.
+     - For help, press `H`.
+   - Note: This launch file is configured to not start recording the ROS bag until 20 seconds after launch.
+     This is because the vehicle starts out in the simulation a few meters above the ground, and that freefall at the
+     start was causing Rovio to diverge. To adjust this, use the parameter `bag_start_delay:=<n>`, where `<n>` is
+     a number of seconds.
  3. `./scripts/fix_rosbag_time.py rosbags/data.bag`
    - This will change the timing of the ROS bag so that all of the messages are published in real time. The results
      are stored in a new bag in the same directory, with `_timefixed` appended. (Carla tends
@@ -65,3 +78,11 @@ This package is for running experiments on ROS bags. To do so:
    - `loam:=false` to disable Loam
    - `rviz:=true` to enable the Rviz configuration included with Loam
    - In the future, I will include an Rviz configuration that displays both Rovio and Loam odometry in a convenient way.
+
+I have included a few sample ROS bags in `vil_fusion/sample_bags/`. These are stored with Git LFS, so you will need
+to have Git LFS installed:
+
+    git lfs install
+
+Everything else should work normally after that. If you installed Git LFS only after cloning the repo, you can
+run `git lfs fetch` to make sure you have all of the important files.
