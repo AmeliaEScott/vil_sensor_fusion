@@ -6,7 +6,7 @@
     <arg name="rviz" default="false" />
 
 	<node pkg="rosbag" type="play" name="rosbag_player" args="$(arg bagfile)" >
-	    <remap to="/velodyne_points" from="/lidar_loam" />
+	    <remap to="/velodyne_points" from="/lidar/loam" />
 	</node>
 
     <include file="$(find vil_fusion)/launch/vil_fusion.launch">

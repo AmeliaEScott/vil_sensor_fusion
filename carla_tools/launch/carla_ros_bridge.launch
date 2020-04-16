@@ -22,9 +22,9 @@
         <param name="role_name" value="ego_vehicle"/>
     </node>
 
-    <node pkg="carla_tools" type="carla_imu_rovio_transform.py" name="carla_imu_rovio_transform" output="screen">
-        <remap from="/carla_imu_rovio_transform/imu_carla" to="/carla/ego_vehicle/imu" />
-        <remap from="/carla_imu_rovio_transform/lidar_carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
+    <node pkg="carla_tools" type="carla_to_ros_transforms.py" name="carla_to_ros_transforms" output="screen">
+        <remap from="~imu/carla" to="/carla/ego_vehicle/imu" />
+        <remap from="~lidar/carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
     </node>
 
     <!--node pkg="carla_tools" type="carla_sensors.py" name="carla_sensors" output="screen">
@@ -37,19 +37,21 @@
     record -O $(find carla_tools)/rosbags/$(arg bagname).bag
     /cam0/camera_info
     /cam0/image_raw
-    /imu_rovio
-    /imu_loam
-    /lidar0
-    /lidar_loam
+    /imu/rovio
+    /imu/loam
+    /imu/ros
+    /lidar/carla
+    /lidar/loam
     /simulation_groundtruth
     /tf
     " >
         <remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front/camera_info" />
         <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front/image_color" />
-        <remap from="/lidar0" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
-        <remap from="/lidar_loam" to="/carla_imu_rovio_transform/lidar_loam" />
-        <remap from="/imu_rovio" to="/carla_imu_rovio_transform/imu_rovio" />
-        <remap from="/imu_loam" to="/carla_imu_rovio_transform/imu_loam" />
+        <remap from="/lidar/carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
+        <remap from="/lidar/loam" to="/carla_to_ros_transforms/lidar/loam" />
+        <remap from="/imu/rovio" to="/carla_to_ros_transforms/imu/rovio" />
+        <remap from="/imu/loam" to="/carla_to_ros_transforms/imu/loam" />
+        <remap from="/imu/ros" to="/carla_to_ros_transforms/imu/ros" />
         <remap from="/simulation_groundtruth" to="/carla/ego_vehicle/vehicle_status" />
     </node>
     

@@ -10,8 +10,11 @@
         </node>
 
         <remap from="cam0/image_raw" to="cam0/image_mono" />
-        <remap from="imu0" to="imu_rovio" />
+        <remap from="imu0" to="imu/rovio" />
         <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
+            <rosparam>
+                tf_prefix: rovio
+            </rosparam>
             <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
             <param name="camera0_config" value="$(find vil_fusion)/cfg/carla.yaml"/>
         </node>
@@ -23,9 +26,12 @@
  * /velodyne_points [unknown type]
 
     -->
-    <remap from="/imu/data" to="/imu0" />
+    <remap from="/imu/data" to="/imu/loam" />
 
     <include if="$(arg loam)" file="$(find loam_velodyne)/launch/loam_velodyne.launch">
+        <rosparam>
+            tf_prefix: loam
+        </rosparam>
         <arg name="rviz" value="$(arg rviz)" />
     </include>
 
