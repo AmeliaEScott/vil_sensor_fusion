@@ -3,6 +3,8 @@
 
     <arg name="bagname" />
     <arg name="bag_start_delay" default="20.0" />
+    <arg name="avoid_stoplights" default="false" />
+    <arg name="do_transforms" default="false" />
 
     <rosparam command="load" file="$(find carla_tools)/config/carla_ros_bridge_settings.yaml" />
     <!--param name="carla_log" value="$(find carla_tools)/carla_logs/$(arg carla_log)" /-->
@@ -22,38 +24,19 @@
         <param name="role_name" value="ego_vehicle"/>
     </node>
 
-    <!--node pkg="carla_tools" type="carla_to_ros_transforms.py" name="carla_to_ros_transforms" output="screen">
+    <node if="$(arg avoid_stoplights)" pkg="carla_tools" type="carla_avoid_stoplights.py" name="avoid_stoplights" output="screen">
+    </node>
+
+    <node if="$(arg do_transforms)" pkg="carla_tools" type="carla_frame_transforms.py" name="carla_frame_transforms" output="screen">
         <remap from="~imu/carla" to="/carla/ego_vehicle/imu" />
-        <remap from="~lidar/carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
-    </node-->
+        <remap from="~lidar/carla" to="/carla/ego_vehicle/lidar/lidar1" />
+	</node>
 
     <!--node pkg="carla_tools" type="carla_sensors.py" name="carla_sensors" output="screen">
         <param name="recording_length" value="$(arg recording_length)" />
     </node-->
 
     <rosparam command="load" file="$(find carla_tools)/config/carla_ros_bridge_settings.yaml" />
-
-    <!--node pkg="rosbag" type="record" name="carla_rosbag_record" launch-prefix="bash -c 'sleep $(arg bag_start_delay); $0 $@' " args="
-    record -O $(find carla_tools)/rosbags/$(arg bagname).bag
-    /cam0/camera_info
-    /cam0/image_raw
-    /imu/rovio
-    /imu/loam
-    /imu/ros
-    /lidar/carla
-    /lidar/loam
-    /simulation_groundtruth
-    /tf
-    " >
-        <remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front/camera_info" />
-        <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front/image_color" />
-        <remap from="/lidar/carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
-        <remap from="/lidar/loam" to="/carla_to_ros_transforms/lidar/loam" />
-        <remap from="/imu/rovio" to="/carla_to_ros_transforms/imu/rovio" />
-        <remap from="/imu/loam" to="/carla_to_ros_transforms/imu/loam" />
-        <remap from="/imu/ros" to="/carla_to_ros_transforms/imu/ros" />
-        <remap from="/simulation_groundtruth" to="/carla/ego_vehicle/vehicle_status" />
-    </node-->
 
     <node pkg="rosbag" type="record" name="carla_rosbag_record" launch-prefix="bash -c 'sleep $(arg bag_start_delay); $0 $@' " args="
     record -O $(find carla_tools)/rosbags/$(arg bagname).bag

@@ -111,16 +111,20 @@ class CarlaFrameTransformer:
             child="/rovio_init/ros_convention"
         )
 
-        # Rotation from Rovio init frame in ROS convention, to Rovio world frame in Rovio convention
-        ros_to_rovio_translate = np.array([0.0, 0.0, 0.0])
-        ros_to_rovio_quat = tf.transformations.quaternion_from_matrix(transform_helper.ros_to_rovio)
+        ros_to_rovio_world_translate = np.array([0.0, 0.0, 0.0])
+        ros_to_rovio_world_quat = tf.transformations.quaternion_from_matrix(transform_helper.ros_to_rovio_world)
+
         self.tf_broadcaster.sendTransform(
-            ros_to_rovio_translate,
-            ros_to_rovio_quat,
+            ros_to_rovio_world_translate,
+            ros_to_rovio_world_quat,
             time=time,
             parent="/rovio_init/ros_convention",
             child="/world"
         )
+
+        # Rotation from Rovio init frame in ROS convention, to Rovio world frame in Rovio convention
+        ros_to_rovio_translate = np.array([0.0, 0.0, 0.0])
+        ros_to_rovio_quat = tf.transformations.quaternion_from_matrix(transform_helper.ros_to_rovio)
 
         # Rotation from Carla's moving IMU frame to Rovio's moving IMU frame
         self.tf_broadcaster.sendTransform(
@@ -142,6 +146,7 @@ class CarlaFrameTransformer:
 
         # Message comes in Carla left-handed convention. First step: Convert to right-handed
         msg.angular_velocity.x *= -1
+        # msg.angular_velocity.y *= -1
         msg.angular_velocity.z *= -1
         msg.linear_acceleration.y *= -1
 

@@ -4,8 +4,9 @@
 	<arg name="rovio" default="true" />
     <arg name="loam" default="true" />
     <arg name="rviz" default="false" />
+    <arg name="rate" default="1.0" />
 
-	<node pkg="rosbag" type="play" name="rosbag_player" args="-r 1.0 $(arg bagfile)" >
+	<node pkg="rosbag" type="play" name="rosbag_player" args="-r $(arg rate) $(arg bagfile)" >
         <remap from="/lidar/carla" to="/velodyne_points" />
 	</node>
 
