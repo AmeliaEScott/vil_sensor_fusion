@@ -79,10 +79,5 @@ This package is for running experiments on ROS bags. To do so:
    - `rviz:=true` to enable the Rviz configuration included with Loam
    - In the future, I will include an Rviz configuration that displays both Rovio and Loam odometry in a convenient way.
 
-I have included a few sample ROS bags in `sample_bags/`. These are stored with Git LFS, so you will need
-to have Git LFS installed:
-
-    git lfs install
-
-Everything else should work normally after that. If you installed Git LFS only after cloning the repo, you can
-run `git lfs fetch` to make sure you have all of the important files.
+I have a sample bag available on [Polybox](https://polybox.ethz.ch/index.php/s/RqxMMW2CLFNMDpx). 
+I will add some more soon.
