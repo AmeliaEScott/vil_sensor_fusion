@@ -5,24 +5,26 @@
     <arg name="loam" default="true" />
     <arg name="rviz" default="false" />
 
-	<node pkg="rosbag" type="play" name="rosbag_player" args="$(arg bagfile)" >
-	    <remap to="/velodyne_points" from="/lidar/loam" />
+	<node pkg="rosbag" type="play" name="rosbag_player" args="-r 1.0 $(arg bagfile)" >
+        <remap from="/lidar/carla" to="/velodyne_points" />
 	</node>
+
+	<node pkg="carla_tools" type="carla_frame_transforms.py" name="carla_frame_transforms" output="screen">
+        <remap from="~imu/carla" to="/imu/carla" />
+        <remap from="~lidar/carla" to="/lidar/carla" />
+
+        <remap from="~imu/loam" to="/imu/loam" />
+        <remap from="~imu/rovio" to="/imu/rovio" />
+        <remap from="~imu/ros" to="/imu/ros" />
+        <remap from="~lidar/loam" to="/lidar/loam" />
+        <!--remap from="~lidar/carla" to="/velodyne_points" /-->
+	</node>
+
 
     <include file="$(find vil_fusion)/launch/vil_fusion.launch">
         <arg name="rovio" value="$(arg rovio)" />
         <arg name="loam" value="$(arg loam)" />
         <arg name="rviz" value="$(arg rviz)" />
     </include>
-
-    <!--node pkg="rovio" type="rovio_rosbag_loader" name="rovio" output="screen">
-        <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
-        <param name="camera0_config" value="$(find vil_fusion)/cfg/airsim.yaml"/>
-        <param name="camera1_config" value="$(find vil_fusion)/cfg/airsim.yaml"/>
-        <param name="rosbag_filename" value="$(arg bagfile)"/>
-        <param name="imu_topic_name" value="/airsim_rosbridge/imu"/>
-        <param name="cam0_topic_name" value="/airsim_rosbridge/cam0/image_raw"/>
-        <param name="cam1_topic_name" value="/airsim_rosbridge/cam1/image_raw"/>
-    </node-->
 
 </launch>

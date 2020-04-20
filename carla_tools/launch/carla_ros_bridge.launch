@@ -22,10 +22,10 @@
         <param name="role_name" value="ego_vehicle"/>
     </node>
 
-    <node pkg="carla_tools" type="carla_to_ros_transforms.py" name="carla_to_ros_transforms" output="screen">
+    <!--node pkg="carla_tools" type="carla_to_ros_transforms.py" name="carla_to_ros_transforms" output="screen">
         <remap from="~imu/carla" to="/carla/ego_vehicle/imu" />
         <remap from="~lidar/carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
-    </node>
+    </node-->
 
     <!--node pkg="carla_tools" type="carla_sensors.py" name="carla_sensors" output="screen">
         <param name="recording_length" value="$(arg recording_length)" />
@@ -33,7 +33,7 @@
 
     <rosparam command="load" file="$(find carla_tools)/config/carla_ros_bridge_settings.yaml" />
 
-    <node pkg="rosbag" type="record" name="carla_rosbag_record" launch-prefix="bash -c 'sleep $(arg bag_start_delay); $0 $@' " args="
+    <!--node pkg="rosbag" type="record" name="carla_rosbag_record" launch-prefix="bash -c 'sleep $(arg bag_start_delay); $0 $@' " args="
     record -O $(find carla_tools)/rosbags/$(arg bagname).bag
     /cam0/camera_info
     /cam0/image_raw
@@ -52,6 +52,22 @@
         <remap from="/imu/rovio" to="/carla_to_ros_transforms/imu/rovio" />
         <remap from="/imu/loam" to="/carla_to_ros_transforms/imu/loam" />
         <remap from="/imu/ros" to="/carla_to_ros_transforms/imu/ros" />
+        <remap from="/simulation_groundtruth" to="/carla/ego_vehicle/vehicle_status" />
+    </node-->
+
+    <node pkg="rosbag" type="record" name="carla_rosbag_record" launch-prefix="bash -c 'sleep $(arg bag_start_delay); $0 $@' " args="
+    record -O $(find carla_tools)/rosbags/$(arg bagname).bag
+    /cam0/camera_info
+    /cam0/image_raw
+    /imu/carla
+    /lidar/carla
+    /simulation_groundtruth
+    /tf
+    " >
+        <remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front/camera_info" />
+        <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front/image_color" />
+        <remap from="/lidar/carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
+        <remap from="/imu/carla" to="/carla/ego_vehicle/imu" />
         <remap from="/simulation_groundtruth" to="/carla/ego_vehicle/vehicle_status" />
     </node>
     

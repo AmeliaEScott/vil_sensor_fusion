@@ -26,12 +26,9 @@
  * /velodyne_points [unknown type]
 
     -->
-    <remap from="/imu/data" to="/imu/loam" />
+    <remap from="/imu/data" to="/imu/ros" />
 
     <include if="$(arg loam)" file="$(find loam_velodyne)/launch/loam_velodyne.launch">
-        <rosparam>
-            tf_prefix: loam
-        </rosparam>
         <arg name="rviz" value="$(arg rviz)" />
     </include>
 
