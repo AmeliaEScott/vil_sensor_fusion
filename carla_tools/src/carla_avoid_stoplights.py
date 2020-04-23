@@ -23,3 +23,4 @@ while not rospy.is_shutdown():
             # world.hud.notification("Traffic light changed! Good to go!")
             rospy.loginfo("Turned traffic light green")
             traffic_light.set_state(carla.TrafficLightState.Green)
+    world.wait_for_tick()

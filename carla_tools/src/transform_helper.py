@@ -11,19 +11,19 @@ carla_to_ros = np.array([
             [0.0, 0.0, 0.0, 1.0]
         ], dtype=np.float32)
 
-ros_to_rovio_world = np.array([
-    [0.0, -1.0, 0.0, 0.0],
-    [1.0, 0.0, 0.0, 0.0],
-    [0.0, 0.0, 1.0, 0.0],
-    [0.0, 0.0, 0.0, 1.0]
-])
-
-ros_to_rovio = np.array([
-            [0.0, -1.0, 0.0, 0.0],
-            [0.0, 0.0, -1.0, 0.0],
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0]
-        ], dtype=np.float32)
+# ros_to_rovio_world = np.array([
+#     [0.0, -1.0, 0.0, 0.0],
+#     [1.0, 0.0, 0.0, 0.0],
+#     [0.0, 0.0, 1.0, 0.0],
+#     [0.0, 0.0, 0.0, 1.0]
+# ])
+#
+# ros_to_rovio = np.array([
+#             [0.0, -1.0, 0.0, 0.0],
+#             [0.0, 0.0, -1.0, 0.0],
+#             [1.0, 0.0, 0.0, 0.0],
+#             [0.0, 0.0, 0.0, 1.0]
+#         ], dtype=np.float32)
 
 ros_to_loam = np.array([
             [0.0, 1.0, 0.0, 0.0],
@@ -39,8 +39,8 @@ ros_to_velodyne = np.array([
             [0.0, 0.0, 0.0, 1.0]
         ], dtype=np.float32)
 
-ros_to_rovio = tf.transformations.inverse_matrix(ros_to_rovio)
-ros_to_rovio_world = tf.transformations.inverse_matrix(ros_to_rovio_world)
+# ros_to_rovio = tf.transformations.inverse_matrix(ros_to_rovio)
+# ros_to_rovio_world = tf.transformations.inverse_matrix(ros_to_rovio_world)
 ros_to_loam = tf.transformations.inverse_matrix(ros_to_loam)
 ros_to_velodyne = tf.transformations.inverse_matrix(ros_to_velodyne)
 

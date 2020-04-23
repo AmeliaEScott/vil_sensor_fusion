@@ -101,39 +101,47 @@ class CarlaFrameTransformer:
             child="/lidar/velodyne"
         )
 
-        # Transformation between Carla's fixed map frame and Rovio's fixed world frame, but rotated to be
-        # in the ROS convention
         self.tf_broadcaster.sendTransform(
             self.init_imu_transform[0],
             self.init_imu_transform[1],
             time=time,
             parent="/map",
-            child="/rovio_init/ros_convention"
-        )
-
-        ros_to_rovio_world_translate = np.array([0.0, 0.0, 0.0])
-        ros_to_rovio_world_quat = tf.transformations.quaternion_from_matrix(transform_helper.ros_to_rovio_world)
-
-        self.tf_broadcaster.sendTransform(
-            ros_to_rovio_world_translate,
-            ros_to_rovio_world_quat,
-            time=time,
-            parent="/rovio_init/ros_convention",
             child="/world"
         )
 
-        # Rotation from Rovio init frame in ROS convention, to Rovio world frame in Rovio convention
-        ros_to_rovio_translate = np.array([0.0, 0.0, 0.0])
-        ros_to_rovio_quat = tf.transformations.quaternion_from_matrix(transform_helper.ros_to_rovio)
-
-        # Rotation from Carla's moving IMU frame to Rovio's moving IMU frame
-        self.tf_broadcaster.sendTransform(
-            ros_to_rovio_translate,
-            ros_to_rovio_quat,
-            time=time,
-            parent="/ego_vehicle/imu",
-            child="/imu/rovio"
-        )
+        # # Transformation between Carla's fixed map frame and Rovio's fixed world frame, but rotated to be
+        # # in the ROS convention
+        # self.tf_broadcaster.sendTransform(
+        #     self.init_imu_transform[0],
+        #     self.init_imu_transform[1],
+        #     time=time,
+        #     parent="/map",
+        #     child="/rovio_init/ros_convention"
+        # )
+        #
+        # ros_to_rovio_world_translate = np.array([0.0, 0.0, 0.0])
+        # ros_to_rovio_world_quat = tf.transformations.quaternion_from_matrix(transform_helper.ros_to_rovio_world)
+        #
+        # self.tf_broadcaster.sendTransform(
+        #     ros_to_rovio_world_translate,
+        #     ros_to_rovio_world_quat,
+        #     time=time,
+        #     parent="/rovio_init/ros_convention",
+        #     child="/world"
+        # )
+        #
+        # # Rotation from Rovio init frame in ROS convention, to Rovio world frame in Rovio convention
+        # ros_to_rovio_translate = np.array([0.0, 0.0, 0.0])
+        # ros_to_rovio_quat = tf.transformations.quaternion_from_matrix(transform_helper.ros_to_rovio)
+        #
+        # # Rotation from Carla's moving IMU frame to Rovio's moving IMU frame
+        # self.tf_broadcaster.sendTransform(
+        #     ros_to_rovio_translate,
+        #     ros_to_rovio_quat,
+        #     time=time,
+        #     parent="/ego_vehicle/imu",
+        #     child="/imu/rovio"
+        # )
 
     def transform_imu(self, msg, target):
         _, rotation = self.tf_listener.lookupTransform(target, msg.header.frame_id, rospy.Time())
@@ -153,8 +161,8 @@ class CarlaFrameTransformer:
         msg_ros = msg
         self.pub_imu_ros.publish(msg_ros)
 
-        self.pub_imu_loam.publish(self.transform_imu(msg_ros, "/imu/loam"))
-        self.pub_imu_rovio.publish(self.transform_imu(msg_ros, "/imu/rovio"))
+        #self.pub_imu_loam.publish(self.transform_imu(msg_ros, "/imu/loam"))
+        #self.pub_imu_rovio.publish(self.transform_imu(msg_ros, "/imu/rovio"))
 
     def lidar_callback(self, msg):
         fake_header = Header()

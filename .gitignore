@@ -1,1 +1,4 @@
 *.pyc
+sample_bags/
+frames.pdf
+frames.gv

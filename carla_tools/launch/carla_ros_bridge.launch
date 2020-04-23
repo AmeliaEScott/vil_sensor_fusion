@@ -5,6 +5,8 @@
     <arg name="bag_start_delay" default="20.0" />
     <arg name="avoid_stoplights" default="false" />
     <arg name="do_transforms" default="false" />
+    <!-- https://carla.readthedocs.io/en/latest/bp_library/ -->
+    <arg name="vehicle_filter" default="vehicle.*" />
 
     <rosparam command="load" file="$(find carla_tools)/config/carla_ros_bridge_settings.yaml" />
     <!--param name="carla_log" value="$(find carla_tools)/carla_logs/$(arg carla_log)" /-->
@@ -16,8 +18,10 @@
     </include>
 
     <include file="$(find carla_ego_vehicle)/launch/carla_ego_vehicle.launch">
-        <arg name="vehicle_filter" value="vehicle.*" />
+        <arg name="vehicle_filter" value="$(arg vehicle_filter)" />
         <arg name="sensor_definition_file" value="$(find carla_tools)/config/sensors.json" />
+        <!-- Spawns the vehicle in front of the tunnel -->
+        <!--arg name="spawn_point" value="244,-50,0.1,0,0,90" /-->
     </include>
 
     <node pkg="carla_tools" type="custom_manual_control.py" name="custom_manual_control" output="screen">
@@ -42,13 +46,17 @@
     record -O $(find carla_tools)/rosbags/$(arg bagname).bag
     /cam0/camera_info
     /cam0/image_raw
+    /cam1/camera_info
+    /cam1/image_raw
     /imu/carla
     /lidar/carla
     /simulation_groundtruth
     /tf
     " >
-        <remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front/camera_info" />
-        <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front/image_color" />
+        <remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front_left/camera_info" />
+        <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front_left/image_color" />
+        <remap from="/cam1/camera_info" to="/carla/ego_vehicle/camera/rgb/front_right/camera_info" />
+        <remap from="/cam1/image_raw" to="/carla/ego_vehicle/camera/rgb/front_right/image_color" />
         <remap from="/lidar/carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
         <remap from="/imu/carla" to="/carla/ego_vehicle/imu" />
         <remap from="/simulation_groundtruth" to="/carla/ego_vehicle/vehicle_status" />

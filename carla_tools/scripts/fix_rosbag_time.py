@@ -22,7 +22,7 @@ output_bagname = sys.argv[1].replace(".bag", "_timefixed.bag")
 
 print("Processing bag...")
 with rosbag.Bag(output_bagname, 'w') as outbag:
-    last_msgs = dict()
+    # last_msgs = dict()
     for topic, msg, t in rosbag.Bag(input_bagname).read_messages():
         # This also replaces tf timestamps under the assumption
         # that all transforms in the message share the same timestamp
@@ -31,8 +31,8 @@ with rosbag.Bag(output_bagname, 'w') as outbag:
         elif not msg._has_header:
             outbag.write(topic, msg, t)
         else:
-            if topic not in last_msgs or last_msgs[topic].header.stamp != msg.header.stamp:
-                last_msgs[topic] = msg
-                outbag.write(topic, msg, msg.header.stamp)
-            else:
-                print("Duplicate timestamp in topic {}".format(topic))
+            # if topic not in last_msgs or last_msgs[topic].header.stamp != msg.header.stamp:
+            #     last_msgs[topic] = msg
+            outbag.write(topic, msg, msg.header.stamp)
+            # else:
+            #     print("Duplicate timestamp in topic {}".format(topic))

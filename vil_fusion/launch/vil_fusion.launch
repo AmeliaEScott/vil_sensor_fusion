@@ -9,14 +9,17 @@
 
         </node>
 
+        <node pkg="image_proc" type="image_proc" name="image_proc" ns="/cam1">
+
+        </node>
+
         <remap from="cam0/image_raw" to="cam0/image_mono" />
-        <remap from="imu0" to="imu/rovio" />
+        <remap from="cam1/image_raw" to="cam1/image_mono" />
+        <remap from="imu0" to="imu/ros" />
         <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
-            <rosparam>
-                tf_prefix: rovio
-            </rosparam>
             <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
             <param name="camera0_config" value="$(find vil_fusion)/cfg/carla.yaml"/>
+            <param name="camera1_config" value="$(find vil_fusion)/cfg/carla.yaml"/>
         </node>
     </group>
 
