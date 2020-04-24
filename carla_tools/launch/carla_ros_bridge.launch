@@ -53,10 +53,12 @@
     /simulation_groundtruth
     /tf
     " >
-        <remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front_left/camera_info" />
-        <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front_left/image_color" />
-        <remap from="/cam1/camera_info" to="/carla/ego_vehicle/camera/rgb/front_right/camera_info" />
-        <remap from="/cam1/image_raw" to="/carla/ego_vehicle/camera/rgb/front_right/image_color" />
+        <remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front/camera_info" />
+        <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front/image_color" />
+       <!--remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front_left/camera_info" />
+       <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front_left/image_color" />
+       <remap from="/cam1/camera_info" to="/carla/ego_vehicle/camera/rgb/front_right/camera_info" />
+       <remap from="/cam1/image_raw" to="/carla/ego_vehicle/camera/rgb/front_right/image_color" /-->
         <remap from="/lidar/carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
         <remap from="/imu/carla" to="/carla/ego_vehicle/imu" />
         <remap from="/simulation_groundtruth" to="/carla/ego_vehicle/vehicle_status" />

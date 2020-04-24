@@ -6,6 +6,8 @@
     <arg name="rviz" default="false" />
     <arg name="rate" default="1.0" />
 
+    <arg name="new_bag" default="" />
+
 	<node pkg="rosbag" type="play" name="rosbag_player" args="-r $(arg rate) $(arg bagfile)" >
         <remap from="/lidar/carla" to="/velodyne_points" />
 	</node>
@@ -27,5 +29,17 @@
         <arg name="loam" value="$(arg loam)" />
         <arg name="rviz" value="$(arg rviz)" />
     </include>
+
+    <node if="$(eval arg('new_bag') != '')" pkg="rosbag" type="record" name="rovio_rosbag_record" args="
+
+    record -O $(arg new_bag)
+    /cam0/camera_info
+    /cam0/image_raw
+    /imu0
+    /simulation_groundtruth
+    " >
+        <remap from="/imu0" to="/imu/ros" />
+        <remap from="/cam0/image_raw" to="/cam0/image_mono" />
+    </node>
 
 </launch>

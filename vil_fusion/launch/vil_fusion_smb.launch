@@ -1,0 +1,38 @@
+<launch>
+
+	<arg name="bagfile" />
+	<arg name="rovio" default="true" />
+    <arg name="loam" default="false" />
+    <arg name="rviz" default="false" />
+    <arg name="rate" default="1.0" />
+
+	<node pkg="rosbag" type="play" name="rosbag_player" args="-r $(arg rate) $(arg bagfile)" >
+	</node>
+
+    <node pkg="vil_fusion" type="imgflip.py" name="imgflip">
+
+    </node>
+
+    <group if="$(arg rovio)" >
+
+        <remap from="cam0/image_raw" to="cam0/image_flipped" />
+        <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
+            <param name="filter_config" value="$(find vil_fusion)/cfg/rovio_smb.info"/>
+            <param name="camera0_config" value="$(find vil_fusion)/cfg/smb.yaml"/>
+            <param name="camera1_config" value="$(find vil_fusion)/cfg/smb.yaml"/>
+        </node>
+    </group>
+
+    <!--
+    Subscriptions:
+ * /imu/data [unknown type]
+ * /velodyne_points [unknown type]
+
+    -->
+    <remap from="/imu/data" to="/imu/ros" />
+
+    <include if="$(arg loam)" file="$(find loam_velodyne)/launch/loam_velodyne.launch">
+        <arg name="rviz" value="$(arg rviz)" />
+    </include>
+
+</launch>
