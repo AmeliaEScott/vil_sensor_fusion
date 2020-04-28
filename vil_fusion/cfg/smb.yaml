@@ -1,6 +1,6 @@
 ###### Camera Calibration File For Cam 0 of Euroc Datasets ######
-image_width: 800
-image_height: 600
+image_width: 877
+image_height: 516
 camera_name: cam0
 camera_matrix:
   rows: 3
