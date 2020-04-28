@@ -78,6 +78,10 @@ This package is for running experiments on ROS bags. To do so:
    - `loam:=false` to disable Loam
    - `rviz:=true` to enable the Rviz configuration included with Loam
    - In the future, I will include an Rviz configuration that displays both Rovio and Loam odometry in a convenient way.
+ - To launch Rovio with the real-life data (from Tim Sandy):
+   - `roslaunch vil_fusion vil_fusion_smb.launch bagfile:=<Path to ROS bag>`
+   - The SMB (SuperMegaBot) data has the image flipped, so this launch file also launches
+     a node to flip the image into the correct orientation.
 
 I have a sample bag available on [Polybox](https://polybox.ethz.ch/index.php/s/RqxMMW2CLFNMDpx). 
 I will add some more soon.
