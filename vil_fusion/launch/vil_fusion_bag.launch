@@ -13,12 +13,12 @@
 	</node>
 
 	<node pkg="carla_tools" type="carla_frame_transforms.py" name="carla_frame_transforms" output="screen">
-        <remap from="~imu/carla" to="/imu/carla" />
+        <remap from="~imu/carla" to="/imu0/carla" />
         <remap from="~lidar/carla" to="/lidar/carla" />
 
-        <remap from="~imu/loam" to="/imu/loam" />
-        <remap from="~imu/rovio" to="/imu/rovio" />
-        <remap from="~imu/ros" to="/imu/ros" />
+        <remap from="~imu/loam" to="/imu0/loam" />
+        <remap from="~imu/rovio" to="/imu0/rovio" />
+        <remap from="~imu/ros" to="/imu0/ros" />
         <remap from="~lidar/loam" to="/lidar/loam" />
         <!--remap from="~lidar/carla" to="/velodyne_points" /-->
 	</node>

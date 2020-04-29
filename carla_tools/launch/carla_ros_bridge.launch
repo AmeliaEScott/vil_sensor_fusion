@@ -48,7 +48,8 @@
     /cam0/image_raw
     /cam1/camera_info
     /cam1/image_raw
-    /imu/carla
+    /imu0/carla
+    /imu1/carla
     /lidar/carla
     /simulation_groundtruth
     /tf
@@ -60,7 +61,8 @@
        <remap from="/cam1/camera_info" to="/carla/ego_vehicle/camera/rgb/front_right/camera_info" />
        <remap from="/cam1/image_raw" to="/carla/ego_vehicle/camera/rgb/front_right/image_color" /-->
         <remap from="/lidar/carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
-        <remap from="/imu/carla" to="/carla/ego_vehicle/imu" />
+        <remap from="/imu0/carla" to="/carla/ego_vehicle/imu/imu0" />
+        <remap from="/imu1/carla" to="/carla/ego_vehicle/imu/imu1" />
         <remap from="/simulation_groundtruth" to="/carla/ego_vehicle/vehicle_status" />
     </node>
     

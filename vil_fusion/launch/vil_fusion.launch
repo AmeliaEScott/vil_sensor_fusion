@@ -15,7 +15,7 @@
 
         <remap from="cam0/image_raw" to="cam0/image_mono" />
         <remap from="cam1/image_raw" to="cam1/image_mono" />
-        <remap from="imu0" to="imu/ros" />
+        <remap from="imu0" to="imu0/ros" />
         <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
             <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
             <param name="camera0_config" value="$(find vil_fusion)/cfg/carla.yaml"/>

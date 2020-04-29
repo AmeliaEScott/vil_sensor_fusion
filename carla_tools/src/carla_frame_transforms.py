@@ -25,7 +25,7 @@ class CarlaFrameTransformer:
             try:
                 # Initial transform between Carla fixed /map frame and Carla imu and lidar
                 self.init_imu_transform = self.tf_listener.lookupTransform(
-                    "/map", "/ego_vehicle/imu", time=rospy.Time())
+                    "/map", "/ego_vehicle/imu/imu0", time=rospy.Time())
                 self.init_lidar_transform = self.tf_listener.lookupTransform(
                     "/map", "/ego_vehicle/lidar/lidar1", time=rospy.Time())
             except LookupException:
@@ -46,7 +46,7 @@ class CarlaFrameTransformer:
         self.sub_lidar = rospy.Subscriber("~lidar/carla", PointCloud2, callback=self.lidar_callback)
 
     def send_transforms(self, *args):
-        time = self.tf_listener.getLatestCommonTime("/ego_vehicle/imu", "/map")
+        time = self.tf_listener.getLatestCommonTime("/ego_vehicle/imu/imu0", "/map")
 
         # Transformation between Carla's fixed map frame and LOAM's fixed camera_init frame, but rotated to be
         # in the ROS convention
@@ -75,8 +75,8 @@ class CarlaFrameTransformer:
             ros_to_loam_translate,
             ros_to_loam_quat,
             time=time,
-            parent="/ego_vehicle/imu",
-            child="/imu/loam"
+            parent="/ego_vehicle/imu/imu0",
+            child="/imu0/loam"
         )
 
         # Rotation from Carla's moving Lidar frame to LOAM's moving Lidar frame

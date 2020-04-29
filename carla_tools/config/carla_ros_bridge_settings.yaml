@@ -9,7 +9,7 @@ carla:
   # within synchronous mode: wait for a vehicle control command before next tick?
   synchronous_mode_wait_for_vehicle_control_command: false
   # set the fixed timestep length
-  fixed_delta_seconds: 0.005
+  fixed_delta_seconds: 0.0005
   # configuration values for the ego vehicle
   ego_vehicle:
     # the role name of the vehicles that acts as ego vehicle for this ros bridge instance

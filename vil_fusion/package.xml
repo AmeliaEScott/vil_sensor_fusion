@@ -16,6 +16,7 @@
   <license>TODO</license>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <depend>confusion</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
