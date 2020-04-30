@@ -71,6 +71,9 @@ To configure the Carla simulation (Speed, sensors, etc.), see `carla_tools/confi
 
 ## Package vil_fusion
 
+Known issue: I had trouble building, because I would get the error "Eigen/Core: No such file or directory".
+I fixed this by running the command `sudo ln -s /usr/include/eigen3/Eigen /usr/include/Eigen`
+
 This package is for running experiments on ROS bags. To do so:
 
  - `roslaunch vil_fusion vil_fusion_bag.launch bagfile:=<Path to ROS bag>`

@@ -1,0 +1,19 @@
+#ifndef VIL_FUSION_VILSENSORENUMDEFINITION_H
+#define VIL_FUSION_VILSENSORENUMDEFINITION_H
+
+namespace vil_fusion {
+
+    enum PROCESS_TYPE {
+        IMU = 0,
+        NUM_PROCESS_SENSORS
+    };
+
+    enum UPDATE_TYPE {
+        LOAM_POSE,
+        ROVIO_POSE,
+        NUM_UPDATE_SENSORS
+    };
+
+}
+
+#endif //VIL_FUSION_VILSENSORENUMDEFINITION_H
