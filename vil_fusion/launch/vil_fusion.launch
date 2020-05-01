@@ -38,10 +38,13 @@
     </include>
 
     <group if="$(arg do_fusion)">
-        <node pkg="vil_fusion" type="vil_fusion_node" name="vil_fusion_node" output="screen">
+        <!--   <node pkg="vil_fusion" type="vil_fusion_node" name="vil_fusion_node" output="screen">
             <remap from="~imu" to="imu0/ros" />
             <remap from="~loam_odometry" to="/laser_odom_to_init" />
             <remap from="~rovio_odometry" to="/rovio/odometry" />
+        </node>  -->
+        <node pkg="confusion" type="multi_sensor_node" name="multi_sensor_node" output="screen">
+            <remap from="imu0" to="imu0/ros" />
         </node>
     </group>
 

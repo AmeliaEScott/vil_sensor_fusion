@@ -21,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS ${PACKAGE_DEPENDENCIES})
 find_package(Boost REQUIRED COMPONENTS system)
 
 find_package(Eigen3 REQUIRED)
-find_package(Ceres REQUIRED COMPONENTS)
+find_package(Ceres REQUIRED)
 find_package(OpenCV REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -134,17 +134,17 @@ catkin_package(
 include_directories(
  include
  ${catkin_INCLUDE_DIRS}
- ${confusion_INCLUDE_DIRS}
+ #${confusion_INCLUDE_DIRS}
  ${Boost_INCLUDE_DIRS}
  ${ceres_INCLUDE_DIRS}
  ${Eigen3_INCLUDE_DIRS}
- ${OpenCV_INCLUDE_DIRS}
+ #${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/vil_fusion.cpp
-# )
+ add_library(ImuState
+   src/ImuState.cpp
+ )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -156,7 +156,6 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node
         src/VILConfusorNode.cpp
-        src/ImuState.cpp
         )
 
 ## Rename C++ executable without prefix
@@ -172,11 +171,11 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 ## Specify libraries to link a library or executable target against
  target_link_libraries(${PROJECT_NAME}_node
    ${catkin_LIBRARIES}
-   ${confusion_LIBRARIES}
+   #${confusion_LIBRARIES}
    ${Boost_LIBRARIES}
    ${Eigen3_LIBRARIES}
    ${Ceres_LIBRARIES}
-   ${OpenCV_LIBRARIES}
+   #${OpenCV_LIBRARIES}
  )
 
 #############
