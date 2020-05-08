@@ -13,6 +13,10 @@
 import rosbag
 import sys
 
+frame_remap = {
+    # '/map': '/carla_map'
+}
+
 if len(sys.argv) != 2:
     print("Usage: python3 fix_rosbag_time.py <bag file>")
     sys.exit(-1)
@@ -27,12 +31,19 @@ with rosbag.Bag(output_bagname, 'w') as outbag:
         # This also replaces tf timestamps under the assumption
         # that all transforms in the message share the same timestamp
         if topic == "/tf" and msg.transforms:
+            for tf in msg.transforms:
+                if tf.header.frame_id in frame_remap:
+                    tf.header.frame_id = frame_remap[tf.header.frame_id]
+                if tf.child_frame_id in frame_remap:
+                    tf.child_frame_id = frame_remap[tf.child_frame_id]
             outbag.write(topic, msg, msg.transforms[0].header.stamp)
         elif not msg._has_header:
             outbag.write(topic, msg, t)
         else:
             # if topic not in last_msgs or last_msgs[topic].header.stamp != msg.header.stamp:
             #     last_msgs[topic] = msg
+            if msg.header.frame_id in frame_remap:
+                msg.header.frame_id = frame_remap[msg.header.frame_id]
             outbag.write(topic, msg, msg.header.stamp)
             # else:
             #     print("Duplicate timestamp in topic {}".format(topic))

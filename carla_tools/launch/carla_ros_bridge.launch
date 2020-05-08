@@ -4,17 +4,22 @@
     <arg name="bagname" />
     <arg name="bag_start_delay" default="20.0" />
     <arg name="avoid_stoplights" default="false" />
-    <arg name="do_transforms" default="false" />
+    <arg name="do_transforms" default="true" />
     <!-- https://carla.readthedocs.io/en/latest/bp_library/ -->
     <arg name="vehicle_filter" default="vehicle.*" />
 
     <rosparam command="load" file="$(find carla_tools)/config/carla_ros_bridge_settings.yaml" />
     <!--param name="carla_log" value="$(find carla_tools)/carla_logs/$(arg carla_log)" /-->
 
+<!--     <group  ns="/carla/ego_vehicle/camera/rgb/front"> -->
+<!--     <remap from="image_raw" to="image_color" /> -->
+<!--         <node pkg="image_proc" type="image_proc" name="image_proc"> -->
+
+<!--         </node> -->
+<!--     </group> -->
+
     <include file="$(find carla_ros_bridge)/launch/carla_ros_bridge.launch">
-<!--         <param name="carla/synchronous_mode" value="true" /> -->
-<!--         <param name="carla/fixed_delta_seconds" value="0.005" /> -->
-<!--         <param name="carla/synchronous_mode_wait_for_vehicle_control_command" value="false" /> -->
+
     </include>
 
     <include file="$(find carla_ego_vehicle)/launch/carla_ego_vehicle.launch">
@@ -34,6 +39,8 @@
     <node if="$(arg do_transforms)" pkg="carla_tools" type="carla_frame_transforms.py" name="carla_frame_transforms" output="screen">
         <remap from="~imu/carla" to="/carla/ego_vehicle/imu" />
         <remap from="~lidar/carla" to="/carla/ego_vehicle/lidar/lidar1" />
+        <rosparam param="imu_names">[imu_vio, imu_lidar, imu_fusion]</rosparam>
+
 	</node>
 
     <!--node pkg="carla_tools" type="carla_sensors.py" name="carla_sensors" output="screen">
@@ -48,10 +55,12 @@
     /cam0/image_raw
     /cam1/camera_info
     /cam1/image_raw
-    /imu0/carla
-    /imu1/carla
-    /lidar/carla
-    /simulation_groundtruth
+    /imu/vio
+    /imu/lidar
+    /imu/fusion
+    /lidar
+    /carla/ego_vehicle/vehicle_status
+    /carla/ego_vehicle/vehicle_info
     /tf
     " >
         <remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front/camera_info" />
@@ -60,10 +69,10 @@
        <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front_left/image_color" />
        <remap from="/cam1/camera_info" to="/carla/ego_vehicle/camera/rgb/front_right/camera_info" />
        <remap from="/cam1/image_raw" to="/carla/ego_vehicle/camera/rgb/front_right/image_color" /-->
-        <remap from="/lidar/carla" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
-        <remap from="/imu0/carla" to="/carla/ego_vehicle/imu/imu0" />
-        <remap from="/imu1/carla" to="/carla/ego_vehicle/imu/imu1" />
-        <remap from="/simulation_groundtruth" to="/carla/ego_vehicle/vehicle_status" />
+        <remap from="/lidar" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
+        <remap from="/imu/vio" to="/carla/ego_vehicle/imu/imu_vio" />
+        <remap from="/imu/lidar" to="/carla/ego_vehicle/imu/imu_lidar" />
+        <remap from="/imu/fusion" to="/carla/ego_vehicle/imu/imu_fusion" />
     </node>
     
 </launch>

@@ -5,6 +5,12 @@
     <arg name="rviz" default="false" />
     <arg name="do_fusion" default="true" />
 
+    <rosparam>
+        rovio/world_frame: rovio_world
+        rovio/camera_frame: rovio_camera
+        rovio/imu_frame: rovio_imu
+    </rosparam>
+
     <group if="$(arg rovio)" >
         <node pkg="image_proc" type="image_proc" name="image_proc" ns="/cam0">
 
@@ -16,7 +22,7 @@
 
         <remap from="cam0/image_raw" to="cam0/image_mono" />
         <remap from="cam1/image_raw" to="cam1/image_mono" />
-        <remap from="imu0" to="imu0/ros" />
+        <remap from="imu0" to="imu/vio" />
         <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
             <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
             <param name="camera0_config" value="$(find vil_fusion)/cfg/carla.yaml"/>
@@ -24,27 +30,22 @@
         </node>
     </group>
 
-    <!--
-    Subscriptions:
- * /imu/data [unknown type]
- * /velodyne_points [unknown type]
+    <group if="$(arg loam)" ns="loam">
+        <remap from="/imu/data" to="/imu/lidar" />
+        <!-- For some reason, this remap does not work. I instead remapped from the rosbag player. -->
+        <!-- <remap from="/velodyne_points" to="/lidar" /> -->
+        <include if="$(arg loam)" file="$(find loam_velodyne)/launch/loam_velodyne.launch">
+            <arg name="rviz" value="$(arg rviz)" />
+        </include>
 
-    -->
-
-
-    <include if="$(arg loam)" file="$(find loam_velodyne)/launch/loam_velodyne.launch" ns="loam">
-        <remap from="/imu/data" to="imu0/ros" />
-        <arg name="rviz" value="$(arg rviz)" />
-    </include>
+        <node pkg="vil_fusion" type="loam_frame_transform.py" name="frame_transform" output="screen">
+            <remap from="~odometry/loam" to="/aft_mapped_to_init" />
+        </node>
+    </group>
 
     <group if="$(arg do_fusion)">
-        <!--   <node pkg="vil_fusion" type="vil_fusion_node" name="vil_fusion_node" output="screen">
-            <remap from="~imu" to="imu0/ros" />
-            <remap from="~loam_odometry" to="/laser_odom_to_init" />
-            <remap from="~rovio_odometry" to="/rovio/odometry" />
-        </node>  -->
-        <node pkg="confusion" type="multi_sensor_node" name="multi_sensor_node" output="screen">
-            <remap from="imu0" to="imu0/ros" />
+        <node pkg="smb_confusor" type="smb_confusor" name="smb_confusor" output="screen">
+
         </node>
     </group>
 
