@@ -1,4 +1,8 @@
 #!/usr/bin/env python2
+"""
+I am sorry this uses Python 2. It was easier to write this in Python 2 than to get ROS TF
+to work in Python 3.
+"""
 
 import tf.transformations
 from tf import Transformer, TransformBroadcaster, LookupException, TransformListener
@@ -54,9 +58,12 @@ class LoamFrameTransform:
         newpose.header.frame_id = msg.header.frame_id
         newpose.pose = msg.pose.pose
         newpose = self.tf_listener.transformPose("loam_init_ros_convention", newpose)
+        msg.pose.pose = newpose.pose
+
+
+
         msg.header.frame_id = "loam_init_ros_convention"
         msg.child_frame_id = msg.child_frame_id + "_ros"
-        msg.pose.pose = newpose.pose
         self.pub_loam_odom.publish(msg)
 
 

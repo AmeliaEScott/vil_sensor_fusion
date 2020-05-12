@@ -16,9 +16,9 @@
 
         </node>
 
-        <node pkg="image_proc" type="image_proc" name="image_proc" ns="/cam1">
+<!--         <node pkg="image_proc" type="image_proc" name="image_proc" ns="/cam1"> -->
 
-        </node>
+<!--         </node> -->
 
         <remap from="cam0/image_raw" to="cam0/image_mono" />
         <remap from="cam1/image_raw" to="cam1/image_mono" />
@@ -34,14 +34,23 @@
         <remap from="/imu/data" to="/imu/lidar" />
         <!-- For some reason, this remap does not work. I instead remapped from the rosbag player. -->
         <!-- <remap from="/velodyne_points" to="/lidar" /> -->
-        <include if="$(arg loam)" file="$(find loam_velodyne)/launch/loam_velodyne.launch">
+        <include file="$(find loam_velodyne)/launch/loam_velodyne.launch">
             <arg name="rviz" value="$(arg rviz)" />
         </include>
 
-        <node pkg="vil_fusion" type="loam_frame_transform.py" name="frame_transform" output="screen">
-            <remap from="~odometry/loam" to="/aft_mapped_to_init" />
-        </node>
+<!--         <node pkg="vil_fusion" type="loam_frame_transform.py" name="frame_transform" output="screen"> -->
+<!--             <remap from="~odometry/loam" to="/aft_mapped_to_init" /> -->
+<!--         </node> -->
     </group>
+
+    <node pkg="vil_fusion" type="degeneracy_detection.py" name="degeneracy_detection_node" output="screen">
+        <remap from="~rovio_input" to="/rovio/odometry" />
+        <remap from="~loam_input" to="/aft_mapped_to_init" />
+        <rosparam>
+            loam_degen_funcs: [demo1]
+            rovio_degen_funcs: [demo2]
+        </rosparam>
+    </node>
 
     <group if="$(arg do_fusion)">
         <node pkg="smb_confusor" type="smb_confusor" name="smb_confusor" output="screen">
