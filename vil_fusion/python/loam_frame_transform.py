@@ -32,7 +32,74 @@ class LoamFrameTransform:
         self.tf_broadcaster = TransformBroadcaster()
 
         self.pub_loam_odom = rospy.Publisher("~odometry/ros", Odometry, queue_size=1)
-        self.sub_loam_odom = rospy.Subscriber("~odometry/loam", Odometry, callback=self.loam_odom_callback)
+        self.sub_loam_odom = rospy.Subscriber("~odometry/loam", Odometry, callback=self.loam_odom_callback_2)
+
+    def loam_odom_callback_2(self, msg):
+        (
+            msg.pose.pose.position.x,
+            msg.pose.pose.position.y,
+            msg.pose.pose.position.z,
+        ) = (
+            msg.pose.pose.position.z,
+            msg.pose.pose.position.x,
+            msg.pose.pose.position.y,
+        )
+
+        (
+            msg.pose.pose.orientation.x,
+            msg.pose.pose.orientation.y,
+            msg.pose.pose.orientation.z,
+        ) = (
+            msg.pose.pose.orientation.z,
+            msg.pose.pose.orientation.x,
+            msg.pose.pose.orientation.y,
+        )
+
+        (
+            msg.twist.twist.linear.x,
+            msg.twist.twist.linear.y,
+            msg.twist.twist.linear.z,
+        ) = (
+            msg.twist.twist.linear.z,
+            msg.twist.twist.linear.x,
+            msg.twist.twist.linear.y,
+        )
+
+        (
+            msg.twist.twist.angular.x,
+            msg.twist.twist.angular.y,
+            msg.twist.twist.angular.z,
+        ) = (
+            msg.twist.twist.angular.z,
+            msg.twist.twist.angular.x,
+            msg.twist.twist.angular.y,
+        )
+
+        msg.header.frame_id = "loam_init_ros_convention"
+        msg.child_frame_id = "aft_mapped_ros"
+
+        self.pub_loam_odom.publish(msg)
+
+        new_trans = np.array([
+            msg.pose.pose.position.x,
+            msg.pose.pose.position.y,
+            msg.pose.pose.position.z,
+        ])
+
+        new_rot = np.array([
+            msg.pose.pose.orientation.x,
+            msg.pose.pose.orientation.y,
+            msg.pose.pose.orientation.z,
+            msg.pose.pose.orientation.w,
+        ])
+
+        self.tf_broadcaster.sendTransform(
+            new_trans,
+            new_rot,
+            msg.header.stamp,
+            "aft_mapped_ros",
+            "loam_init_ros_convention"
+        )
 
     def loam_odom_callback(self, msg):
         # Rotation from LOAM init frame in ROS convention, to LOAM init frame in LOAM convention
