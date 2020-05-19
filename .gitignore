@@ -1,5 +1,4 @@
 *.pyc
-sample_bags/
 frames.pdf
 frames.gv
 waymo_data/
