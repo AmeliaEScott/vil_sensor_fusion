@@ -4,6 +4,7 @@
     <arg name="loam" default="true" />
     <arg name="rviz" default="false" />
     <arg name="do_fusion" default="true" />
+    <arg name="diagnostics" default="true" />
 
     <rosparam>
         rovio/world_frame: rovio_world
@@ -58,7 +59,16 @@
         </node>
     </group>
 
+    <group if="$(arg diagnostics)">
+        <node pkg="vil_fusion" type="diagnostics.py" name="diagnostics" output="screen">
+            <rosparam command="load" file="$(find vil_fusion)/cfg/diagnostics_params.yaml" />
+        </node>
+    </group>
+
     <group if="$(arg do_fusion)">
+        <node pkg="tf" type="static_transform_publisher" name="confusion_world_transform"
+            args="0 0 0 0 0 0 1  rovio_world world  50"/>
+
         <node pkg="smb_confusor" type="smb_confusor" name="smb_confusor" output="screen">
             <rosparam param="config_path" subst_value="true">
                 $(find vil_fusion)/cfg/confusion.cfg

@@ -52,6 +52,15 @@ class DegenDetectionNode:
             is_degenerate = is_degenerate or degen_msg.degenerate
             pub.publish(degen_msg)
 
+        # ConFusion does some weird things with coordinate transforms. It seems to assume that the pose measurements
+        # it receives are not already published to TF. However, both LOAM and Rovio do publish to TF, so some transforms
+        # get published multiple times.
+        # So here, I just create some new coordinate frames for ConFusion to work with.
+        # I do it here because all of my pose measurements will end up here anyway, and it's too simple of a task
+        # to justify creating a new node.
+        msg.header.frame_id += "_for_confusion"
+        msg.child_frame_id += "_for_confusion"
+
         if not is_degenerate:
             odom_pub.publish(msg)
 

@@ -1,0 +1,17 @@
+
+diagnostics:
+  - name: rovio
+    gt: /ego_vehicle/imu/imu_vio
+    est: rovio_imu
+    ref: rovio_world
+    rate: 20
+  - name: loam
+    gt: /ego_vehicle/lidar/lidar1
+    est: aft_mapped_ros
+    ref: loam_init_ros_convention
+    rate: 5
+  - name: confusion
+    gt: /ego_vehicle/imu/imu_fusion
+    est: imu
+    ref: world
+    rate: 20
