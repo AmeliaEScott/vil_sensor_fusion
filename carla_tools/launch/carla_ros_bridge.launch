@@ -25,6 +25,7 @@
     <include file="$(find carla_ego_vehicle)/launch/carla_ego_vehicle.launch">
         <arg name="vehicle_filter" value="$(arg vehicle_filter)" />
         <arg name="sensor_definition_file" value="$(find carla_tools)/config/sensors.json" />
+<!--         <arg name="sensor_definition_file" value="$(find carla_tools)/config/sensors_all_in_same_place.json" /> -->
         <!-- Spawns the vehicle in front of the tunnel -->
         <!--arg name="spawn_point" value="244,-50,0.1,0,0,90" /-->
     </include>

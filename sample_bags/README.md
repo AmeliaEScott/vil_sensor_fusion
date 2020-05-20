@@ -35,6 +35,22 @@ folder contains the following bags:
      - **Carla Map**: `Town03`
      - **Time of Day**: Noon
      - **Weather**: Sunny
+ - `motorcycle_long.bag`
+     - **Vehicle**: Motorcycle
+     - **Length**: 5:45
+     - **Vehicle**: Motorcycle
+     - **Driving Style**: Autopilot
+     - **Carla Map**: I forgot
+     - **Time of Day**: Noon
+     - **Weather**: Sunny
+ - `motorcycle_aggressive.bag`
+     - **Vehicle**: Motorcycle
+     - **Length**: 1:41
+     - **Vehicle**: Motorcycle
+     - **Driving Style**: Aggressive manual control
+     - **Carla Map**: `Town03`
+     - **Time of Day**: Noon
+     - **Weather**: Sunny
  - `stationary.bag`
      - **Vehicle**: Car
      - **Length**: 0:38

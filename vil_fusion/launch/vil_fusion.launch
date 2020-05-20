@@ -6,22 +6,27 @@
     <arg name="do_fusion" default="true" />
     <arg name="diagnostics" default="true" />
 
+    <!-- These parameters change the names of the frame_ids used by Rovio in transforms -->
     <rosparam>
         rovio/world_frame: rovio_world
         rovio/camera_frame: rovio_camera
         rovio/imu_frame: rovio_imu
     </rosparam>
 
-    <node pkg="vil_fusion" type="imu_filter.py" name="imu_filter" output="screen">
-        <param name="~filter_length" value="10" />
-    </node>
+    <!-- This is leftover from previous experiments with filtering the IMU measurements -->
+<!--     <node pkg="vil_fusion" type="imu_filter.py" name="imu_filter" output="screen"> -->
+<!--         <param name="~filter_length" value="10" /> -->
+<!--     </node> -->
 
+    <!-- Everything in this group concerns Rovio -->
     <group if="$(arg rovio)" >
+        <!-- image_proc takes in the color image and outputs the mono image that Rovio needs -->
         <node pkg="image_proc" type="image_proc" name="image_proc" ns="/cam0">
         </node>
 
+        <!-- Rovio thinks cam0/image_raw is mono, but here, it's color. The actual mono image is cam0/image_mono -->
         <remap from="cam0/image_raw" to="cam0/image_mono" />
-        <remap from="cam1/image_raw" to="cam1/image_mono" />
+        <!-- imu/vio is the IMU used exclusively by Rovio -->
         <remap from="imu0" to="imu/vio" />
         <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
             <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
@@ -30,19 +35,29 @@
         </node>
     </group>
 
+    <!-- Everything in this group concerns Loam -->
     <group if="$(arg loam)" ns="loam">
+        <!-- imu/loam is the IMU used exclusively by Loam -->
         <remap from="/imu/data" to="/imu/lidar" />
         <!-- For some reason, this remap does not work. I instead remapped from the rosbag player. -->
         <!-- <remap from="/velodyne_points" to="/lidar" /> -->
         <include file="$(find loam_velodyne)/launch/loam_velodyne.launch">
-            <arg name="rviz" value="$(arg rviz)" />
+            <arg name="rviz" value="false" />
         </include>
 
+        <!-- loam_frame_transform publishes a transform from the raw Loam output to the ROS convention
+             (X forward, Y left, Z up) -->
         <node pkg="vil_fusion" type="loam_frame_transform.py" name="frame_transform" output="screen">
             <remap from="~odometry/loam" to="/aft_mapped_to_init" />
         </node>
     </group>
 
+    <!-- This node takes in both Odometry sources (Rovio and Loam) and calculates metrics to determine when either
+         is degenerate. If they are not degenerate, the message is passed on. If it is degenerate, then the message
+         is dropped.
+
+         This node also changes the names of the frame_ids of the odometry messages, without publishing new transforms.
+         This is because ConFusion publishes these transforms, so there would be conflicts. -->
     <node pkg="vil_fusion" type="degeneracy_detection.py" name="degeneracy_detection_node" output="screen">
         <remap from="~rovio_input" to="/rovio/odometry" />
         <!-- <remap from="~loam_input" to="/aft_mapped_to_init" /> -->
@@ -53,27 +68,38 @@
         </rosparam>
     </node>
 
+    <!-- The Carla ROS bridge publishes the ground truth information only as transforms. ConFusion expects it as
+         Pose messages. This node just does that simple conversion, for when we do experiments with the ground truth
+         pose with ConFusion. -->
     <group>
         <node pkg="vil_fusion" type="ground_truth_pose.py" name="ground_truth_pose" output="screen">
 
         </node>
     </group>
 
+    <!-- Diagnostics which provide the absolute error of the various odometry estimates -->
     <group if="$(arg diagnostics)">
         <node pkg="vil_fusion" type="diagnostics.py" name="diagnostics" output="screen">
             <rosparam command="load" file="$(find vil_fusion)/cfg/diagnostics_params.yaml" />
         </node>
     </group>
 
+    <!-- Here is where the actual odometry fusion is done. -->
     <group if="$(arg do_fusion)">
+        <!-- ConFusion uses "world" as the stationary frame_id. This is coincident with the Rovio stationary frame.
+             Here we just publish an identity transform between the two. -->
         <node pkg="tf" type="static_transform_publisher" name="confusion_world_transform"
-            args="0 0 0 0 0 0 1  rovio_world world  50"/>
+            args="0 0 0 0 0 0 1  rovio_world world 50"/>
 
         <node pkg="smb_confusor" type="smb_confusor" name="smb_confusor" output="screen">
             <rosparam param="config_path" subst_value="true">
                 $(find vil_fusion)/cfg/confusion.cfg
             </rosparam>
         </node>
+    </group>
+
+    <group if="$(arg rviz)">
+        <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find vil_fusion)/cfg/rviz_config.rviz" />
     </group>
 
 </launch>
