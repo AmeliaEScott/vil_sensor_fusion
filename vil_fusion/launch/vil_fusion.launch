@@ -5,6 +5,7 @@
     <arg name="rviz" default="false" />
     <arg name="do_fusion" default="true" />
     <arg name="diagnostics" default="true" />
+    <arg name="loam_rviz" default="false" />
 
     <!-- These parameters change the names of the frame_ids used by Rovio in transforms -->
     <rosparam>
@@ -42,7 +43,7 @@
         <!-- For some reason, this remap does not work. I instead remapped from the rosbag player. -->
         <!-- <remap from="/velodyne_points" to="/lidar" /> -->
         <include file="$(find loam_velodyne)/launch/loam_velodyne.launch">
-            <arg name="rviz" value="false" />
+            <arg name="rviz" value="$(arg loam_rviz)" />
         </include>
 
         <!-- loam_frame_transform publishes a transform from the raw Loam output to the ROS convention

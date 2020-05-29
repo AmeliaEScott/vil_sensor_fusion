@@ -4,6 +4,7 @@
 	<arg name="rovio" default="true" />
     <arg name="loam" default="true" />
     <arg name="rviz" default="false" />
+    <arg name="loam_rviz" default="false" />
     <arg name="rate" default="1.0" />
     <arg name="do_fusion" default="true" />
 
@@ -32,6 +33,7 @@
         <arg name="rovio" value="$(arg rovio)" />
         <arg name="loam" value="$(arg loam)" />
         <arg name="rviz" value="$(arg rviz)" />
+        <arg name="loam_rviz" value="$(arg loam_rviz)" />
         <arg name="do_fusion" value="$(arg do_fusion)" />
     </include>
 
