@@ -22,18 +22,18 @@ VEHICLE_FILTER = "vehicle.tesla.model3"
 SIM_TIME_SECS = 60 * 60  # 1 Hour
 
 maps = ["Test1", "Test2", "Test3", "Test4"]
-repeats = 4
+vehicles = ["vehicle.tesla.model3", "vehicle.audi.tt", "vehicle.harley-davidson.low_rider"]
 client = carla.Client("localhost", 2000)
 
 for map in maps:
 
     client.load_world(map)
 
-    for num in range(0, repeats):
-        label = "{}_{}".format(map, num)
+    for vehicle in vehicles:
+        label = "{}_{}".format(map, vehicle)
         uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
         roslaunch.configure_logging(uuid)
-        cli_args = [LAUNCH_FILE, 'bagname:={}'.format(label), "vehicle_filter:={}".format(VEHICLE_FILTER)]
+        cli_args = [LAUNCH_FILE, 'bagname:={}'.format(label), "vehicle_filter:={}".format(vehicle)]
         roslaunch_args = cli_args[1:]
         roslaunch_file = [(roslaunch.rlutil.resolve_launch_arguments(cli_args)[0], roslaunch_args)]
         launch = roslaunch.parent.ROSLaunchParent(uuid, roslaunch_file)
@@ -44,11 +44,11 @@ for map in maps:
         rospy.sleep(rospy.Duration.from_sec(15))
 
         manual_control_override = rospy.Publisher("/carla/ego_vehicle/vehicle_control_manual_override",
-                                                  Bool, queue_size=1)
+                                                  Bool, queue_size=10, latch=True)
         autopilot = rospy.Publisher("/carla/ego_vehicle/enable_autopilot",
-                                    Bool, queue_size=1)
+                                    Bool, queue_size=10, latch=True)
         print("############# PUBLISHING AUTOPILOT #####################")
-        for _ in range(0, 10):
+        for _ in range(0, 50):
             # NO IDEA WHY I MUST PUBLISH SO MANY TIMES!
             manual_control_override.publish(Bool(data=False))
             autopilot.publish(Bool(data=True))
@@ -57,6 +57,9 @@ for map in maps:
         rospy.sleep(rospy.Duration.from_sec(SIM_TIME_SECS))
         print("####################### SHUTTING DOWN ROSLAUNCH #####################")
         launch.shutdown()
+
+        manual_control_override.unregister()
+        autopilot.unregister()
 
         newbag = os.path.join(BAG_SOURCE, "{}.bag".format(label))
         newbag_timefixed = os.path.join(BAG_SOURCE, "{}_timefixed.bag".format(label))
@@ -67,6 +70,6 @@ for map in maps:
         print("####################### MOVING TO HARD DRIVE #########################")
         subprocess.run(["mv", newbag_timefixed, moved_bag])
         print("####################### REMOVING CRAP ###############################")
-        subprocess.run(["rm", newbag, newbag_timefixed])
+        subprocess.run(["rm", newbag])
 
         print("################# {} -> {} -> {} ################".format(newbag, newbag_timefixed, moved_bag))

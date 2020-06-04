@@ -12,7 +12,7 @@
 
     <param name="use_sim_time" value="true" />
 
-	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" >
+	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
          <remap from="/lidar" to="/velodyne_points" />
 	</node>
 
@@ -37,16 +37,47 @@
         <arg name="do_fusion" value="$(arg do_fusion)" />
     </include>
 
-    <node if="$(eval arg('new_bag') != '')" pkg="rosbag" type="record" name="rovio_rosbag_record" args="
+    <node if="$(eval arg('new_bag') != '')" pkg="rosbag" type="record" name="rosbag_record" args="
 
     record -O $(arg new_bag)
     /cam0/camera_info
     /cam0/image_raw
-    /imu0
-    /simulation_groundtruth
+    /imu/fusion
+    /imu/lidar
+    /imu/vio
+    /velodyne_points
+    /carla/ego_vehicle/vehicle_info
+    /carla/ego_vehicle/vehicle_status
+    /tf
+    /rosout
+    /rovio/*
+    /aft_mapped_to_init
+    /laser_cloud_surround
+    /velodyne_cloud_registered
+    /laser_cloud_corner_last
+    /laser_cloud_surf_last
+    /laser_odom_to_init
+
+    /velodyne_cloud_1
+    /velodyne_cloud_2
+    /velodyne_cloud_3
+    /velodyne_cloud_registered
+
+    /imu_trans
+    /integrated_to_init
+    /laser_cloud_corner_last
+    /laser_cloud_flat
+    /laser_cloud_less_flat
+    /laser_cloud_less_sharp
+    /laser_cloud_sharp
+    /laser_cloud_surf_last
+    /laser_cloud_surround
+    /laser_odom_to_init
+    /loam/frame_transform/odometry/ros
+
+    /diagnostics/confusion
+    /diagnostics/loam
     " >
-        <remap from="/imu0" to="/imu/ros" />
-        <remap from="/cam0/image_raw" to="/cam0/image_mono" />
     </node>
 
 </launch>

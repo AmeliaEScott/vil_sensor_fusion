@@ -1,9 +1,12 @@
 Header header
 
 string name         # Name of this degeneracy detection function
-float64 score       # The score calculated for this measurement
-float64 threshold   # The threshold at which this measurement is considered degenerate.
-                    # Note: This can be either an upper threshold or lower threshold. It is only here for diagnostics,
-                    # so whoever reads this message should know ahead of time which it is.
-bool degenerate     # True if the associated measurement is degenerate, false if it's OK.
 
+float64 score_all       # The score calculated for this measurement, including all 6 DoF
+float64 derivative_all  # Difference between current score and previous score, for all 6 D0F
+
+float64 score_trans     # Score calculated for this measurement, including only the 3 translational DoF
+float64 derivative_trans  # Difference between current and previous score_trans
+
+float64 score_rot       # Score calculated for this measurement, including only the 3 rotational DoF
+float64 derivative_rot  # Difference between current score_rot and previous score_rot

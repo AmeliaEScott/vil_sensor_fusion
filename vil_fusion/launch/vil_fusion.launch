@@ -49,7 +49,7 @@
         <!-- loam_frame_transform publishes a transform from the raw Loam output to the ROS convention
              (X forward, Y left, Z up) -->
         <node pkg="vil_fusion" type="loam_frame_transform.py" name="frame_transform" output="screen">
-            <remap from="~odometry/loam" to="/aft_mapped_to_init" />
+            <remap from="~odometry/loam" to="/aft_mapped_to_init_with_hessian" />
         </node>
     </group>
 
@@ -64,8 +64,14 @@
         <!-- <remap from="~loam_input" to="/aft_mapped_to_init" /> -->
         <remap from="~loam_input" to="/loam/frame_transform/odometry/ros" />
         <rosparam>
-            loam_degen_funcs: [demo1]
-            rovio_degen_funcs: [demo2]
+            loam_degen_funcs: [
+                d_opt, a_opt, e_opt, jensen_bregman, kullback_leibler, norm_frobenius, norm_nuclear, norm_1, norm_2,
+                norm_frobenius_diff, norm_nuclear_diff, norm_1_diff, norm_2_diff,
+            ]
+            rovio_degen_funcs: [
+                d_opt, a_opt, e_opt, jensen_bregman, kullback_leibler, norm_frobenius, norm_nuclear, norm_1, norm_2,
+                norm_frobenius_diff, norm_nuclear_diff, norm_1_diff, norm_2_diff,
+            ]
         </rosparam>
     </node>
 
