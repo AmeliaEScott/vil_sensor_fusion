@@ -50,7 +50,17 @@
     /carla/ego_vehicle/vehicle_status
     /tf
     /rosout
-    /rovio/*
+
+    /rovio/T_G_W
+    /rovio/extrinsics0
+    /rovio/imu_biases
+    /rovio/markers
+    /rovio/odometry
+    /rovio/patch
+    /rovio/pcl
+    /rovio/pose_with_covariance_stamped
+    /rovio/transform
+
     /aft_mapped_to_init
     /laser_cloud_surround
     /velodyne_cloud_registered
@@ -74,9 +84,12 @@
     /laser_cloud_surround
     /laser_odom_to_init
     /loam/frame_transform/odometry/ros
+    /loam/frame_transform/mapping/ros
 
     /diagnostics/confusion
-    /diagnostics/loam
+    /diagnostics/loam_mapping
+    /diagnostics/loam_odom
+    /diagnostics/rovio
     " >
     </node>
 

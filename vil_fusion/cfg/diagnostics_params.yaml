@@ -5,11 +5,16 @@ diagnostics: # For each of the following items, the diagnostics node will track 
     est: rovio_imu                # frame_id of estimated transform from odometry algorithm
     ref: rovio_world              # Stationary reference frame
     rate: 20                      # Frequency of odometry publications (Hz)
-  - name: loam
+  - name: loam_mapping
     gt: /ego_vehicle/lidar/lidar1
     est: aft_mapped_ros
     ref: loam_init_ros_convention
-    rate: 5
+    rate: 10
+  - name: loam_odom
+    gt: /ego_vehicle/lidar/lidar1
+    est: laser_odom_ros
+    ref: loam_init_ros_convention
+    rate: 10
   - name: confusion
     gt: /ego_vehicle/imu/imu_fusion
     est: imu

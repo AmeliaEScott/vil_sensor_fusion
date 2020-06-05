@@ -32,9 +32,17 @@ class LoamFrameTransform:
         self.tf_broadcaster = TransformBroadcaster()
 
         self.pub_loam_odom = rospy.Publisher("~odometry/ros", OdometryWithHessian, queue_size=1)
-        self.sub_loam_odom = rospy.Subscriber("~odometry/loam", OdometryWithHessian, callback=self.loam_odom_callback_2)
+        self.pub_loam_mapping = rospy.Publisher("~mapping/ros", OdometryWithHessian, queue_size=1)
+        self.sub_loam_odom = rospy.Subscriber(
+            "~odometry/loam",
+            OdometryWithHessian,
+            callback=lambda msg: self.loam_odom_callback_2(msg, self.pub_loam_odom))
+        self.sub_loam_mapping = rospy.Subscriber(
+            "~mapping/loam",
+            OdometryWithHessian,
+            callback=lambda msg: self.loam_odom_callback_2(msg, self.pub_loam_mapping))
 
-    def loam_odom_callback_2(self, msg):
+    def loam_odom_callback_2(self, msg, pub):
         (
             msg.odom.pose.pose.position.x,
             msg.odom.pose.pose.position.y,
@@ -76,9 +84,9 @@ class LoamFrameTransform:
         )
 
         msg.odom.header.frame_id = "loam_init_ros_convention"
-        msg.odom.child_frame_id = "aft_mapped_ros"
+        msg.odom.child_frame_id += "_ros"
 
-        self.pub_loam_odom.publish(msg)
+        pub.publish(msg)
 
         new_trans = np.array([
             msg.odom.pose.pose.position.x,
@@ -97,41 +105,41 @@ class LoamFrameTransform:
             new_trans,
             new_rot,
             msg.odom.header.stamp,
-            "aft_mapped_ros",
+            msg.odom.child_frame_id,
             "loam_init_ros_convention"
         )
 
-    def loam_odom_callback(self, msg):
-        # Rotation from LOAM init frame in ROS convention, to LOAM init frame in LOAM convention
-        loam_to_ros_translate = np.array([0.0, 0.0, 0.0])
-        loam_to_ros_quat = tf.transformations.quaternion_from_matrix(
-            tf.transformations.inverse_matrix(ros_to_loam)
-        )
-        self.tf_broadcaster.sendTransform(
-            loam_to_ros_translate,
-            loam_to_ros_quat,
-            time=msg.header.stamp,
-            parent=msg.child_frame_id,
-            child=msg.child_frame_id + "_ros"
-        )
-        self.tf_listener.waitForTransform(
-            self.loam_init_frame_id,
-            "loam_init_ros_convention",
-            msg.header.stamp,
-            rospy.Duration.from_sec(0.1)
-        )
-        newpose = PoseStamped()
-        newpose.header = msg.header
-        newpose.header.frame_id = msg.header.frame_id
-        newpose.pose = msg.pose.pose
-        newpose = self.tf_listener.transformPose("loam_init_ros_convention", newpose)
-        msg.pose.pose = newpose.pose
-
-
-
-        msg.header.frame_id = "loam_init_ros_convention"
-        msg.child_frame_id = msg.child_frame_id + "_ros"
-        self.pub_loam_odom.publish(msg)
+    # def loam_odom_callback(self, msg):
+    #     # Rotation from LOAM init frame in ROS convention, to LOAM init frame in LOAM convention
+    #     loam_to_ros_translate = np.array([0.0, 0.0, 0.0])
+    #     loam_to_ros_quat = tf.transformations.quaternion_from_matrix(
+    #         tf.transformations.inverse_matrix(ros_to_loam)
+    #     )
+    #     self.tf_broadcaster.sendTransform(
+    #         loam_to_ros_translate,
+    #         loam_to_ros_quat,
+    #         time=msg.header.stamp,
+    #         parent=msg.child_frame_id,
+    #         child=msg.child_frame_id + "_ros"
+    #     )
+    #     self.tf_listener.waitForTransform(
+    #         self.loam_init_frame_id,
+    #         "loam_init_ros_convention",
+    #         msg.header.stamp,
+    #         rospy.Duration.from_sec(0.1)
+    #     )
+    #     newpose = PoseStamped()
+    #     newpose.header = msg.header
+    #     newpose.header.frame_id = msg.header.frame_id
+    #     newpose.pose = msg.pose.pose
+    #     newpose = self.tf_listener.transformPose("loam_init_ros_convention", newpose)
+    #     msg.pose.pose = newpose.pose
+    #
+    #
+    #
+    #     msg.header.frame_id = "loam_init_ros_convention"
+    #     msg.child_frame_id = msg.child_frame_id + "_ros"
+    #     self.pub_loam_odom.publish(msg)
 
 
 if __name__ == "__main__":

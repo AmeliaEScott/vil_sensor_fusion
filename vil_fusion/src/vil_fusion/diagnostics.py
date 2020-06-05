@@ -7,6 +7,7 @@ import threading
 import numpy as np
 from vil_fusion.msg import DiagnosticMessage
 import math
+from geometry_msgs.msg import Vector3Stamped
 
 
 class DiagnosticNode:
@@ -81,8 +82,22 @@ class DiagnosticNode:
                 source_time=now,
                 fixed_frame=ref
             )
+            gt_d_trans = np.array(gt_d_trans)
+
+            # Estimated transform between last time-step and now
+            est_d_trans, est_d_rot = self.tf_listener.lookupTransformFull(
+                target_frame=est,
+                target_time=last_time,
+                source_frame=est,
+                source_time=now,
+                fixed_frame=ref
+            )
+            est_d_trans = np.array(est_d_trans)
 
             total_distance += np.linalg.norm(gt_d_trans)
+
+            lin_vel_diff = est_d_trans - gt_d_trans
+            ang_vel_diff = transformations.quaternion_multiply(gt_d_rot, transformations.quaternion_inverse(est_d_rot))
 
             trans_err, rot_err = self.tf_listener.lookupTransform(
                 target_frame=gt,
@@ -92,13 +107,20 @@ class DiagnosticNode:
 
             rot_ang = 2 * math.acos(abs(rot_err[3]))
 
+
+
             msg = DiagnosticMessage()
             msg.header.stamp = now
             msg.name = name
             msg.gt_distance = total_distance
             msg.abs_dist_err = np.linalg.norm(trans_err)
             msg.abs_rot_err = rot_ang
-            msg.relative_dist_err = msg.abs_dist_err / msg.gt_distance
+            msg.relative_dist_err = float('Inf') if msg.gt_distance == 0 else msg.abs_dist_err / msg.gt_distance
+
+            msg.abs_linear_vel_err = np.linalg.norm(lin_vel_diff)
+            msg.abs_rot_vel_err = 2 * math.acos(abs(ang_vel_diff[3]))
+            msg.rel_linear_vel_err = float('Inf') if np.linalg.norm(gt_d_trans) == 0 else msg.abs_linear_vel_err / np.linalg.norm(gt_d_trans)
+            msg.rel_rot_vel_err = float('Inf') if math.acos(abs(gt_d_rot[3])) == 0 else msg.abs_rot_vel_err / (2 * math.acos(abs(gt_d_rot[3])))
 
             msg.err.orientation.x = rot_err[0]
             msg.err.orientation.y = rot_err[1]
