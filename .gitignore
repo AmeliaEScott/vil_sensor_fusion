@@ -2,3 +2,5 @@
 frames.pdf
 frames.gv
 waymo_data/
+*.pkl
+*.dill
