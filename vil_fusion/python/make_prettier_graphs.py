@@ -236,8 +236,8 @@ def plot(
         tpr = np.sum(true_positives, axis=1) / np.sum(is_degen)
         fpr = np.sum(false_positives, axis=1) / np.sum(np.logical_not(is_degen))
         roc_ax.plot(fpr, tpr)
-        roc_ax.set_ylabel("FPR")
-        roc_ax.set_xlabel("TPR")
+        roc_ax.set_ylabel("TPR")
+        roc_ax.set_xlabel("FPR")
 
     fig.suptitle(title)
     fig.show()
