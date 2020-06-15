@@ -17,8 +17,8 @@ import shutil
 
 pkg = rospkg.RosPack()
 
-DATA_HOME = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments"
-RESULTS_DIR = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/experiment_results"
+DATA_HOME = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_v3"
+RESULTS_DIR = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/experiment_results_v3"
 LAUNCH_FILE = os.path.join(pkg.get_path("vil_fusion"), "launch", "vil_fusion_bag.launch")
 
 with tempfile.TemporaryDirectory() as tmpdir:

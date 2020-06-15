@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import roslaunch
 import rospkg
@@ -14,14 +14,14 @@ pkg = rospkg.RosPack()
 
 CARLA_PREFIX = "/home/timothy/Code/carla"
 BAG_SOURCE = os.path.join(pkg.get_path("carla_tools"), "rosbags")
-BAG_DEST = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments"
+BAG_DEST = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_v3"
 LAUNCH_FILE = os.path.join(pkg.get_path("carla_tools"), "launch", "carla_ros_bridge.launch")
 FIX_ROSBAG_SCRIPT = os.path.join(pkg.get_path("carla_tools"), "scripts", "fix_rosbag_time.py")
 VEHICLE_FILTER = "vehicle.tesla.model3"
 
-SIM_TIME_SECS = 60 * 60  # 1 Hour
+SIM_TIME_SECS = int(60 * 60 * 1.5)  # 1.5 Hours
 
-maps = ["Test1", "Test2", "Test3", "Test4"]
+maps = ["Test1", "Test2_Denser", "Test3", "Test4"]
 vehicles = ["vehicle.tesla.model3", "vehicle.audi.tt", "vehicle.harley-davidson.low_rider"]
 client = carla.Client("localhost", 2000)
 
