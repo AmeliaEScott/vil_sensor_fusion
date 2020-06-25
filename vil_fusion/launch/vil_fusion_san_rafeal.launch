@@ -38,6 +38,12 @@
         0.0 0.0 0.0 1.0
         map rovio_world 100"/>
 
+    <rosparam>
+        rovio/cam0_offset: 0.01215371276812396
+        rovio/resize_input_image: true
+        rovio/resise_factor: 0.5
+    </rosparam>
+
     <include file="$(find vil_fusion)/launch/vil_fusion.launch">
         <arg name="rovio" value="$(arg rovio)" />
         <arg name="loam" value="$(arg loam)" />
@@ -47,6 +53,7 @@
 
         <arg name="config_dir" value="$(find vil_fusion)/cfg/san_rafeal" />
         <arg name="diagnostics" value="false" />
+
     </include>
 
     <node if="$(eval arg('new_bag') != '')" pkg="rosbag" type="record" name="rosbag_record" args="

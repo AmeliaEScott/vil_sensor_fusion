@@ -2,7 +2,7 @@
 ; #include "/home/user/workspace/rovio/cfg/rovio_custom.info"
 Common
 {
-	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
+	doVECalibration false;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
 	verbose false;				Is the verbose active
 }
@@ -122,10 +122,16 @@ ImgUpdate
     noiseGainForOffCamera 10.0;									Factor added on update noise if not main camera
     discriminativeSamplingDistance 0.02;						Sampling distance for checking discriminativity of patch (if <= 0.0 no check is performed).
     discriminativeSamplingGain 1.1;								Gain for threshold above which the samples must lie (if <= 1.0 the patchRejectionTh is used).
-    maxAllowedFeatureDistance 200;
+    maxAllowedFeatureDistance 25.0;                             Max allowed estimated feature distance after performing update, remove features with very far away estimated depth and clustered features during backward motion.
+    minTimeBeforeFeaDistCheck 1.0;                              Min time allowed in secd before maxAllowedFeatureDistance check is applied. Typically 1.0 second for camera at 20 Hz i.e. 20 updates have been applied
+    useDepthFromLiDAR true;                                     Enable or Disable usage of LiDAR direct depth for features
+    lidarDepthCalcMode_ 1;                                      Use Patch(0) or Line(1) for Depth Calculation
+    depthSearchWindowWidth 15; 23;                              Horizontal size of direct depth search window
+    depthSearchWindowHeight 7; 47;                              Vertical size of direct depth search window
+    directDepInitCovScaleFactor 1e-3;                           Factor to scale depth initialization covaraince in case of direct depth initialization
     MotionDetection
     {
-    	isEnabled 0;											Is the motion detection enabled
+    	isEnabled 1;											Is the motion detection enabled
 	    rateOfMovingFeaturesTh 0.5;								Amount of feature with motion for overall motion detection
 	    pixelCoordinateMotionTh 1.0;							Threshold for motion detection for patched [pixels]
 	    minFeatureCountForNoMotionDetection 5;					Min feature count in frame for motion detection
@@ -140,7 +146,7 @@ ImgUpdate
         }
         MahalanobisTh0 7.689997599999999;						Mahalanobid distance for zero velocity updates
         minNoMotionTime 1.0;									Min duration of no-motion
-        isEnabled 0;											Should zero velocity update be applied, only works if MotionDetection.isEnabled is true
+        isEnabled 1;											Should zero velocity update be applied, only works if MotionDetection.isEnabled is true
     }
 }
 Prediction
@@ -164,8 +170,14 @@ Prediction
         att_1 7.6e-7;							Y-Covariance parameter of attitude prediction [rad^2/s]
         att_2 7.6e-7;							Z-Covariance parameter of attitude prediction [rad^2/s]
         vea 1e-8;								Covariance parameter of rotational extrinsics prediction [rad^2/s]
-        dep 0.0001;							Covariance parameter of distance prediction [m^2/s]
-        nor 0.00001;								Covariance parameter of bearing vector prediction [rad^2/s]
+        dep 0.0001;							    Covariance parameter of distance prediction [m^2/s]
+        nor 0.00001;							Covariance parameter of bearing vector prediction [rad^2/s]
+    }
+    GravityVector
+    {
+        g_x 0.0;                                X-Component of gravity vector [m^2/s]
+        g_y 0.0;                                Y-Component of gravity vector [m^2/s]
+        g_z -9.81;                              Z-Component of gravity vector [m^2/s]
     }
     MotionDetection
     {

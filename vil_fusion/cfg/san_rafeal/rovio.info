@@ -2,7 +2,7 @@
 ; #include "/home/user/workspace/rovio/cfg/rovio_custom.info"
 Common
 {
-	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
+	doVECalibration false;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
 	verbose false;				Is the verbose active
 }
@@ -10,21 +10,20 @@ Camera0
 {
   CalibrationFile  ;
   qCM_x  0.541994263973;                               X-entry of IMU to Camera quaterion (Hamilton)
-  qCM_y  -0.538194367618;                               Y-entry of IMU to Camera quaterion (Hamilton)
+  qCM_y  -0.538194367618;                              Y-entry of IMU to Camera quaterion (Hamilton)
   qCM_z  0.457984250078;                               Z-entry of IMU to Camera quaterion (Hamilton)
   qCM_w  0.454796072065;                               W-entry of IMU to Camera quaterion (Hamilton)
   MrMC_x 0.0321990644814;                              X-entry of IMU to Camera vector (expressed in IMU CF) [m]
   MrMC_y 0.00236694722335;                             Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
   MrMC_z -0.0596451018445;                             Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
-
 Init
 {
     State
     {
         pos_0 0;			X-entry of initial position (world to IMU in world) [m]
         pos_1 0;			Y-entry of initial position (world to IMU in world) [m]
-        pos_2 0; 0.235; 0.572; 0.225;      Z-entry of initial position (world to IMU in world) [m]
+        pos_2 0;			Z-entry of initial position (world to IMU in world) [m]
         vel_0 0;			X-entry of initial velocity (robocentric, IMU) [m/s]
         vel_1 0;			Y-entry of initial velocity (robocentric, IMU) [m/s]
         vel_2 0;			Z-entry of initial velocity (robocentric, IMU) [m/s]
@@ -34,10 +33,10 @@ Init
         gyb_0 0;			X-entry of gyroscope bias [rad/s]
         gyb_1 0;			Y-entry of gyroscope bias [rad/s]
         gyb_2 0;			Z-entry of gyroscope bias [rad/s]
-        att_x 0;			X-entry of initial attitude (IMU to world, JPL)
-        att_y 0;			Y-entry of initial attitude (IMU to world, JPL)
-        att_z 0;			Z-entry of initial attitude (IMU to world, JPL)
-        att_w 1;			W-entry of initial attitude (IMU to world, JPL)
+        att_x 0;			X-entry of initial attitude (IMU to world, Hamilton)
+        att_y 0;			Y-entry of initial attitude (IMU to world, Hamilton)
+        att_z 0;			Z-entry of initial attitude (IMU to world, Hamilton)
+        att_w 1;			W-entry of initial attitude (IMU to world, Hamilton)
     }
     Covariance
     {
@@ -112,7 +111,13 @@ ImgUpdate
     noiseGainForOffCamera 10.0;									Factor added on update noise if not main camera
     discriminativeSamplingDistance 0.02;						Sampling distance for checking discriminativity of patch (if <= 0.0 no check is performed).
     discriminativeSamplingGain 1.1;								Gain for threshold above which the samples must lie (if <= 1.0 the patchRejectionTh is used).
-    maxAllowedFeatureDistance 200;
+    maxAllowedFeatureDistance 25.0;                             Max allowed estimated feature distance after performing update, remove features with very far away estimated depth and clustered features during backward motion.
+    minTimeBeforeFeaDistCheck 1.0;                              Min time allowed in secd before maxAllowedFeatureDistance check is applied. Typically 1.0 second for camera at 20 Hz i.e. 20 updates have been applied
+    useDepthFromLiDAR true;                                     Enable or Disable usage of LiDAR direct depth for features
+    lidarDepthCalcMode_ 1;                                      Use Patch(0) or Line(1) for Depth Calculation
+    depthSearchWindowWidth 15; 23;                              Horizontal size of direct depth search window
+    depthSearchWindowHeight 7; 47;                              Vertical size of direct depth search window
+    directDepInitCovScaleFactor 1e-3;                           Factor to scale depth initialization covaraince in case of direct depth initialization
     MotionDetection
     {
     	isEnabled 1;											Is the motion detection enabled
@@ -140,22 +145,28 @@ Prediction
         pos_0 1e-4;								X-covariance parameter of position prediction [m^2/s]
         pos_1 1e-4;								Y-covariance parameter of position prediction [m^2/s]
         pos_2 1e-4;								Z-covariance parameter of position prediction [m^2/s]
-        vel_0 4e-5; 4e-6						X-covariance parameter of velocity prediction [m^2/s^3]
-        vel_1 4e-5;								Y-covariance parameter of velocity prediction [m^2/s^3]
-        vel_2 4e-5;								Z-covariance parameter of velocity prediction [m^2/s^3]
-        acb_0 1e-8;							    X-covariance parameter of accelerometer bias prediction [m^2/s^5]
-        acb_1 1e-8;							    Y-covariance parameter of accelerometer bias prediction [m^2/s^5]
-        acb_2 1e-8;							    Z-covariance parameter of accelerometer bias prediction [m^2/s^5]
-        gyb_0 3.8e-9;							X-covariance parameter of gyroscope bias prediction [rad^2/s^3]
-        gyb_1 3.8e-9;							Y-covariance parameter of gyroscope bias prediction [rad^2/s^3]
-        gyb_2 3.8e-9;							Z-covariance parameter of gyroscope bias prediction [rad^2/s^3]
+        vel_0 4e-6;								X-covariance parameter of velocity prediction [m^2/s^3]
+        vel_1 4e-6;								Y-covariance parameter of velocity prediction [m^2/s^3]
+        vel_2 4e-6;								Z-covariance parameter of velocity prediction [m^2/s^3]
+        acb_0 1e-8;								X-covariance parameter of accelerometer bias prediction [m^2/s^5]
+        acb_1 1e-8;								Y-covariance parameter of accelerometer bias prediction [m^2/s^5]
+        acb_2 1e-8;								Z-covariance parameter of accelerometer bias prediction [m^2/s^5]
+        gyb_0 3.8e-7;							X-covariance parameter of gyroscope bias prediction [rad^2/s^3]
+        gyb_1 3.8e-7;							Y-covariance parameter of gyroscope bias prediction [rad^2/s^3]
+        gyb_2 3.8e-7;							Z-covariance parameter of gyroscope bias prediction [rad^2/s^3]
         vep 1e-8;								Covariance parameter of linear extrinsics prediction [m^2/s]
-        att_0 7.6e-8; 7.6e-7					X-Covariance parameter of attitude prediction [rad^2/s]
-        att_1 7.6e-8;							Y-Covariance parameter of attitude prediction [rad^2/s]
-        att_2 7.6e-8;							Z-Covariance parameter of attitude prediction [rad^2/s]
+        att_0 7.6e-7;							X-Covariance parameter of attitude prediction [rad^2/s]
+        att_1 7.6e-7;							Y-Covariance parameter of attitude prediction [rad^2/s]
+        att_2 7.6e-7;							Z-Covariance parameter of attitude prediction [rad^2/s]
         vea 1e-8;								Covariance parameter of rotational extrinsics prediction [rad^2/s]
-        dep 0.00001;							Covariance parameter of distance prediction [m^2/s]
-        nor 0.000001;							Covariance parameter of bearing vector prediction [rad^2/s]
+        dep 0.0001;							    Covariance parameter of distance prediction [m^2/s]
+        nor 0.00001;							Covariance parameter of bearing vector prediction [rad^2/s]
+    }
+    GravityVector
+    {
+        g_x 0.0;                                X-Component of gravity vector [m^2/s]
+        g_y 0.0;                                Y-Component of gravity vector [m^2/s]
+        g_z -9.81;                              Z-Component of gravity vector [m^2/s]
     }
     MotionDetection
     {
@@ -188,19 +199,19 @@ PoseUpdate
 	enableAttitude true;						Should the rotation part be used during the update (e.g. set to fals eif feeding GPS-measurement)
 	noFeedbackToRovio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
 	doInertialAlignmentAtStart true;			Should the transformation between I and W be explicitly computed and set with the first pose measurement.
-	useOdometryCov false;
 	timeOffset 0.0;								Time offset added to the pose measurement timestamps
-    qVM_x 0;									X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
-    qVM_y 0;									Y-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
-    qVM_z 0;									Z-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
-    qVM_w 1;									W-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
+    useOdometryCov false;                    Should the UpdateNoise position covariance be scaled using the covariance in the Odometry message
+    qVM_x 0;									X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
+    qVM_y 0;									Y-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
+    qVM_z 0;									Z-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
+    qVM_w 1;									W-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
     MrMV_x 0;									X-entry of vector representing IMU to reference body coordinate frame of pose measurement
     MrMV_y 0;									Y-entry of vector representing IMU to reference body coordinate frame of pose measurement
     MrMV_z 0;									Z-entry of vector representing IMU to reference body coordinate frame of pose measurement
-    qWI_x 0;									X-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
-    qWI_y 0;									Y-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
-    qWI_z 0;									Z-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
-    qWI_w 1;									W-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
+    qWI_x 0;									X-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
+    qWI_y 0;									Y-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
+    qWI_z 0;									Z-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
+    qWI_w 1;									W-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
     IrIW_x 0;									X-entry of vector representing World to reference inertial coordinate frame of pose measurement
     IrIW_y 0;									Y-entry of vector representing World to reference inertial coordinate frame of pose measurement
     IrIW_z 0;									Z-entry of vector representing World to reference inertial coordinate frame of pose measurement
