@@ -17,9 +17,10 @@ import shutil
 
 pkg = rospkg.RosPack()
 
-DATA_HOME = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_v3"
-RESULTS_DIR = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/experiment_results_v3"
-LAUNCH_FILE = os.path.join(pkg.get_path("vil_fusion"), "launch", "vil_fusion_bag.launch")
+DATA_HOME = "/home/timothy/Code/catkin_ws/src/vil_sensor_fusion/sample_bags/euroc"
+RESULTS_DIR = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/euroc_results"
+# LAUNCH_FILE = os.path.join(pkg.get_path("vil_fusion"), "launch", "vil_fusion_bag.launch")
+LAUNCH_FILE = os.path.join(pkg.get_path("vil_fusion"), "launch", "vil_fusion_euroc.launch")
 
 with tempfile.TemporaryDirectory() as tmpdir:
     for filename in filter(lambda x: x.endswith(".bag"), os.listdir(DATA_HOME)):

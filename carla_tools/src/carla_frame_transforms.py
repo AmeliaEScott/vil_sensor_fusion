@@ -25,6 +25,7 @@ class CarlaFrameTransformer:
         self.carla_map_frame_id = "/map"
 
         self.rovio_world_frame_id = rospy.get_param("/rovio/world_frame", "rovio_world")
+        self.do_loam = rospy.get_param("~do_loam", True)
 
         self.loam_init_frame_id = "loam_init"
 
@@ -33,8 +34,11 @@ class CarlaFrameTransformer:
                 # Initial transform between Carla fixed /map frame and Carla imu and lidar
                 self.init_imu_transform = self.tf_listener.lookupTransform(
                     self.carla_map_frame_id, "/ego_vehicle/imu/imu_vio", time=rospy.Time())
-                self.init_lidar_transform = self.tf_listener.lookupTransform(
-                    self.carla_map_frame_id, "/ego_vehicle/lidar/lidar1", time=rospy.Time())
+                if self.do_loam:
+                    self.init_lidar_transform = self.tf_listener.lookupTransform(
+                        self.carla_map_frame_id, "/ego_vehicle/lidar/lidar1", time=rospy.Time())
+                else:
+                    self.init_lidar_transform = self.init_imu_transform
             except LookupException:
                 # Transforms from Carla are not available yet
                 rospy.sleep(rospy.Duration.from_sec(0.1))
@@ -50,27 +54,28 @@ class CarlaFrameTransformer:
     def send_transforms(self, *args):
         time = self.tf_listener.getLatestCommonTime("/ego_vehicle/imu/imu_vio", self.carla_map_frame_id)
 
-        # Transformation between Carla's fixed map frame and LOAM's fixed init frame, but rotated to be
-        # in the ROS convention
-        self.tf_broadcaster.sendTransform(
-            self.init_lidar_transform[0],
-            self.init_lidar_transform[1],
-            time=time,
-            parent=self.carla_map_frame_id,
-            child="loam_init_ros_convention"
-        )
+        if self.do_loam:
+            # Transformation between Carla's fixed map frame and LOAM's fixed init frame, but rotated to be
+            # in the ROS convention
+            self.tf_broadcaster.sendTransform(
+                self.init_lidar_transform[0],
+                self.init_lidar_transform[1],
+                time=time,
+                parent=self.carla_map_frame_id,
+                child="loam_init_ros_convention"
+            )
 
-        # Rotation from LOAM init frame in ROS convention, to LOAM init frame in LOAM convention
-        # ros_to_loam_translate = tf.transformations.translation_from_matrix(transform_helper.ros_to_loam)
-        ros_to_loam_translate = np.array([0.0, 0.0, 0.0])
-        ros_to_loam_quat = tf.transformations.quaternion_from_matrix(transform_helper.ros_to_loam)
-        self.tf_broadcaster.sendTransform(
-            ros_to_loam_translate,
-            ros_to_loam_quat,
-            time=time,
-            parent="loam_init_ros_convention",
-            child=self.loam_init_frame_id
-        )
+            # Rotation from LOAM init frame in ROS convention, to LOAM init frame in LOAM convention
+            # ros_to_loam_translate = tf.transformations.translation_from_matrix(transform_helper.ros_to_loam)
+            ros_to_loam_translate = np.array([0.0, 0.0, 0.0])
+            ros_to_loam_quat = tf.transformations.quaternion_from_matrix(transform_helper.ros_to_loam)
+            self.tf_broadcaster.sendTransform(
+                ros_to_loam_translate,
+                ros_to_loam_quat,
+                time=time,
+                parent="loam_init_ros_convention",
+                child=self.loam_init_frame_id
+            )
 
         self.tf_broadcaster.sendTransform(
             self.init_imu_transform[0],

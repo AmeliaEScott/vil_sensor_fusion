@@ -1,0 +1,56 @@
+<launch>
+
+	<arg name="bagfile" />
+    <arg name="rviz" default="false" />
+    <arg name="rate" default="1.0" />
+
+    <arg name="new_bag" default="" />
+
+    <param name="use_sim_time" value="true" />
+
+	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
+         <remap from="/cam0/image_raw" to="/cam0/image_mono" />
+         <remap from="/imu0" to="/imu/vio"/>
+	</node>
+
+	<node pkg="vil_fusion" type="gt_transform.py" name="gt_transform" output="screen">
+	    <remap from="~transform" to="/vicon/firefly_sbx/firefly_sbx" />
+        <rosparam param="vicon_extrinsics">
+            [ 0.33638, -0.01749,  0.94156,  0.06901,
+             -0.02078, -0.99972, -0.01114, -0.02781,
+              0.94150, -0.01582, -0.33665, -0.12395,
+              0.0,      0.0,      0.0,      1.0]
+        </rosparam>
+	</node>
+
+    <include file="$(find vil_fusion)/launch/vil_fusion.launch">
+        <arg name="rovio" value="true" />
+        <arg name="loam" value="false" />
+        <arg name="rviz" value="$(arg rviz)" />
+        <arg name="do_fusion" value="false" />
+
+        <arg name="config_dir" value="$(find vil_fusion)/cfg/euroc" />
+    </include>
+
+    <node if="$(eval arg('new_bag') != '')" pkg="rosbag" type="record" name="rosbag_record" args="
+
+    record -O $(arg new_bag)
+    /imu0
+    /tf
+    /rosout
+
+    /rovio/T_G_W
+    /rovio/extrinsics0
+    /rovio/imu_biases
+    /rovio/markers
+    /rovio/odometry
+    /rovio/patch
+    /rovio/pcl
+    /rovio/pose_with_covariance_stamped
+    /rovio/transform
+
+    /diagnostics/rovio
+    " >
+    </node>
+
+</launch>

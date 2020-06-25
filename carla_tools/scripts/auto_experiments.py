@@ -14,14 +14,21 @@ pkg = rospkg.RosPack()
 
 CARLA_PREFIX = "/home/timothy/Code/carla"
 BAG_SOURCE = os.path.join(pkg.get_path("carla_tools"), "rosbags")
-BAG_DEST = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_v3"
+BAG_DEST = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_v5"
 LAUNCH_FILE = os.path.join(pkg.get_path("carla_tools"), "launch", "carla_ros_bridge.launch")
 FIX_ROSBAG_SCRIPT = os.path.join(pkg.get_path("carla_tools"), "scripts", "fix_rosbag_time.py")
 VEHICLE_FILTER = "vehicle.tesla.model3"
 
 SIM_TIME_SECS = int(60 * 60 * 1.5)  # 1.5 Hours
 
-maps = ["Test1", "Test2_Denser", "Test3", "Test4"]
+maps = [
+    # "Test1",
+    # "Test2_Denser",
+    # "Test3",
+    # "Test4",
+    "Town02",
+    "Town03",
+]
 vehicles = ["vehicle.tesla.model3", "vehicle.audi.tt", "vehicle.harley-davidson.low_rider"]
 client = carla.Client("localhost", 2000)
 
@@ -33,7 +40,7 @@ for map in maps:
         label = "{}_{}".format(map, vehicle)
         uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
         roslaunch.configure_logging(uuid)
-        cli_args = [LAUNCH_FILE, 'bagname:={}'.format(label), "vehicle_filter:={}".format(vehicle)]
+        cli_args = [LAUNCH_FILE, 'bagname:={}'.format(label), "vehicle_filter:={}".format(vehicle), "avoid_stoplights:=true"]
         roslaunch_args = cli_args[1:]
         roslaunch_file = [(roslaunch.rlutil.resolve_launch_arguments(cli_args)[0], roslaunch_args)]
         launch = roslaunch.parent.ROSLaunchParent(uuid, roslaunch_file)

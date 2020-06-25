@@ -1,0 +1,106 @@
+<launch>
+
+	<arg name="bagfile" />
+	<arg name="rovio" default="true" />
+    <arg name="loam" default="true" />
+    <arg name="rviz" default="false" />
+    <arg name="loam_rviz" default="false" />
+    <arg name="rate" default="1.0" />
+    <arg name="do_fusion" default="false" />
+
+    <arg name="new_bag" default="" />
+
+    <param name="use_sim_time" value="true" />
+
+	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
+         <remap from="/camera/image_mono" to="/cam0/image_mono" />
+         <remap from="/matrice/imu" to="/imu/lidar" />
+         <remap from="/vn100/imu" to="/imu/vio"/>
+	</node>
+
+    <node pkg="tf" type="static_transform_publisher" name="tf_lidar_cam" args="
+        0.143373033912513   0.001844679769965  -0.152734883569140
+        -1.563483662924555  -0.001122948541060  -1.755796784911929
+        /velodyne /cam_blackfly 100"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="tf_loam_transform" args="
+        0.0 0.0 0.0
+        0.5 0.5 0.5 0.5
+        loam_init_ros_convention loam_init 100"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="tf_map_loam_init" args="
+        0.0 0.0 0.0
+        0.0 0.0 0.0 1.0
+        map loam_init_ros_convention 100"/>
+
+     <node pkg="tf" type="static_transform_publisher" name="tf_map_rovio_world" args="
+        0.0 0.0 0.0
+        0.0 0.0 0.0 1.0
+        map rovio_world 100"/>
+
+    <include file="$(find vil_fusion)/launch/vil_fusion.launch">
+        <arg name="rovio" value="$(arg rovio)" />
+        <arg name="loam" value="$(arg loam)" />
+        <arg name="rviz" value="$(arg rviz)" />
+        <arg name="loam_rviz" value="$(arg loam_rviz)" />
+        <arg name="do_fusion" value="$(arg do_fusion)" />
+
+        <arg name="config_dir" value="$(find vil_fusion)/cfg/san_rafeal" />
+        <arg name="diagnostics" value="false" />
+    </include>
+
+    <node if="$(eval arg('new_bag') != '')" pkg="rosbag" type="record" name="rosbag_record" args="
+
+    record -O $(arg new_bag)
+    /imu/fusion
+    /imu/lidar
+    /imu/vio
+    /velodyne_points
+    /carla/ego_vehicle/vehicle_info
+    /carla/ego_vehicle/vehicle_status
+    /tf
+    /rosout
+
+    /rovio/T_G_W
+    /rovio/extrinsics0
+    /rovio/imu_biases
+    /rovio/markers
+    /rovio/odometry
+    /rovio/patch
+    /rovio/pcl
+    /rovio/pose_with_covariance_stamped
+    /rovio/transform
+
+    /aft_mapped_to_init
+    /laser_cloud_surround
+    /velodyne_cloud_registered
+    /laser_cloud_corner_last
+    /laser_cloud_surf_last
+    /laser_odom_to_init
+
+    /velodyne_cloud_1
+    /velodyne_cloud_2
+    /velodyne_cloud_3
+    /velodyne_cloud_registered
+
+    /imu_trans
+    /integrated_to_init
+    /laser_cloud_corner_last
+    /laser_cloud_flat
+    /laser_cloud_less_flat
+    /laser_cloud_less_sharp
+    /laser_cloud_sharp
+    /laser_cloud_surf_last
+    /laser_cloud_surround
+    /laser_odom_to_init
+    /loam/frame_transform/odometry/ros
+    /loam/frame_transform/mapping/ros
+
+    /diagnostics/confusion
+    /diagnostics/loam_mapping
+    /diagnostics/loam_odom
+    /diagnostics/rovio
+    " >
+    </node>
+
+</launch>

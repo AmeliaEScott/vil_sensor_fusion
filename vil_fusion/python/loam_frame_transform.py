@@ -8,6 +8,7 @@ import tf.transformations
 from tf import Transformer, TransformBroadcaster, LookupException, TransformListener
 import numpy as np
 import rospy
+from nav_msgs.msg import Odometry
 from loam_velodyne.msg import OdometryWithHessian
 from geometry_msgs.msg import PoseStamped
 
@@ -32,17 +33,19 @@ class LoamFrameTransform:
         self.tf_broadcaster = TransformBroadcaster()
 
         self.pub_loam_odom = rospy.Publisher("~odometry/ros", OdometryWithHessian, queue_size=1)
+        self.pub_loam_odom_only = rospy.Publisher("~odometry/ros/odomonly", Odometry, queue_size=1)
         self.pub_loam_mapping = rospy.Publisher("~mapping/ros", OdometryWithHessian, queue_size=1)
+        self.pub_loam_mapping_only = rospy.Publisher("~mapping/ros/odomonly", Odometry, queue_size=1)
         self.sub_loam_odom = rospy.Subscriber(
             "~odometry/loam",
             OdometryWithHessian,
-            callback=lambda msg: self.loam_odom_callback_2(msg, self.pub_loam_odom))
+            callback=lambda msg: self.loam_odom_callback_2(msg, self.pub_loam_odom, self.pub_loam_odom_only))
         self.sub_loam_mapping = rospy.Subscriber(
             "~mapping/loam",
             OdometryWithHessian,
-            callback=lambda msg: self.loam_odom_callback_2(msg, self.pub_loam_mapping))
+            callback=lambda msg: self.loam_odom_callback_2(msg, self.pub_loam_mapping, self.pub_loam_mapping_only))
 
-    def loam_odom_callback_2(self, msg, pub):
+    def loam_odom_callback_2(self, msg, pub, pub_odomonly):
         (
             msg.odom.pose.pose.position.x,
             msg.odom.pose.pose.position.y,
@@ -87,6 +90,7 @@ class LoamFrameTransform:
         msg.odom.child_frame_id += "_ros"
 
         pub.publish(msg)
+        pub_odomonly.publish(msg.odom)
 
         new_trans = np.array([
             msg.odom.pose.pose.position.x,

@@ -17,9 +17,9 @@
 
         <remap from="cam0/image_raw" to="cam0/image_flipped" />
         <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
-            <param name="filter_config" value="$(find vil_fusion)/cfg/rovio_smb.info"/>
-            <param name="camera0_config" value="$(find vil_fusion)/cfg/smb.yaml"/>
-            <param name="camera1_config" value="$(find vil_fusion)/cfg/smb.yaml"/>
+            <param name="filter_config" value="$(find vil_fusion)/cfg/smb/rovio.info"/>
+            <param name="camera0_config" value="$(find vil_fusion)/cfg/smb/rovio_camera.yaml"/>
+            <param name="camera1_config" value="$(find vil_fusion)/cfg/smb/rovio_camera.yaml"/>
         </node>
     </group>
 

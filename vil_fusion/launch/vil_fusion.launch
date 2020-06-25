@@ -7,6 +7,14 @@
     <arg name="diagnostics" default="true" />
     <arg name="loam_rviz" default="false" />
 
+    <arg name="config_dir" default="$(find vil_fusion)/cfg/carla" />
+
+    <arg name="rovio_filter_config" default="$(arg config_dir)/rovio.info" />
+    <arg name="rovio_camera_config" default="$(arg config_dir)/rovio_camera.yaml" />
+    <arg name="diagnostic_config_path" default="$(arg config_dir)/diagnostics_params.yaml" />
+    <arg name="confusion_config_path" default="$(find vil_fusion)/cfg/confusion.cfg" />
+
+
     <!-- These parameters change the names of the frame_ids used by Rovio in transforms -->
     <rosparam>
         rovio/world_frame: rovio_world
@@ -30,9 +38,9 @@
         <!-- imu/vio is the IMU used exclusively by Rovio -->
         <remap from="imu0" to="imu/vio" />
         <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
-            <param name="filter_config" value="$(find vil_fusion)/cfg/rovio.info"/>
-            <param name="camera0_config" value="$(find vil_fusion)/cfg/carla.yaml"/>
-            <param name="camera1_config" value="$(find vil_fusion)/cfg/carla.yaml"/>
+            <param name="filter_config" value="$(arg rovio_filter_config)"/>
+            <param name="camera0_config" value="$(arg rovio_camera_config)"/>
+            <param name="camera1_config" value="$(arg rovio_camera_config)"/>
         </node>
     </group>
 
@@ -79,16 +87,16 @@
     <!-- The Carla ROS bridge publishes the ground truth information only as transforms. ConFusion expects it as
          Pose messages. This node just does that simple conversion, for when we do experiments with the ground truth
          pose with ConFusion. -->
-    <group>
-        <node pkg="vil_fusion" type="ground_truth_pose.py" name="ground_truth_pose" output="screen">
+<!--     <group> -->
+<!--         <node pkg="vil_fusion" type="ground_truth_pose.py" name="ground_truth_pose" output="screen"> -->
 
-        </node>
-    </group>
+<!--         </node> -->
+<!--     </group> -->
 
     <!-- Diagnostics which provide the absolute error of the various odometry estimates -->
     <group if="$(arg diagnostics)">
         <node pkg="vil_fusion" type="diagnostics.py" name="diagnostics" output="screen">
-            <rosparam command="load" file="$(find vil_fusion)/cfg/diagnostics_params.yaml" />
+            <rosparam command="load" file="$(arg diagnostic_config_path)" />
         </node>
     </group>
 
@@ -101,7 +109,7 @@
 
         <node pkg="smb_confusor" type="smb_confusor" name="smb_confusor" output="screen">
             <rosparam param="config_path" subst_value="true">
-                $(find vil_fusion)/cfg/confusion.cfg
+                $(arg confusion_config_path)
             </rosparam>
         </node>
     </group>
