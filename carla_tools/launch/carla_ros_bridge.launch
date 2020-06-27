@@ -1,7 +1,7 @@
 <!-- -->
 <launch>
 
-    <arg name="bagname" />
+    <arg name="bagname" default="" />
     <arg name="bag_start_delay" default="20.0" />
     <arg name="avoid_stoplights" default="false" />
     <arg name="do_transforms" default="true" />
@@ -50,12 +50,12 @@
 
     <rosparam command="load" file="$(find carla_tools)/config/carla_ros_bridge_settings.yaml" />
 
-    <node pkg="rosbag" type="record" name="carla_rosbag_record" launch-prefix="bash -c 'sleep $(arg bag_start_delay); $0 $@' " args="
+    <node if="$(eval arg('bagname') != '')" pkg="rosbag" type="record" name="carla_rosbag_record" launch-prefix="bash -c 'sleep $(arg bag_start_delay); $0 $@' " args="
     record -O $(find carla_tools)/rosbags/$(arg bagname).bag
-    /cam0/camera_info
-    /cam0/image_raw
-    /cam1/camera_info
-    /cam1/image_raw
+    /cam_forward/camera_info
+    /cam_forward/image_raw
+    /cam_down/camera_info
+    /cam_down/image_raw
     /imu/vio
     /imu/lidar
     /imu/fusion
@@ -64,12 +64,10 @@
     /carla/ego_vehicle/vehicle_info
     /tf
     " >
-        <remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front/camera_info" />
-        <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front/image_color" />
-       <!--remap from="/cam0/camera_info" to="/carla/ego_vehicle/camera/rgb/front_left/camera_info" />
-       <remap from="/cam0/image_raw" to="/carla/ego_vehicle/camera/rgb/front_left/image_color" />
-       <remap from="/cam1/camera_info" to="/carla/ego_vehicle/camera/rgb/front_right/camera_info" />
-       <remap from="/cam1/image_raw" to="/carla/ego_vehicle/camera/rgb/front_right/image_color" /-->
+        <remap from="/cam_forward/camera_info" to="/carla/ego_vehicle/camera/rgb/front/camera_info" />
+        <remap from="/cam_forward/image_raw" to="/carla/ego_vehicle/camera/rgb/front/image_color" />
+        <remap from="/cam_down/camera_info" to="/carla/ego_vehicle/camera/rgb/down/camera_info" />
+        <remap from="/cam_down/image_raw" to="/carla/ego_vehicle/camera/rgb/down/image_color" />
         <remap from="/lidar" to="/carla/ego_vehicle/lidar/lidar1/point_cloud" />
         <remap from="/imu/vio" to="/carla/ego_vehicle/imu/imu_vio" />
         <remap from="/imu/lidar" to="/carla/ego_vehicle/imu/imu_lidar" />

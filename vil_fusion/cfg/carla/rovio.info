@@ -9,17 +9,9 @@ Common
 Camera0
 {
 	CalibrationFile ;												Camera-Calibration file for intrinsics
-	; To get the ground truth values of these extrensics from the simulation, run this command while the Carla ROS
+	; To get the ground truth values of these extrinsics from the simulation, run this command while the Carla ROS
 	; bridge is running:
-	;  rosrun tf tf_echo /ego_vehicle/camera/rgb/front /ego_vehicle/imu
-	; These are the values for when the IMU is aligned with the ROS frame (X forward, Y right, Z up)
-	; qCM_x  0.5;										                X-entry of IMU to Camera quaterion (Hamilton)
-	; qCM_y  -0.5;										            Y-entry of IMU to Camera quaterion (Hamilton)
-	; qCM_z  0.5;											            Z-entry of IMU to Camera quaterion (Hamilton)
-	; qCM_w  0.5;											            W-entry of IMU to Camera quaterion (Hamilton)
-	; MrMC_x 0;										                X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	; MrMC_y 0;										                Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	; MrMC_z 0;											            Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	;  rosrun tf tf_echo /ego_vehicle/imu /ego_vehicle/camera/rgb/front
 
 	qCM_x  0.5;										                X-entry of IMU to Camera quaterion (Hamilton)
     qCM_y  -0.5;										            Y-entry of IMU to Camera quaterion (Hamilton)
