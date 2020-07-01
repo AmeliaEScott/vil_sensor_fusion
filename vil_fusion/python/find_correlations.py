@@ -126,7 +126,7 @@ if __name__ == "__main__":
     results_cache = os.path.join(CACHE_DIR, "RESULTS.pkl")
 
     data = read_bags(BAG_DIR, CACHE_DIR)
-    results = p_hack(data["rovio_odometry"], data["rovio_diagnostics"])
+    results = p_hack(data["loam_odometry"], data["loam_diagnostics"])
     with open(results_cache, "wb") as fp:
         pickle.dump(results, fp)
 

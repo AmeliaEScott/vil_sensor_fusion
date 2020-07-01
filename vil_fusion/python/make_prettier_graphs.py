@@ -14,6 +14,7 @@ import pickle
 from matplotlib import pyplot as plt
 from vil_fusion.msg import DiagnosticMessage
 import rospy
+import copy
 
 LOAM_DIAGNOSTIC_TOPIC = "/diagnostics/loam_odom"
 ROVIO_DIAGNOSTIC_TOPIC = "/diagnostics/rovio"
@@ -26,24 +27,70 @@ ROVIO_ODOM_TOPIC = "/rovio/odometry"
 BAG_DIR = "/home/timothy/Code/catkin_ws/src/vil_sensor_fusion/carla_tools/rosbags"
 
 DEGEN_REGIONS = {
-    # "Test1_vehicle.audi.tt_results.bag": [
-    #
+    # "Test1_vehicle.audi.tt_results.bag": [  # LOAM failed in this run
+    #     (505.0, 535.0),
+    #     (625.0, 665.0),
+    #     (745.0, 783.0),
     # ],
-    # "Test4_vehicle.audi.tt_results.bag": [
-    #     (607.0, 625.0),
-    # ],
+    "Test1_vehicle.tesla.model3_results.bag": [
+        (58.0, 85.0),
+        (125.0, 175.0),
+
+    ],
+    "Test2_Denser_vehicle.tesla.model3_results.bag": [
+        (65.0, 100.0),
+        (185.0, 195.0)
+    ],
+    "Test3_vehicle.tesla.model3_results.bag": [
+    ],
+    "Test4_vehicle.audi.tt_results.bag": [
+        (607.0, 625.0),
+    ],
     # "Town03_vehicle.audi.tt_results.bag": [
     #     (170.0, 217.0)
     # ],
     # "V1_01_easy_results.bag": [
     #
     # ],
-    "V1_03_difficult_results.bag": [
+    # "V1_03_difficult_results.bag": [
+    #
+    # ],
+    # "san_rafeal_tunnel_2019-06-24-14-17-04_0_results.bag": [
+    #     (1561411065.0, 1561411103.0)
+    # ]
+}
+
+DEGEN_ROT = {
+    "Test1_vehicle.tesla.model3_results.bag": [
+        (58.0, 85.0),
+        (125.0, 175.0),
 
     ],
-    "san_rafeal_tunnel_2019-06-24-14-17-04_0_results.bag": [
-        (1561411065.0, 1561411103.0)
-    ]
+    "Test2_Denser_vehicle.tesla.model3_results.bag": [
+        (65.0, 100.0),
+        (185.0, 195.0)
+    ],
+    "Test3_vehicle.tesla.model3_results.bag": [
+    ],
+    "Test4_vehicle.audi.tt_results.bag": [
+    ],
+}
+
+DEGEN_TRANS = {
+    "Test1_vehicle.tesla.model3_results.bag": [
+        (58.0, 85.0),
+        (125.0, 175.0),
+
+    ],
+    "Test2_Denser_vehicle.tesla.model3_results.bag": [
+        (65.0, 100.0),
+        (185.0, 195.0)
+    ],
+    "Test3_vehicle.tesla.model3_results.bag": [
+    ],
+    "Test4_vehicle.audi.tt_results.bag": [
+        (607.0, 625.0),
+    ],
 }
 
 PLOTS = [
@@ -57,7 +104,7 @@ PLOTS = [
                 'metric': 'rel_linear_vel_err',
                 'log': False,
                 'label': 'GT Vel. Error',
-                'ylim': 0.5
+                # 'ylim': 0.5
             },
             {
                 'diagnostic': False,
@@ -358,6 +405,18 @@ def apply_degen_function(matrix, pose, matrix_subset, func):
     return y
 
 
+def calc_roc(is_degen: np.ndarray, score: np.ndarray):
+    percentiles = np.linspace(0, 100, 100, dtype=np.float64)
+    thresholds = np.percentile(score, percentiles)
+    is_degen_estimate = np.expand_dims(score, 0) <= np.expand_dims(thresholds, 1)
+    true_positives = np.logical_and(is_degen_estimate, is_degen)
+    false_positives = np.logical_and(is_degen_estimate, np.logical_not(is_degen))
+    tpr = np.sum(true_positives, axis=1) / np.sum(is_degen)
+    fpr = np.sum(false_positives, axis=1) / np.sum(np.logical_not(is_degen))
+
+    return tpr, fpr
+
+
 def plot(
         times: np.ndarray,
         diagnostics,
@@ -431,16 +490,9 @@ def plot(
                 ))
             is_degen = is_degen[1:]
 
-            percentiles = np.linspace(0, 100, 100, dtype=np.float64)
-            thresholds = np.percentile(y, percentiles)
+            tpr, fpr = calc_roc(is_degen, y)
             if matrix_name.startswith("cov"):
-                is_degen_estimate = np.expand_dims(y, 0) >= np.expand_dims(thresholds, 1)
-            else:
-                is_degen_estimate = np.expand_dims(y, 0) <= np.expand_dims(thresholds, 1)
-            true_positives = np.logical_and(is_degen_estimate, is_degen)
-            false_positives = np.logical_and(is_degen_estimate, np.logical_not(is_degen))
-            tpr = np.sum(true_positives, axis=1) / np.sum(is_degen)
-            fpr = np.sum(false_positives, axis=1) / np.sum(np.logical_not(is_degen))
+                tpr = 1.0 - tpr
             roc_ax.plot(fpr, tpr)
             roc_ax.set_ylabel("TPR")
             roc_ax.set_xlabel("FPR")
@@ -453,6 +505,112 @@ def plot(
 
 
 if __name__ == "__main__":
+
+    is_degen_rot = np.array([], dtype=np.bool)
+    is_degen_trans = np.array([], dtype=np.bool)
+    trans_scores = [
+        {
+            'func': degen_funcs.d_opt,
+            'matrix_name': 'hessian',
+            'label': "D-Opt"
+        },
+        {
+            'func': degen_funcs.a_opt,
+            'matrix_name': 'hessian',
+            'label': "A-Opt"
+        },
+        {
+            'func': degen_funcs.e_opt,
+            'matrix_name': 'hessian',
+            'label': "E-Opt"
+        },
+        {
+            'func': degen_funcs.max_eigen,
+            'matrix_name': 'covariance',
+            'label': "Max Eigen"
+        },
+        {
+            'func': degen_funcs.d_opt_ratio,
+            'matrix_name': 'hessian',
+            'label': "D-Opt Ratio"
+        },
+        {
+            'func': degen_funcs.a_opt_ratio,
+            'matrix_name': 'hessian',
+            'label': "A-Opt Ratio"
+        },
+        {
+            'func': degen_funcs.e_opt_ratio,
+            'matrix_name': 'hessian',
+            'label': "E-Opt Ratio"
+        },
+        {
+            'func': degen_funcs.max_eigen_ratio,
+            'matrix_name': 'covariance',
+            'label': "Max Eigen Ratio"
+        },
+        {
+            'func': degen_funcs.jensen_bregman,
+            'matrix_name': 'covariance',
+            'label': "Jensen Bregman"
+        },
+        {
+            'func': degen_funcs.correlation_matrix_distance,
+            'matrix_name': 'covariance',
+            'label': "Corr. Mat. Dist"
+        },
+        {
+            'func': degen_funcs.kullback_leibler,
+            'matrix_name': 'covariance',
+            'label': "Kullback Leibler"
+        },
+        {
+            'func': degen_funcs.norm_1,
+            'matrix_name': 'covariance',
+            'label': "1 Norm"
+        },
+        {
+            'func': degen_funcs.norm_2,
+            'matrix_name': 'covariance',
+            'label': "2 Norm"
+        },
+        {
+            'func': degen_funcs.norm_frobenius,
+            'matrix_name': 'covariance',
+            'label': "F Norm"
+        },
+        {
+            'func': degen_funcs.norm_nuclear,
+            'matrix_name': 'covariance',
+            'label': "N Norm"
+        },
+        {
+            'func': degen_funcs.norm_1_ratio,
+            'matrix_name': 'covariance',
+            'label': "1 Norm Ratio"
+        },
+        {
+            'func': degen_funcs.norm_2_ratio,
+            'matrix_name': 'covariance',
+            'label': "2 Norm Ratio"
+        },
+        {
+            'func': degen_funcs.norm_frobenius_ratio,
+            'matrix_name': 'covariance',
+            'label': "F Norm Ratio"
+        },
+        {
+            'func': degen_funcs.norm_nuclear_ratio,
+            'matrix_name': 'covariance',
+            'label': "N Norm Ratio"
+        },
+    ]
+
+    for d in trans_scores:
+        d['scores'] = np.array([], dtype=np.float64)
+
+    rot_scores = copy.deepcopy(trans_scores)
+
     for bag_name, degen_regions in DEGEN_REGIONS.items():
         bag_abs_path = os.path.join(BAG_DIR, bag_name)
         pkl_abs_path = os.path.join(BAG_DIR, bag_name + ".pkl")
@@ -461,16 +619,16 @@ if __name__ == "__main__":
 
             loam_data, rovio_data = load_ros_bag(bag_abs_path)
             loam_times, loam_diagnostics, loam_odometry = numpify_diagnostics(loam_data, hessian=True)
-            rovio_times, rovio_diagnostics, rovio_odometry = numpify_diagnostics(rovio_data, hessian=False)
+            # rovio_times, rovio_diagnostics, rovio_odometry = numpify_diagnostics(rovio_data, hessian=False)
 
             # Checkpoint save
             tmp_data = {
                 'loam_times': loam_times,
                 'loam_diagnostics': loam_diagnostics,
                 'loam_odometry': loam_odometry,
-                'rovio_times': rovio_times,
-                'rovio_diagnostics': rovio_diagnostics,
-                'rovio_odometry': rovio_odometry
+                # 'rovio_times': rovio_times,
+                # 'rovio_diagnostics': rovio_diagnostics,
+                # 'rovio_odometry': rovio_odometry
             }
 
             print("Dumping data...")
@@ -483,30 +641,88 @@ if __name__ == "__main__":
         loam_times = tmp_data['loam_times']
         loam_diagnostics = tmp_data['loam_diagnostics']
         loam_odometry = tmp_data['loam_odometry']
-        rovio_times = tmp_data['rovio_times']
-        rovio_diagnostics = tmp_data['rovio_diagnostics']
-        rovio_odometry = tmp_data['rovio_odometry']
+        # rovio_times = tmp_data['rovio_times']
+        # rovio_diagnostics = tmp_data['rovio_diagnostics']
+        # rovio_odometry = tmp_data['rovio_odometry']
 
-        for fig_data in PLOTS:
-            source = fig_data['source']
-            title = bag_name.split("_")[0]
+        # for fig_data in PLOTS:   # Uncomment me for the good ol' plots!
+        #     source = fig_data['source']
+        #     title = bag_name.split("_")[0]
+        #
+        #     if source == 'loam':
+        #         plot(
+        #             loam_times,
+        #             loam_diagnostics,
+        #             loam_odometry,
+        #             degen_regions,
+        #             fig_data,
+        #             title
+        #         )
+        #     else:
+        #         warn("Be careful, Rovio is not fully implemented")
+        #         plot(
+        #             rovio_times,
+        #             rovio_diagnostics,
+        #             rovio_odometry,
+        #             degen_regions,
+        #             fig_data,
+        #             title
+        #         )
 
-            if source == 'loam':
-                plot(
-                    loam_times,
-                    loam_diagnostics,
-                    loam_odometry,
-                    degen_regions,
-                    fig_data,
-                    title
-                )
-            else:
-                warn("Be careful, Rovio is not fully implemented")
-                plot(
-                    rovio_times,
-                    rovio_diagnostics,
-                    rovio_odometry,
-                    degen_regions,
-                    fig_data,
-                    title
-                )
+        is_degen = np.zeros_like(loam_times, dtype=np.bool)
+        for degen_region in DEGEN_ROT[bag_name]:
+            is_degen = np.logical_or(is_degen, np.logical_and(
+                loam_times > degen_region[0],
+                loam_times < degen_region[1]
+            ))
+        is_degen_rot = np.concatenate([is_degen_rot, is_degen])
+
+        is_degen = np.zeros_like(loam_times, dtype=np.bool)
+        for degen_region in DEGEN_TRANS[bag_name]:
+            is_degen = np.logical_or(is_degen, np.logical_and(
+                loam_times > degen_region[0],
+                loam_times < degen_region[1]
+            ))
+        is_degen_trans = np.concatenate([is_degen_trans, is_degen])
+
+        for x, subset in zip([rot_scores, trans_scores], ["rot", "trans"]):
+            for d in x:
+                y = apply_degen_function(loam_odometry[d['matrix_name']], loam_odometry['pose'], subset, d['func'])
+                d['scores'] = np.concatenate([d['scores'], y])
+                # print("+ {} = {}".format(y.shape, d['scores'].shape))
+
+    fig_rot: plt.Figure
+    axeses_rot: List[plt.Axes]
+    fig_rot, axeses_rot = plt.subplots(nrows=4, ncols=5)
+
+    fig_trans: plt.Figure
+    axeses_trans: List[plt.Axes]
+    fig_trans, axeses_trans = plt.subplots(nrows=4, ncols=5)
+
+    fig: plt.Figure
+    for x, subset, axeses, is_degen, label, fig in zip(
+            [rot_scores, trans_scores],
+            ["rot", "trans"],
+            [axeses_rot, axeses_trans],
+            [is_degen_rot, is_degen_trans],
+            ["Rotation", "Translation"],
+            [fig_rot, fig_trans]
+    ):
+        fig.suptitle(label)
+        axes: plt.Axes
+        for d, axes in zip(x, axeses.flatten()):
+            tpr, fpr = calc_roc(is_degen, d['scores'])
+            if d['matrix_name'].startswith('cov'):
+                fpr = 1.0 - fpr
+                tpr = 1.0 - tpr
+            axes.plot(fpr, tpr)
+            auc = abs(np.trapz(tpr, fpr))
+            axes.set_ylim(0, 1)
+            axes.set_xlim(0, 1)
+            axes.set_title(d['label'])
+            axes.text(0.2, 0.1, "{:.3f}".format(auc))
+        fig.show()
+
+    print("Degen rot: {}, trans: {}".format(is_degen_rot.shape, is_degen_trans.shape))
+
+
