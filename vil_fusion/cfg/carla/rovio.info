@@ -11,15 +11,24 @@ Camera0
 	CalibrationFile ;												Camera-Calibration file for intrinsics
 	; To get the ground truth values of these extrinsics from the simulation, run this command while the Carla ROS
 	; bridge is running:
-	;  rosrun tf tf_echo /ego_vehicle/imu /ego_vehicle/camera/rgb/front
+	;  rosrun tf tf_echo /ego_vehicle/camera/rgb/front /ego_vehicle/imu/imu_vio
 
-	qCM_x  0.5;										                X-entry of IMU to Camera quaterion (Hamilton)
-    qCM_y  -0.5;										            Y-entry of IMU to Camera quaterion (Hamilton)
-    qCM_z  0.5;											            Z-entry of IMU to Camera quaterion (Hamilton)
-    qCM_w  0.5;											            W-entry of IMU to Camera quaterion (Hamilton)
-    MrMC_x 0;										                X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-    MrMC_y 0;										                Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-    MrMC_z 0;											            Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	; qCM_x  0.5;										                X-entry of IMU to Camera quaterion (Hamilton)
+    ; qCM_y  -0.5;										            Y-entry of IMU to Camera quaterion (Hamilton)
+    ; qCM_z  0.5;											            Z-entry of IMU to Camera quaterion (Hamilton)
+    ; qCM_w  0.5;											            W-entry of IMU to Camera quaterion (Hamilton)
+    ; MrMC_x 0;										                X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+    ; MrMC_y 0;										                Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+    ; MrMC_z 0;											            Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+
+    ; -0.612, 0.613, -0.354, 0.353
+    qCM_x 0.612;
+    qCM_y -0.613;
+    qCM_z 0.354;
+    qCM_w 0.353;
+    MrMC_x 0;
+    MrMC_y 0;
+    MrMC_z 0;
 }
 
 Init

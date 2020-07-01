@@ -26,25 +26,14 @@ ROVIO_ODOM_TOPIC = "/rovio/odometry"
 BAG_DIR = "/home/timothy/Code/catkin_ws/src/vil_sensor_fusion/carla_tools/rosbags"
 
 DEGEN_REGIONS = {
-    # "Test1_vehicle.tesla.model3_results.bag": [
-    #     (55.0, 80.0),
-    #     (170.0, 185.0),
-    # ],
-    # "Test2_Denser_vehicle.tesla.model3_results.bag": [
-    #     (50.0, 85.0),
-    #     (165.0, 185.0),
-    # ],
-    # "Test3_vehicle.tesla.model3_results.bag": [
+    # "Test1_vehicle.audi.tt_results.bag": [
     #
     # ],
-    # "Test4_vehicle.tesla.model3_results.bag": [
-    #     (134.0, 151.0),
+    # "Test4_vehicle.audi.tt_results.bag": [
+    #     (607.0, 625.0),
     # ],
-    # "Town02_vehicle.tesla.model3_results.bag": [
-    #
-    # ],
-    # "Town03_vehicle.tesla.model3_results.bag": [
-    #     (110.0, 160.0),
+    # "Town03_vehicle.audi.tt_results.bag": [
+    #     (170.0, 217.0)
     # ],
     # "V1_01_easy_results.bag": [
     #
@@ -52,149 +41,23 @@ DEGEN_REGIONS = {
     "V1_03_difficult_results.bag": [
 
     ],
-    "san_rafeal_results.bag": [
+    "san_rafeal_tunnel_2019-06-24-14-17-04_0_results.bag": [
         (1561411065.0, 1561411103.0)
     ]
 }
 
 PLOTS = [
-    # {
-    #     'source': 'loam',
-    #     'title': 'Loam Translation',
-    #     'plots': [
-    #         {
-    #             'diagnostic': True,
-    #             'roc': False,
-    #             'metric': 'rel_linear_vel_err',
-    #             'log': False,
-    #             'label': 'GT Vel. Error',
-    #             'ylim': 0.5
-    #         },
-    #         {
-    #             'diagnostic': False,
-    #             'roc': True,
-    #             'metric': 'd_opt',
-    #             'log': False,
-    #             'label': 'D Opt',
-    #             'matrix': 'hessian',
-    #             'matrix_subset': 'trans'
-    #         },
-    #         {
-    #             'diagnostic': False,
-    #             'roc': True,
-    #             'metric': 'e_opt',
-    #             'log': False,
-    #             'label': 'E Opt',
-    #             'matrix': 'hessian',
-    #             'matrix_subset': 'trans'
-    #         },
-    #         {
-    #             'diagnostic': False,
-    #             'roc': True,
-    #             'metric': 'a_opt',
-    #             'log': False,
-    #             'label': 'A Opt',
-    #             'matrix': 'hessian',
-    #             'matrix_subset': 'trans'
-    #         },
-    #     ]
-    # },
-    # {
-    #     'source': 'loam',
-    #     'title': 'Loam Rotation',
-    #     'plots': [
-    #         {
-    #             'diagnostic': True,
-    #             'roc': False,
-    #             'metric': 'abs_rot_vel_err',
-    #             'log': False,
-    #             'label': 'GT Ang. Vel. Err'
-    #         },
-    #         {
-    #             'diagnostic': False,
-    #             'roc': True,
-    #             'metric': 'd_opt',
-    #             'log': False,
-    #             'label': 'D Opt',
-    #             'matrix': 'hessian',
-    #             'matrix_subset': 'rot'
-    #         },
-    #         {
-    #             'diagnostic': False,
-    #             'roc': True,
-    #             'metric': 'e_opt',
-    #             'log': False,
-    #             'label': 'E Opt',
-    #             'matrix': 'hessian',
-    #             'matrix_subset': 'rot'
-    #         },
-    #         {
-    #             'diagnostic': False,
-    #             'roc': True,
-    #             'metric': 'a_opt',
-    #             'log': False,
-    #             'label': 'A Opt',
-    #             'matrix': 'hessian',
-    #             'matrix_subset': 'rot'
-    #         },
-    #     ]
-    # },
     {
-        'source': 'rovio',
-        'title': 'Twist Covariance - Rotation',
+        'source': 'loam',
+        'title': 'Loam Translation',
         'plots': [
             {
                 'diagnostic': True,
                 'roc': False,
-                'metric': 'abs_rot_vel_err',
-                'log': False,
-                'label': 'GT Rot. Err',
-                # 'ylim': 0.05
-            },
-            {
-                'diagnostic': False,
-                'roc': True,
-                'metric': 'd_opt',
-                'log': False,
-                'label': 'D Opt',
-                'matrix': 'cov_twist',
-                'matrix_subset': 'rot',
-                # 'ymin': 0.000153,
-                # 'ylim': 0.000155,
-            },
-            {
-                'diagnostic': False,
-                'roc': True,
-                'metric': 'e_opt',
-                'log': False,
-                'label': 'E Opt',
-                'matrix': 'cov_twist',
-                'matrix_subset': 'rot',
-                # 'ymin': 0.000150,
-                # 'ylim': 0.000154,
-            },
-            {
-                'diagnostic': False,
-                'roc': True,
-                'metric': 'norm_frobenius',
-                'log': False,
-                'label': 'F Norm',
-                'matrix': 'cov_twist',
-                'matrix_subset': 'rot',
-            },
-        ]
-    },
-    {
-        'source': 'rovio',
-        'title': 'Twist Covariance - Translation',
-        'plots': [
-            {
-                'diagnostic': True,
-                'roc': False,
-                'metric': 'abs_linear_vel_err',
+                'metric': 'rel_linear_vel_err',
                 'log': False,
                 'label': 'GT Vel. Error',
-                #'ylim': 1.0
+                'ylim': 0.5
             },
             {
                 'diagnostic': False,
@@ -202,7 +65,7 @@ PLOTS = [
                 'metric': 'd_opt',
                 'log': False,
                 'label': 'D Opt',
-                'matrix': 'cov_twist',
+                'matrix': 'hessian',
                 'matrix_subset': 'trans'
             },
             {
@@ -211,7 +74,7 @@ PLOTS = [
                 'metric': 'e_opt',
                 'log': False,
                 'label': 'E Opt',
-                'matrix': 'cov_twist',
+                'matrix': 'hessian',
                 'matrix_subset': 'trans'
             },
             {
@@ -220,11 +83,146 @@ PLOTS = [
                 'metric': 'a_opt',
                 'log': False,
                 'label': 'A Opt',
-                'matrix': 'cov_twist',
+                'matrix': 'hessian',
                 'matrix_subset': 'trans'
             },
         ]
     },
+    {
+        'source': 'loam',
+        'title': 'Loam Rotation',
+        'plots': [
+            {
+                'diagnostic': True,
+                'roc': False,
+                'metric': 'abs_rot_vel_err',
+                'log': False,
+                'label': 'GT Ang. Vel. Err'
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'd_opt',
+                'log': False,
+                'label': 'D Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'rot'
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'e_opt',
+                'log': False,
+                'label': 'E Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'rot'
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'a_opt',
+                'log': False,
+                'label': 'A Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'rot'
+            },
+        ]
+    },
+    # {
+    #     'source': 'rovio',
+    #     'title': 'Pose Covariance - Rotation',
+    #     'plots': [
+    #         {
+    #             'diagnostic': True,
+    #             'roc': False,
+    #             'metric': 'abs_rot_vel_err',
+    #             'log': False,
+    #             'label': 'GT Rot. Err',
+    #             'ylim': 0.05
+    #         },
+    #         {
+    #             'diagnostic': False,
+    #             'roc': True,
+    #             'metric': 'norm_2_ratio',
+    #             'log': False,
+    #             'label': '2 Norm Ratio',
+    #             'matrix': 'covariance',
+    #             'matrix_subset': 'rot',
+    #             'derive': False,
+    #             # 'ymin': 0.000153,
+    #             # 'ylim': 500,
+    #         },
+    #         {
+    #             'diagnostic': False,
+    #             'roc': True,
+    #             'metric': 'norm_frobenius_ratio',
+    #             'log': False,
+    #             'label': 'Frobenius Ratio',
+    #             'matrix': 'covariance',
+    #             'matrix_subset': 'rot',
+    #             'derive': False,
+    #             # 'ymin': 0.000150,
+    #             # 'ylim': 500,
+    #         },
+    #         {
+    #             'diagnostic': False,
+    #             'roc': True,
+    #             'metric': 'max_eigen',
+    #             'log': False,
+    #             'label': 'Max Eigen',
+    #             'matrix': 'covariance',
+    #             'matrix_subset': 'rot',
+    #             'derive': False,
+    #         },
+    #     ]
+    # },
+    # {
+    #     'source': 'rovio',
+    #     'title': 'Rovio Covariance - Translation',
+    #     'plots': [
+    #         {
+    #             'diagnostic': True,
+    #             'roc': False,
+    #             'metric': 'abs_linear_vel_err',
+    #             'log': False,
+    #             'label': 'GT Vel. Error',
+    #             'ylim': 0.03
+    #         },
+    #         {
+    #             'diagnostic': False,
+    #             'roc': True,
+    #             'metric': 'd_opt',
+    #             'log': False,
+    #             'label': 'D Opt(twist)',
+    #             'matrix': 'cov_twist',
+    #             'matrix_subset': 'trans',
+    #             'derive': False,
+    #             # 'ylim': 0.1,
+    #         },
+    #         {
+    #             'diagnostic': False,
+    #             'roc': True,
+    #             'metric': 'e_opt',
+    #             'log': False,
+    #             'label': 'E opt',
+    #             'matrix': 'covariance',
+    #             'matrix_subset': 'trans',
+    #             'derive': False,
+    #             # 'ylim': 0.1,
+    #         },
+    #         {
+    #             'diagnostic': False,
+    #             'roc': True,
+    #             'metric': 'max_eigen',
+    #             'log': False,
+    #             'label': 'Max eigen',
+    #             'matrix': 'covariance',
+    #             'matrix_subset': 'trans',
+    #             'derive': False,
+    #
+    #         },
+    #     ]
+    # },
 ]
 
 
@@ -332,6 +330,34 @@ def shade_degen_regions(axes: plt.Axes, yrange: Tuple, regions: List[Tuple]):
         axes.fill_between(x, y1, y2, color=(0.2, 0.2, 0.2, 0.2))
 
 
+def apply_degen_function(matrix, pose, matrix_subset, func):
+    if matrix_subset == "rot":
+        matrix = matrix[3:6, 3:6, :]
+        pose = pose[3:6, :, :]
+    elif matrix_subset == "trans":
+        matrix = matrix[0:3, 0:3, :]
+        pose = pose[0:3, :, :]
+    elif matrix_subset in ["x", "y", "z", "roll", "pitch", "yaw"]:
+        i = ["x", "y", "z", "roll", "pitch", "yaw"].index(matrix_subset)
+        matrix = matrix[i:i + 1, i:i + 1, :]
+        pose = pose[i:i + 1, :, :]
+    elif matrix_subset != "all":
+        raise RuntimeWarning("Invalid matrix subset {}".format(matrix_subset))
+
+    y = np.zeros(matrix.shape[2], dtype=matrix.dtype)
+    for i in range(1, matrix.shape[2]):
+        args = {
+            'mat_now': matrix[:, :, i],
+            'mat_prev': matrix[:, :, i - 1],
+            'pose_now': pose[:, :, i],
+            'pose_prev': pose[:, :, i - 1]
+        }
+
+        y[i] = func(**args)
+
+    return y
+
+
 def plot(
         times: np.ndarray,
         diagnostics,
@@ -368,41 +394,20 @@ def plot(
 
         if is_diagnostic:
             y = diagnostics[metric]
+            y = y[1:]
         else:
             matrix_name = plot_metadata['matrix']
             matrix_subset = plot_metadata['matrix_subset']
-
             matrix = odometry[matrix_name]
-
             pose = odometry['pose']
-
-            # if source == "loam":
-            if matrix_subset == "rot":
-                matrix = matrix[3:6, 3:6, :]
-                pose = pose[3:6, :, :]
-            elif matrix_subset == "trans":
-                matrix = matrix[0:3, 0:3, :]
-                pose = pose[0:3, :, :]
-            elif matrix_subset in ["x", "y", "z", "roll", "pitch", "yaw"]:
-                i = ["x", "y", "z", "roll", "pitch", "yaw"].index(matrix_subset)
-                matrix = matrix[i:i+1, i:i+1, :]
-                pose = pose[i:i+1, :, :]
-            # else:
-            #     raise RuntimeWarning("I did not implement this part for Rovio")
-
             degen_func = getattr(degen_funcs, metric)
-            y = np.zeros_like(times)
-            for i in range(1, matrix.shape[2]):
-                args = {
-                    'mat_now': matrix[:, :, i],
-                    'mat_prev': matrix[:, :, i - 1],
-                    'pose_now': pose[:, :, i],
-                    'pose_prev': pose[:, :, i - 1]
-                }
 
-                y[i] = degen_func(**args)
+            y = apply_degen_function(matrix, pose, matrix_subset, degen_func)
 
-        y = y[1:]
+            if "derive" in plot_metadata and plot_metadata["derive"]:
+                y = y[1:] - y[:-1]
+            else:
+                y = y[1:]
 
         ax.plot(times[10:], y[9:])
         shade_degen_regions(ax, (np.min(y), np.max(y)), degen_regions)
@@ -447,60 +452,61 @@ def plot(
     fig.show()
 
 
-for bag_name, degen_regions in DEGEN_REGIONS.items():
-    bag_abs_path = os.path.join(BAG_DIR, bag_name)
-    pkl_abs_path = os.path.join(BAG_DIR, bag_name + ".pkl")
+if __name__ == "__main__":
+    for bag_name, degen_regions in DEGEN_REGIONS.items():
+        bag_abs_path = os.path.join(BAG_DIR, bag_name)
+        pkl_abs_path = os.path.join(BAG_DIR, bag_name + ".pkl")
 
-    if not os.path.isfile(pkl_abs_path):
+        if not os.path.isfile(pkl_abs_path):
 
-        loam_data, rovio_data = load_ros_bag(bag_abs_path)
-        loam_times, loam_diagnostics, loam_odometry = numpify_diagnostics(loam_data, hessian=True)
-        rovio_times, rovio_diagnostics, rovio_odometry = numpify_diagnostics(rovio_data, hessian=False)
+            loam_data, rovio_data = load_ros_bag(bag_abs_path)
+            loam_times, loam_diagnostics, loam_odometry = numpify_diagnostics(loam_data, hessian=True)
+            rovio_times, rovio_diagnostics, rovio_odometry = numpify_diagnostics(rovio_data, hessian=False)
 
-        # Checkpoint save
-        tmp_data = {
-            'loam_times': loam_times,
-            'loam_diagnostics': loam_diagnostics,
-            'loam_odometry': loam_odometry,
-            'rovio_times': rovio_times,
-            'rovio_diagnostics': rovio_diagnostics,
-            'rovio_odometry': rovio_odometry
-        }
+            # Checkpoint save
+            tmp_data = {
+                'loam_times': loam_times,
+                'loam_diagnostics': loam_diagnostics,
+                'loam_odometry': loam_odometry,
+                'rovio_times': rovio_times,
+                'rovio_diagnostics': rovio_diagnostics,
+                'rovio_odometry': rovio_odometry
+            }
 
-        print("Dumping data...")
-        with open(pkl_abs_path, "wb") as fp:
-            pickle.dump(tmp_data, fp)
-    else:
-        with open(pkl_abs_path, "rb") as fp:
-            tmp_data = pickle.load(fp)
-
-    loam_times = tmp_data['loam_times']
-    loam_diagnostics = tmp_data['loam_diagnostics']
-    loam_odometry = tmp_data['loam_odometry']
-    rovio_times = tmp_data['rovio_times']
-    rovio_diagnostics = tmp_data['rovio_diagnostics']
-    rovio_odometry = tmp_data['rovio_odometry']
-
-    for fig_data in PLOTS:
-        source = fig_data['source']
-        title = bag_name.split("_")[0]
-
-        if source == 'loam':
-            plot(
-                loam_times,
-                loam_diagnostics,
-                loam_odometry,
-                degen_regions,
-                fig_data,
-                title
-            )
+            print("Dumping data...")
+            with open(pkl_abs_path, "wb") as fp:
+                pickle.dump(tmp_data, fp)
         else:
-            warn("Be careful, Rovio is not fully implemented")
-            plot(
-                rovio_times,
-                rovio_diagnostics,
-                rovio_odometry,
-                degen_regions,
-                fig_data,
-                title
-            )
+            with open(pkl_abs_path, "rb") as fp:
+                tmp_data = pickle.load(fp)
+
+        loam_times = tmp_data['loam_times']
+        loam_diagnostics = tmp_data['loam_diagnostics']
+        loam_odometry = tmp_data['loam_odometry']
+        rovio_times = tmp_data['rovio_times']
+        rovio_diagnostics = tmp_data['rovio_diagnostics']
+        rovio_odometry = tmp_data['rovio_odometry']
+
+        for fig_data in PLOTS:
+            source = fig_data['source']
+            title = bag_name.split("_")[0]
+
+            if source == 'loam':
+                plot(
+                    loam_times,
+                    loam_diagnostics,
+                    loam_odometry,
+                    degen_regions,
+                    fig_data,
+                    title
+                )
+            else:
+                warn("Be careful, Rovio is not fully implemented")
+                plot(
+                    rovio_times,
+                    rovio_diagnostics,
+                    rovio_odometry,
+                    degen_regions,
+                    fig_data,
+                    title
+                )

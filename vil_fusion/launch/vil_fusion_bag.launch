@@ -14,6 +14,8 @@
 
 	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
          <remap from="/lidar" to="/velodyne_points" />
+         <remap from="/cam_down/image_raw" to="/cam0/image_raw" />
+         <remap from="/cam_down/camera_info" to="/cam0/camera_info" />
 	</node>
 
 <!-- 	<node pkg="carla_tools" type="carla_frame_transforms.py" name="carla_frame_transforms" output="screen"> -->
@@ -40,8 +42,6 @@
     <node if="$(eval arg('new_bag') != '')" pkg="rosbag" type="record" name="rosbag_record" args="
 
     record -O $(arg new_bag)
-    /cam0/camera_info
-    /cam0/image_raw
     /imu/fusion
     /imu/lidar
     /imu/vio

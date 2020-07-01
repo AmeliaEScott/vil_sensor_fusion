@@ -65,10 +65,9 @@ def e_opt(mat_now, **kwargs):
 
     try:
         eigenvalues = np.linalg.eigvals(mat_now)
+        return np.min(eigenvalues)
     except np.linalg.LinAlgError:
-        print("Error with {}".format(mat_now))
-        eigenvalues = np.array([0, 0, 0, 0, 0, 0])
-    return np.min(eigenvalues)
+        return np.nan
 
 
 def e_opt_ratio(mat_now, mat_prev, **kwargs):
@@ -78,10 +77,33 @@ def e_opt_ratio(mat_now, mat_prev, **kwargs):
     ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
     try:
         eigenvalues = np.linalg.eigvals(ratio)
+        return np.min(eigenvalues)
     except np.linalg.LinAlgError:
-        print("Error with {}".format(ratio))
-        eigenvalues = np.array([0, 0, 0, 0, 0, 0])
-    return np.min(eigenvalues)
+        return np.nan
+
+
+def max_eigen(mat_now, **kwargs):
+    """
+    E-optimality
+    """
+
+    try:
+        eigenvalues = np.linalg.eigvals(mat_now)
+        return np.max(eigenvalues)
+    except np.linalg.LinAlgError:
+        return np.nan
+
+
+def max_eigen_ratio(mat_now, mat_prev, **kwargs):
+    """
+    E-optimality
+    """
+    ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
+    try:
+        eigenvalues = np.linalg.eigvals(ratio)
+        return np.max(eigenvalues)
+    except np.linalg.LinAlgError:
+        return np.nan
 
 
 def jensen_bregman(mat_now, mat_prev, **kwargs):
@@ -182,6 +204,8 @@ degen_funcs = [
     a_opt_ratio,
     e_opt,
     e_opt_ratio,
+    max_eigen,
+    max_eigen_ratio,
     jensen_bregman,
     correlation_matrix_distance,
     kullback_leibler,
