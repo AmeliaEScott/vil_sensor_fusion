@@ -15,6 +15,21 @@
          <remap from="/velodyne_points" to="/velodyne_points_raw"/>
 	</node>
 
+    <node pkg="tf" type="static_transform_publisher" name="tf_map_world" args="
+        0.0 0.0 0.0
+        0.0 0.0 0.0 1.0
+        map world 10"/>
+
+	<node pkg="tf" type="static_transform_publisher" name="tf_world_loam" args="
+        0.0 0.0 0.0
+        0.0 0.0 0.0 1.0
+        world loam_init_ros_convention 10"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="tf_loam" args="
+        0.0 0.0 0.0
+        0.5 0.5 0.5 0.5
+        loam_init_ros_convention loam_init 10"/>
+
 	<node pkg="vil_fusion" type="downsample_pointcloud.py" name="downsample_pointcloud" output="screen">
 	    <remap from="~input" to="/velodyne_points_raw" />
 	    <remap from="~output" to="/velodyne_points" />
