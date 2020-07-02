@@ -1,0 +1,53 @@
+<launch>
+
+	<arg name="bagfile" />
+    <arg name="rviz" default="false" />
+    <arg name="rate" default="1.0" />
+    <arg name="rovio" default="false" />
+
+    <arg name="new_bag" default="" />
+
+    <param name="use_sim_time" value="true" />
+
+	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
+         <remap from="/cam00/image_raw" to="/cam0/image_mono" />
+         <remap from="/cam00/camera_info" to="/cam0/camera_info" />
+         <remap from="/velodyne_points" to="/velodyne_points_raw"/>
+	</node>
+
+	<node pkg="vil_fusion" type="downsample_pointcloud.py" name="downsample_pointcloud" output="screen">
+	    <remap from="~input" to="/velodyne_points_raw" />
+	    <remap from="~output" to="/velodyne_points" />
+	</node>
+
+    <include file="$(find vil_fusion)/launch/vil_fusion.launch">
+        <arg name="rovio" value="$(arg rovio)" />
+        <arg name="loam" value="true" />
+        <arg name="rviz" value="$(arg rviz)" />
+        <arg name="do_fusion" value="false" />
+
+        <arg name="config_dir" value="$(find vil_fusion)/cfg/kitti" />
+    </include>
+
+    <node if="$(eval arg('new_bag') != '')" pkg="rosbag" type="record" name="rosbag_record" args="
+
+    record -O $(arg new_bag)
+    /imu0
+    /tf
+    /rosout
+
+    /rovio/T_G_W
+    /rovio/extrinsics0
+    /rovio/imu_biases
+    /rovio/markers
+    /rovio/odometry
+    /rovio/patch
+    /rovio/pcl
+    /rovio/pose_with_covariance_stamped
+    /rovio/transform
+
+    /diagnostics/rovio
+    " >
+    </node>
+
+</launch>
