@@ -135,11 +135,11 @@ def p_hack(odometry: Dict[str, np.ndarray], diagnostics: Dict[str, np.ndarray]):
 
 if __name__ == "__main__":
     results_cache = os.path.join(CACHE_DIR, "RESULTS.pkl")
-
-    data = read_bags(BAG_DIR, CACHE_DIR)
-    results = p_hack(data["loam_odometry"], data["loam_diagnostics"])
-    with open(results_cache, "wb") as fp:
-        pickle.dump(results, fp)
+    #
+    # data = read_bags(BAG_DIR, CACHE_DIR)
+    # results = p_hack(data["loam_odometry"], data["loam_diagnostics"])
+    # with open(results_cache, "wb") as fp:
+    #     pickle.dump(results, fp)
 
     with open(results_cache, "rb") as fp:
         results = pickle.load(fp)
@@ -148,4 +148,5 @@ if __name__ == "__main__":
 
     for func_label, diag_label, rvalue in sorted(
             results, key=lambda x: -1 if math.isnan(x[-1]) else abs(x[-1])):
-        print("{} -> {}: {}".format(func_label, diag_label, rvalue))
+        if "jensen_bregman" not in func_label:
+            print("{} -> {}: {}".format(func_label, diag_label, rvalue))
