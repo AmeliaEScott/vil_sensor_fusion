@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+Part of an experiment to see if applying a low-pass filter to the IMU from the simulator might help Rovio.
+
+It did not. This node is now useless.
+"""
+
 import rospy
 import numpy as np
 from sensor_msgs.msg import Imu

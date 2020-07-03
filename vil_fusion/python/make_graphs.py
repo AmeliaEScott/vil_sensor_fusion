@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+"""
+Basically an older, worse version of find_correlations.py.
+"""
+
 from typing import List, Tuple
 
 import matplotlib

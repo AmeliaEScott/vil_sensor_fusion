@@ -1,5 +1,11 @@
 #!/usr/bin/env python2
 
+"""
+This was part of an experiment involving ConFusion, in which the ground truth pose from the simulator was
+sent to ConFusion as an input. This node just converts the transform that Carla gives into the TransformStamped
+topic that ConFusion wants.
+"""
+
 from tf import TransformBroadcaster, TransformListener, transformations
 import rospy
 from geometry_msgs.msg import TransformStamped

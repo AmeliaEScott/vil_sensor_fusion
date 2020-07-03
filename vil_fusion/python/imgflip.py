@@ -1,5 +1,10 @@
 #!/usr/bin/env python2
 
+"""
+SuperMegaBot bags had the image inverted. Rovio expects it not inverted. This was the quickest way to get them
+right-side-up. There was probably a better way involving just a static transform.
+"""
+
 from __future__ import division, print_function
 
 import rospy

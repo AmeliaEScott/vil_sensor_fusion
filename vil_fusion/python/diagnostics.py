@@ -1,5 +1,11 @@
 #!/usr/bin/env python2
 
+"""
+Compares the transforms from ground truth data to odometry estimates, and published DiagnosticMessage topics.
+
+See vil_fusion/cfg/*/diagnostics_params.yaml for example configurations.
+"""
+
 from __future__ import print_function, division
 import rospy
 from tf import TransformListener, transformations

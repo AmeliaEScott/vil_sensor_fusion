@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 
+"""
+Does the following:
+
+ - Read ROS bags that contain odometry outputs from Loam and Rovio, as well as diagnostics (see diagnostics.py)
+ - Apply every degeneracy detection function listed in degeneracy_detection_functions.py to the odometry data
+ - Compare degeneracy scores to each diagnostic measurement
+ - Output the correlation coefficient for every possible combination of degeneracy score and diagnostic measurement
+
+This is basically a dumb brute-force search to find any and all degeneracy metrics which are at all useful.
+"""
+
 import os
 from typing import Dict
 

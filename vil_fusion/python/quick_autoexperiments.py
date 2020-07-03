@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
 
+"""
+A poorly-named script, which does the following:
+ - For each bag file in DATA_HOME containing raw data (IMU, Point clouds, images):
+   - Copy the bag from the external HDD to a temp folder on the main drive
+   - Use roslaunch to launch the whole odometry and diagnostic system
+   - Store results in a bag
+   - Copy the results bag into RESULTS_DIR
+
+This script was useful because my laptop drive did not have enough space for all of my bags, but my
+external drive was too slow to run `rosbag play` at full speed.
+"""
+
 from __future__ import print_function, division, with_statement
 
 import roslaunch

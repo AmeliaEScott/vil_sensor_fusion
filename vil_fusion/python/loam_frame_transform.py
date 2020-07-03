@@ -2,6 +2,9 @@
 """
 I am sorry this uses Python 2. It was easier to write this in Python 2 than to get ROS TF
 to work in Python 3.
+
+LOAM outputs everything in its own weird frame. This node transforms all of the relevant LOAM messages into
+the ROS frame (X forward, Y left, Z up), and re-publishes them.
 """
 
 import tf.transformations

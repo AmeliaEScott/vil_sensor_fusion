@@ -1,10 +1,13 @@
+"""
+Just a collection of functions which were tested for this project. No node here!
+"""
+
 from __future__ import print_function, division
 import rospy
 from vil_fusion.msg import DegeneracyScore
 from nav_msgs.msg import Odometry
 import numpy as np
 import math
-
 
 def _demo1(mat_now, mat_prev, pose_now, pose_prev, hessian_now, hessian_prev, msg_now, msg_prev):
     """

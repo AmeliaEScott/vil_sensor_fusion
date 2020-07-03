@@ -1,5 +1,11 @@
 #!/usr/bin/env python2
 
+"""
+Used with Euroc dataset. Groudn truth pose is provided as a TransformStamped message. This node
+collects those and broadcasts them with tf2, along with some other transforms that help link the
+ground truth to the Rovio odometry estimate.
+"""
+
 from __future__ import print_function, division
 
 import rospy

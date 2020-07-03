@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+"""
+Gathers data from ROS bags containing odometry output, and plots degeneracy metrics vs. ground truth
+error metrics over time. Also includes the ROC curve for degeneracy detection.
+"""
+
 from typing import Tuple, List, SupportsFloat, AnyStr, Dict
 from warnings import warn
 

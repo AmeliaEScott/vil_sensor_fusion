@@ -1,5 +1,10 @@
 #!/usr/bin/env python2
 
+"""
+I don't remember what this script did, but it worked in conjunction with make_graphs.py, and therefore
+is now obsolete.
+"""
+
 from __future__ import print_function, division
 import rosbag
 from loam_velodyne.msg import OdometryWithHessian
