@@ -22,13 +22,13 @@ from vil_fusion.msg import DiagnosticMessage
 import rospy
 import copy
 
-LOAM_DIAGNOSTIC_TOPIC = "/diagnostics/loam_odom"
+LOAM_DIAGNOSTIC_TOPIC = "/diagnostics/loam_odommmmmm"  # TODO: un-typo this to get diagnostics back
 ROVIO_DIAGNOSTIC_TOPIC = "/diagnostics/rovio"
 
 LOAM_ODOM_TOPIC = "/loam/frame_transform/odometry/ros"
 ROVIO_ODOM_TOPIC = "/rovio/odometry"
 
-BAG_DIR = "/home/timothy/Code/catkin_ws/src/vil_sensor_fusion/carla_tools/rosbags"
+BAG_DIR = "/home/timothy/Code/catkin_ws/src/vil_sensor_fusion/sample_bags"
 
 # DEGEN_REGIONS = {
 #     # "Test1_vehicle.audi.tt_results.bag": [  # LOAM failed in this run
@@ -65,35 +65,41 @@ BAG_DIR = "/home/timothy/Code/catkin_ws/src/vil_sensor_fusion/carla_tools/rosbag
 # }
 
 DEGEN_ROT = {
-    "Test1_vehicle.tesla.model3_results.bag": [
-        (58.0, 85.0),
-        (125.0, 175.0),
-    ],
-    "Test2_Denser_vehicle.tesla.model3_results.bag": [
-        (65.0, 100.0),
-        (185.0, 195.0)
-    ],
-    "Test3_vehicle.tesla.model3_results.bag": [
-    ],
-    "Test4_vehicle.audi.tt_results.bag": [
-    ],
+    # "Test1_vehicle.tesla.model3_results.bag": [
+    #     (58.0, 85.0),
+    #     (125.0, 175.0),
+    # ],
+    # "Test2_Denser_vehicle.tesla.model3_results.bag": [
+    #     (65.0, 100.0),
+    #     (185.0, 195.0)
+    # ],
+    # "Test3_vehicle.tesla.model3_results.bag": [
+    # ],
+    # "Test4_vehicle.audi.tt_results.bag": [
+    # ],
+    "san_04_handheld_results.bag": [],
+    "2011_09_26_drive_0022_sync_results.bag": [],
+    "2011_10_03_drive_0042_sync_results.bag": [],
 }
 
 DEGEN_TRANS = {
-    "Test1_vehicle.tesla.model3_results.bag": [
-        (58.0, 85.0),
-        (125.0, 175.0),
-
-    ],
-    "Test2_Denser_vehicle.tesla.model3_results.bag": [
-        (65.0, 100.0),
-        (185.0, 195.0)
-    ],
-    "Test3_vehicle.tesla.model3_results.bag": [
-    ],
-    "Test4_vehicle.audi.tt_results.bag": [
-        (607.0, 625.0),
-    ],
+    # "Test1_vehicle.tesla.model3_results.bag": [
+    #     (58.0, 85.0),
+    #     (125.0, 175.0),
+    #
+    # ],
+    # "Test2_Denser_vehicle.tesla.model3_results.bag": [
+    #     (65.0, 100.0),
+    #     (185.0, 195.0)
+    # ],
+    # "Test3_vehicle.tesla.model3_results.bag": [
+    # ],
+    # "Test4_vehicle.audi.tt_results.bag": [
+    #     (607.0, 625.0),
+    # ],
+    "san_04_handheld_results.bag": [],
+    "2011_09_26_drive_0022_sync_results.bag": [],
+    "2011_10_03_drive_0042_sync_results.bag": [],
 }
 
 PLOTS = [
@@ -101,15 +107,15 @@ PLOTS = [
         'source': 'loam',
         'title': 'Loam Translation',
         'plots': [
-            {
-                'diagnostic': True,
-                'roc': False,
-                'metric': 'rel_linear_vel_err',
-                'log': False,
-                'label': 'GT Vel. Error',
-                'matrix_subset': 'trans',
-                # 'ylim': 0.5
-            },
+            # {
+            #     'diagnostic': True,
+            #     'roc': False,
+            #     'metric': 'rel_linear_vel_err',
+            #     'log': False,
+            #     'label': 'GT Vel. Error',
+            #     'matrix_subset': 'trans',
+            #     # 'ylim': 0.5
+            # },
             {
                 'diagnostic': False,
                 'roc': True,
@@ -152,14 +158,14 @@ PLOTS = [
         'source': 'loam',
         'title': 'Loam Rotation',
         'plots': [
-            {
-                'diagnostic': True,
-                'roc': False,
-                'metric': 'abs_rot_vel_err',
-                'log': False,
-                'label': 'GT Ang. Vel. Err',
-                'matrix_subset': 'rot',
-            },
+            # {
+            #     'diagnostic': True,
+            #     'roc': False,
+            #     'metric': 'abs_rot_vel_err',
+            #     'log': False,
+            #     'label': 'GT Ang. Vel. Err',
+            #     'matrix_subset': 'rot',
+            # },
             {
                 'diagnostic': False,
                 'roc': True,
@@ -583,6 +589,8 @@ def load_all_bags(bag_dir: str, degen_regions_rot: Dict, degen_regions_trans: Di
             loam_times, loam_diagnostics, loam_odometry = numpify_diagnostics(loam_data, hessian=True)
             # rovio_times, rovio_diagnostics, rovio_odometry = numpify_diagnostics(rovio_data, hessian=False)
 
+            loam_times -= loam_times[0]
+
             # Checkpoint save
             tmp_data = {
                 'loam_times': loam_times,
@@ -767,8 +775,29 @@ def plot_all_rocs(data):
         fig.show()
 
 
+def compare_datasets(data):
+
+    for plot in PLOTS:
+        fig: plt.Figure
+        axeses: List[List[plt.Axes]]
+        fig, axeses = plt.subplots(nrows=len(plot['plots']), ncols=len(data), sharex='col', sharey='row')
+
+        for i, axes_row, plot_metadata in zip(range(0, 1000), axeses, plot['plots']):
+            for j, axes, (bagname, bagdata) in zip(range(0, 1000), axes_row, data.items()):
+                if i == 0:
+                    axes.set_title(bagname[:-12][0:7])
+                plot_single_axes(axes, plot['source'], bagdata, bagdata['degen_regions_trans'], plot_metadata)
+                if j != 0:
+                    axes.set_ylabel(None)
+                if i == axeses.shape[0] - 1:
+                    axes.set_xlabel("Time (s)")
+                axes.set_ylim(auto=True)
+        fig.show()
+
+
 if __name__ == "__main__":
 
     data = load_all_bags(BAG_DIR, DEGEN_ROT, DEGEN_TRANS)
     # plot_all_over_time(data, PLOTS)
-    plot_all_rocs(data)
+    # plot_all_rocs(data)
+    compare_datasets(data)

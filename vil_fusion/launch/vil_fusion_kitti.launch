@@ -50,17 +50,37 @@
     /imu0
     /tf
     /rosout
+    /velodyne_points_raw
+    /velodyne_points
 
-    /rovio/T_G_W
-    /rovio/extrinsics0
-    /rovio/imu_biases
-    /rovio/markers
-    /rovio/odometry
-    /rovio/patch
-    /rovio/pcl
-    /rovio/pose_with_covariance_stamped
-    /rovio/transform
+    /aft_mapped_to_init
+    /laser_cloud_surround
+    /velodyne_cloud_registered
+    /laser_cloud_corner_last
+    /laser_cloud_surf_last
+    /laser_odom_to_init
 
+    /velodyne_cloud_1
+    /velodyne_cloud_2
+    /velodyne_cloud_3
+    /velodyne_cloud_registered
+
+    /imu_trans
+    /integrated_to_init
+    /laser_cloud_corner_last
+    /laser_cloud_flat
+    /laser_cloud_less_flat
+    /laser_cloud_less_sharp
+    /laser_cloud_sharp
+    /laser_cloud_surf_last
+    /laser_cloud_surround
+    /laser_odom_to_init
+    /loam/frame_transform/odometry/ros
+    /loam/frame_transform/mapping/ros
+
+    /diagnostics/confusion
+    /diagnostics/loam_mapping
+    /diagnostics/loam_odom
     /diagnostics/rovio
     " >
     </node>

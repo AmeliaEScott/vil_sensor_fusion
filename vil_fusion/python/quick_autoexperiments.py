@@ -29,9 +29,9 @@ import shutil
 
 pkg = rospkg.RosPack()
 
-DATA_HOME = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_v6"
-RESULTS_DIR = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/experiment_results_v6"
-LAUNCH_FILE = os.path.join(pkg.get_path("vil_fusion"), "launch", "vil_fusion_bag.launch")
+DATA_HOME = "/media/timothy/1ABED71A5F421E8D/TimothyScott/Good Cool Datasets/kitti/bags"
+RESULTS_DIR = "/media/timothy/1ABED71A5F421E8D/TimothyScott/Good Cool Datasets/kitti/results"
+LAUNCH_FILE = os.path.join(pkg.get_path("vil_fusion"), "launch", "vil_fusion_kitti.launch")
 # LAUNCH_FILE = os.path.join(pkg.get_path("vil_fusion"), "launch", "vil_fusion_euroc.launch")
 
 with tempfile.TemporaryDirectory() as tmpdir:
