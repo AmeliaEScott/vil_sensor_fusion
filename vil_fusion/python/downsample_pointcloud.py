@@ -45,7 +45,7 @@ class PointcloudDownsampler:
         data = data[0:num_points, :]
         data = np.reshape(data, [64, -1, 8])
         # print("Height: {}, Width: {}, Shape: {}".format(msg.height, msg.width, data.shape))
-        downsampled_data = data[::4, ::2, :]
+        downsampled_data = data[::self.vert_downsample, ::self.horiz_downsample, :]
         downsampled_data = np.reshape(downsampled_data, [-1, 8])
         msg.data = downsampled_data.tostring()
         msg.width = downsampled_data.shape[0]

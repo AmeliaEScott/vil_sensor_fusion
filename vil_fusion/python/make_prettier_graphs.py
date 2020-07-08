@@ -21,8 +21,9 @@ from matplotlib import pyplot as plt
 from vil_fusion.msg import DiagnosticMessage
 import rospy
 import copy
+import itertools
 
-LOAM_DIAGNOSTIC_TOPIC = "/diagnostics/loam_odommmmmm"  # TODO: un-typo this to get diagnostics back
+LOAM_DIAGNOSTIC_TOPIC = "/diagnostics/loam_odommmmm"  # TODO: Remove this typo to get diagnostics back
 ROVIO_DIAGNOSTIC_TOPIC = "/diagnostics/rovio"
 
 LOAM_ODOM_TOPIC = "/loam/frame_transform/odometry/ros"
@@ -66,40 +67,50 @@ BAG_DIR = "/home/timothy/Code/catkin_ws/src/vil_sensor_fusion/sample_bags"
 
 DEGEN_ROT = {
     # "Test1_vehicle.tesla.model3_results.bag": [
-    #     (58.0, 85.0),
-    #     (125.0, 175.0),
+    #     (53.0, 70.0),
+    #     (115.0, 162.0),
     # ],
     # "Test2_Denser_vehicle.tesla.model3_results.bag": [
-    #     (65.0, 100.0),
-    #     (185.0, 195.0)
+    #     (45.0, 77.0),
+    #     (165.0, 180.0)
     # ],
     # "Test3_vehicle.tesla.model3_results.bag": [
     # ],
     # "Test4_vehicle.audi.tt_results.bag": [
     # ],
-    "san_04_handheld_results.bag": [],
+    "Town03_vehicle.tesla.model3_results.bag": [],
+    # "stopnstart_results.bag": [
+    #
+    # ],
+    # "san_04_handheld_results.bag": [],
     "2011_09_26_drive_0022_sync_results.bag": [],
     "2011_10_03_drive_0042_sync_results.bag": [],
 }
 
 DEGEN_TRANS = {
     # "Test1_vehicle.tesla.model3_results.bag": [
-    #     (58.0, 85.0),
-    #     (125.0, 175.0),
-    #
+    #     (53.0, 70.0),
+    #     (115.0, 162.0),
     # ],
     # "Test2_Denser_vehicle.tesla.model3_results.bag": [
-    #     (65.0, 100.0),
-    #     (185.0, 195.0)
+    #     # (45.0, 77.0),
+    #     # (165.0, 180.0)
     # ],
     # "Test3_vehicle.tesla.model3_results.bag": [
     # ],
     # "Test4_vehicle.audi.tt_results.bag": [
-    #     (607.0, 625.0),
+    #     (106.0, 125.0),
     # ],
-    "san_04_handheld_results.bag": [],
+    "Town03_vehicle.tesla.model3_results.bag": [],
+    # "stopnstart_results.bag": [
+    #
+    # ],
+    # "san_04_handheld_results.bag": [
+    #     (29.0, 83.0)
+    # ],
     "2011_09_26_drive_0022_sync_results.bag": [],
     "2011_10_03_drive_0042_sync_results.bag": [],
+
 }
 
 PLOTS = [
@@ -146,9 +157,9 @@ PLOTS = [
             {
                 'diagnostic': False,
                 'roc': True,
-                'metric': 'norm_nuclear',
+                'metric': 'norm_frobenius',
                 'log': False,
-                'label': 'N. Norm',
+                'label': 'F. Norm',
                 'matrix': 'hessian',
                 'matrix_subset': 'trans'
             },
@@ -196,9 +207,9 @@ PLOTS = [
             {
                 'diagnostic': False,
                 'roc': True,
-                'metric': 'norm_nuclear',
+                'metric': 'norm_frobenius',
                 'log': False,
-                'label': 'N. Norm',
+                'label': 'F. Norm',
                 'matrix': 'hessian',
                 'matrix_subset': 'rot'
             },
@@ -673,18 +684,18 @@ def plot_all_rocs(data):
         {
             'func': degen_funcs.jensen_bregman,
             'matrix_name': 'covariance',
-            'label': "Jensen Bregman"
+            'label': "JB LogDet Div"
         },
         {
             'func': degen_funcs.correlation_matrix_distance,
             'matrix_name': 'covariance',
             'label': "Corr. Mat. Dist"
         },
-        {
-            'func': degen_funcs.kullback_leibler,
-            'matrix_name': 'covariance',
-            'label': "Kullback Leibler"
-        },
+        # {
+        #     'func': degen_funcs.kullback_leibler,
+        #     'matrix_name': 'covariance',
+        #     'label': "Kullback Leibler"
+        # },
         {
             'func': degen_funcs.norm_1,
             'matrix_name': 'hessian',
@@ -700,11 +711,11 @@ def plot_all_rocs(data):
             'matrix_name': 'hessian',
             'label': "F Norm"
         },
-        {
-            'func': degen_funcs.norm_nuclear,
-            'matrix_name': 'hessian',
-            'label': "N Norm"
-        },
+        # {
+        #     'func': degen_funcs.norm_nuclear,
+        #     'matrix_name': 'hessian',
+        #     'label': "N Norm"
+        # },
         {
             'func': degen_funcs.norm_1_ratio,
             'matrix_name': 'hessian',
@@ -720,11 +731,11 @@ def plot_all_rocs(data):
             'matrix_name': 'hessian',
             'label': "F Norm Ratio"
         },
-        {
-            'func': degen_funcs.norm_nuclear_ratio,
-            'matrix_name': 'hessian',
-            'label': "N Norm Ratio"
-        },
+        # {
+        #     'func': degen_funcs.norm_nuclear_ratio,
+        #     'matrix_name': 'hessian',
+        #     'label': "N Norm Ratio"
+        # },
     ]
 
     for d in trans_scores:
@@ -744,11 +755,17 @@ def plot_all_rocs(data):
 
     fig_rot: plt.Figure
     axeses_rot: List[plt.Axes]
-    fig_rot, axeses_rot = plt.subplots(nrows=4, ncols=5)
+    fig_rot, axeses_rot = plt.subplots(nrows=4, ncols=4, gridspec_kw={
+        'left': 0.1, 'right': 0.95, 'top': 0.9, 'bottom': 0.1,
+        'hspace': 0.4, 'wspace': 0.25
+    })
 
     fig_trans: plt.Figure
     axeses_trans: List[plt.Axes]
-    fig_trans, axeses_trans = plt.subplots(nrows=4, ncols=5)
+    fig_trans, axeses_trans = plt.subplots(nrows=4, ncols=4, gridspec_kw={
+        'left': 0.1, 'right': 0.95, 'top': 0.9, 'bottom': 0.1,
+        'hspace': 0.4, 'wspace': 0.25
+    })
 
     fig: plt.Figure
     for x, subset, axeses, is_degen, label, fig in zip(
@@ -759,20 +776,41 @@ def plot_all_rocs(data):
             ["Rotation", "Translation"],
             [fig_rot, fig_trans]
     ):
-        fig.suptitle(label)
+        fig.suptitle(label, y=0.996, size='large')
         axes: plt.Axes
-        for d, axes in zip(x, axeses.flatten()):
+        for d, axes in zip(itertools.chain(x, itertools.repeat(None)), axeses.flatten()):
+            if d is None:
+                axes.axis('off')
+                continue
             tpr, fpr = calc_roc(is_degen, d['scores'])
+            tpr[-1] = 1.0
+            fpr[-1] = 1.0
+            tpr[0] = 0.0
+            fpr[0] = 0.0
             if d['matrix_name'].startswith('cov'):
                 fpr = 1.0 - fpr
                 tpr = 1.0 - tpr
             axes.plot(fpr, tpr)
             auc = abs(np.trapz(tpr, fpr))
-            axes.set_ylim(0, 1)
-            axes.set_xlim(0, 1)
-            axes.set_title(d['label'])
-            axes.text(0.2, 0.1, "{:.3f}".format(auc))
+            axes.set_ylim(0, 1.05)
+            axes.set_xlim(-0.05, 1)
+            axes.set_xticks([])
+            axes.set_yticks([])
+            axes.set_title(d['label'], size="medium")
+            axes.text(0.95, 0.05, s="{:.3f}".format(auc), ha='right', va='bottom')
+        for axes in axeses[3, :]:
+            axes.set_xticks([0.0, 1.0])
+        for axes in axeses[:, 0]:
+            axes.set_yticks([0.0, 1.0])
+        fig.text(x=0.5, y=0.02, s="False Positive Rate",
+                 horizontalalignment='center', verticalalignment='center', size='large')
+        fig.text(x=0.03, y=0.5, s="True Positive Rate",
+                 horizontalalignment='center', verticalalignment='center', size='large',
+                 rotation='vertical')
         fig.show()
+        fig.savefig(label + ".svg", format="svg", transparent=True)
+        fig.savefig(label + ".pdf", format="pdf", transparent=True)
+        fig.savefig(label + ".png", format="png", transparent=True, dpi=400 )
 
 
 def compare_datasets(data):
@@ -783,15 +821,22 @@ def compare_datasets(data):
         fig, axeses = plt.subplots(nrows=len(plot['plots']), ncols=len(data), sharex='col', sharey='row')
 
         for i, axes_row, plot_metadata in zip(range(0, 1000), axeses, plot['plots']):
+            if type(axes_row) != np.ndarray:
+                axes_row = [axes_row]
             for j, axes, (bagname, bagdata) in zip(range(0, 1000), axes_row, data.items()):
                 if i == 0:
-                    axes.set_title(bagname[:-12][0:7])
-                plot_single_axes(axes, plot['source'], bagdata, bagdata['degen_regions_trans'], plot_metadata)
+                    axes.set_title(bagname[:-12][:15])
+                if plot_metadata['matrix_subset'] == 'rot':
+                    degen_regions = bagdata['degen_regions_rot']
+                else:
+                    degen_regions = bagdata['degen_regions_trans']
+                plot_single_axes(axes, plot['source'], bagdata, degen_regions, plot_metadata)
                 if j != 0:
                     axes.set_ylabel(None)
                 if i == axeses.shape[0] - 1:
                     axes.set_xlabel("Time (s)")
                 axes.set_ylim(auto=True)
+        fig.suptitle(plot['title'], y=0.997)
         fig.show()
 
 

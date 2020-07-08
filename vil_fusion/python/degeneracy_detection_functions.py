@@ -25,13 +25,16 @@ def _demo1(mat_now, mat_prev, pose_now, pose_prev, hessian_now, hessian_prev, ms
 
 
 def _covariance_to_correlation(mat_now):
-    diag = np.diag(np.diag(mat_now))
-    d = np.sqrt(diag)
-    d_inv = np.linalg.inv(d)
-    return d_inv * mat_now * d_inv
+    try:
+        diag = np.diag(np.diag(mat_now))
+        d = np.sqrt(diag)
+        d_inv = np.linalg.inv(d)
+        return d_inv * mat_now * d_inv
+    except np.linalg.LinAlgError:
+        return np.nan
 
 
-def d_opt(mat_now, **kwargs):
+def d_opt(mat_now, **_):
     """
     D-optimality
     """
@@ -40,28 +43,34 @@ def d_opt(mat_now, **kwargs):
     return math.exp(logdet / mat_now.shape[0])
 
 
-def d_opt_ratio(mat_now, mat_prev, **kwargs):
-    ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
-    _, logdet = np.linalg.slogdet(ratio)
-    return math.exp(logdet / ratio.shape[0])
+def d_opt_ratio(mat_now, mat_prev, **_):
+    try:
+        ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
+        _, logdet = np.linalg.slogdet(ratio)
+        return math.exp(logdet / ratio.shape[0])
+    except np.linalg.LinAlgError:
+        return np.nan
 
 
-def a_opt(mat_now, **kwargs):
+def a_opt(mat_now, **_):
     """
     A-optimality
     """
     return np.trace(mat_now)
 
 
-def a_opt_ratio(mat_now, mat_prev, **kwargs):
+def a_opt_ratio(mat_now, mat_prev, **_):
     """
     A-optimality
     """
-    ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
-    return np.trace(ratio)
+    try:
+        ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
+        return np.trace(ratio)
+    except np.linalg.LinAlgError:
+        return np.nan
 
 
-def e_opt(mat_now, **kwargs):
+def e_opt(mat_now, **_):
     """
     E-optimality
     """
@@ -73,19 +82,20 @@ def e_opt(mat_now, **kwargs):
         return np.nan
 
 
-def e_opt_ratio(mat_now, mat_prev, **kwargs):
+def e_opt_ratio(mat_now, mat_prev, **_):
     """
     E-optimality
     """
-    ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
+
     try:
+        ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
         eigenvalues = np.linalg.eigvals(ratio)
         return np.min(eigenvalues)
     except np.linalg.LinAlgError:
         return np.nan
 
 
-def max_eigen(mat_now, **kwargs):
+def max_eigen(mat_now, **_):
     """
     E-optimality
     """
@@ -97,19 +107,19 @@ def max_eigen(mat_now, **kwargs):
         return np.nan
 
 
-def max_eigen_ratio(mat_now, mat_prev, **kwargs):
+def max_eigen_ratio(mat_now, mat_prev, **_):
     """
     E-optimality
     """
-    ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
     try:
+        ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
         eigenvalues = np.linalg.eigvals(ratio)
         return np.max(eigenvalues)
     except np.linalg.LinAlgError:
         return np.nan
 
 
-def jensen_bregman(mat_now, mat_prev, **kwargs):
+def jensen_bregman(mat_now, mat_prev, **_):
     """
     Jensen-Bregman LogDet Divergence
     """
@@ -118,20 +128,23 @@ def jensen_bregman(mat_now, mat_prev, **kwargs):
     return logdet - 0.5 * np.linalg.det(np.matmul(mat_now, mat_prev))
 
 
-def correlation_matrix_distance(mat_now, mat_prev, **kwargs):
+def correlation_matrix_distance(mat_now, mat_prev, **_):
     """
     Correlation matrix distance
     """
-    mat_now = _covariance_to_correlation(mat_now)
-    mat_prev = _covariance_to_correlation(mat_prev)
-    trace = np.trace(np.matmul(mat_now, mat_prev))
-    frob_x = np.linalg.norm(mat_now, ord='fro')
-    frob_y = np.linalg.norm(mat_prev, ord='fro')
+    try:
+        mat_now = _covariance_to_correlation(mat_now)
+        mat_prev = _covariance_to_correlation(mat_prev)
+        trace = np.trace(np.matmul(mat_now, mat_prev))
+        frob_x = np.linalg.norm(mat_now, ord='fro')
+        frob_y = np.linalg.norm(mat_prev, ord='fro')
 
-    return 1 - (trace / (frob_x * frob_y))
+        return 1 - (trace / (frob_x * frob_y))
+    except ValueError:
+        return np.nan
 
 
-def kullback_leibler(mat_now, mat_prev, pose_now, pose_prev, **kwargs):
+def kullback_leibler(mat_now, mat_prev, pose_now, pose_prev, **_):
     """
     Kullback-Leibler Divergence
     """
@@ -164,38 +177,38 @@ def kullback_leibler(mat_now, mat_prev, pose_now, pose_prev, **kwargs):
     return score
 
 
-def norm_frobenius(mat_now, **kwargs):
+def norm_frobenius(mat_now, **_):
     return np.linalg.norm(mat_now, ord="fro")
 
 
-def norm_nuclear(mat_now, **kwargs):
+def norm_nuclear(mat_now, **_):
     return np.linalg.norm(mat_now, ord="nuc")
 
 
-def norm_1(mat_now, **kwargs):
+def norm_1(mat_now, **_):
     return np.linalg.norm(mat_now, ord=1)
 
 
-def norm_2(mat_now, **kwargs):
+def norm_2(mat_now, **_):
     return np.linalg.norm(mat_now, ord=2)
 
 
-def norm_frobenius_ratio(mat_now, mat_prev, **kwargs):
+def norm_frobenius_ratio(mat_now, mat_prev, **_):
     ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
     return np.linalg.norm(ratio, ord="fro")
 
 
-def norm_nuclear_ratio(mat_now, mat_prev, **kwargs):
+def norm_nuclear_ratio(mat_now, mat_prev, **_):
     ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
     return np.linalg.norm(ratio, ord="nuc")
 
 
-def norm_1_ratio(mat_now, mat_prev, **kwargs):
+def norm_1_ratio(mat_now, mat_prev, **_):
     ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
     return np.linalg.norm(ratio, ord=1)
 
 
-def norm_2_ratio(mat_now, mat_prev, **kwargs):
+def norm_2_ratio(mat_now, mat_prev, **_):
     ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
     return np.linalg.norm(ratio, ord=2)
 

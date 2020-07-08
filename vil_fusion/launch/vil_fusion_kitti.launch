@@ -33,6 +33,8 @@
 	<node pkg="vil_fusion" type="downsample_pointcloud.py" name="downsample_pointcloud" output="screen">
 	    <remap from="~input" to="/velodyne_points_raw" />
 	    <remap from="~output" to="/velodyne_points" />
+	    <param name="vert_downsample" value="4" />
+	    <param name="horiz_downsample" value="2" />
 	</node>
 
     <include file="$(find vil_fusion)/launch/vil_fusion.launch">
