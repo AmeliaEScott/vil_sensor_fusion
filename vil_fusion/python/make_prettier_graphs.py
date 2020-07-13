@@ -23,7 +23,7 @@ import rospy
 import copy
 import itertools
 
-LOAM_DIAGNOSTIC_TOPIC = "/diagnostics/loam_odommmmm"  # TODO: Remove this typo to get diagnostics back
+LOAM_DIAGNOSTIC_TOPIC = "/diagnostics/loam_odom"
 ROVIO_DIAGNOSTIC_TOPIC = "/diagnostics/rovio"
 
 LOAM_ODOM_TOPIC = "/loam/frame_transform/odometry/ros"
@@ -66,50 +66,48 @@ BAG_DIR = "/home/timothy/Code/catkin_ws/src/vil_sensor_fusion/sample_bags"
 # }
 
 DEGEN_ROT = {
-    # "Test1_vehicle.tesla.model3_results.bag": [
-    #     (53.0, 70.0),
-    #     (115.0, 162.0),
-    # ],
-    # "Test2_Denser_vehicle.tesla.model3_results.bag": [
-    #     (45.0, 77.0),
-    #     (165.0, 180.0)
-    # ],
-    # "Test3_vehicle.tesla.model3_results.bag": [
-    # ],
-    # "Test4_vehicle.audi.tt_results.bag": [
-    # ],
+    "Test1_vehicle.tesla.model3_results.bag": [
+        (53.0, 70.0),
+        (115.0, 162.0),
+    ],
+    "Test2_Denser_vehicle.tesla.model3_results.bag": [
+        (45.0, 77.0),
+        (165.0, 180.0)
+    ],
+    "Test3_vehicle.tesla.model3_results.bag": [
+    ],
+    "Test4_vehicle.audi.tt_results.bag": [
+    ],
     "Town03_vehicle.tesla.model3_results.bag": [],
-    # "stopnstart_results.bag": [
-    #
-    # ],
+    "stopnstart_results.bag": [
+
+    ],
     # "san_04_handheld_results.bag": [],
-    "2011_09_26_drive_0022_sync_results.bag": [],
-    "2011_10_03_drive_0042_sync_results.bag": [],
+    # "2011_09_26_drive_0022_sync_results.bag": [],
+    # "2011_10_03_drive_0042_sync_results.bag": [],
 }
 
 DEGEN_TRANS = {
-    # "Test1_vehicle.tesla.model3_results.bag": [
-    #     (53.0, 70.0),
-    #     (115.0, 162.0),
-    # ],
-    # "Test2_Denser_vehicle.tesla.model3_results.bag": [
-    #     # (45.0, 77.0),
-    #     # (165.0, 180.0)
-    # ],
-    # "Test3_vehicle.tesla.model3_results.bag": [
-    # ],
-    # "Test4_vehicle.audi.tt_results.bag": [
-    #     (106.0, 125.0),
-    # ],
+    "Test1_vehicle.tesla.model3_results.bag": [
+        (53.0, 70.0),
+        (115.0, 162.0),
+    ],
+    "Test2_Denser_vehicle.tesla.model3_results.bag": [
+        # (45.0, 77.0),
+        # (165.0, 180.0)
+    ],
+    "Test3_vehicle.tesla.model3_results.bag": [
+    ],
+    "Test4_vehicle.audi.tt_results.bag": [
+        (106.0, 125.0),
+    ],
     "Town03_vehicle.tesla.model3_results.bag": [],
-    # "stopnstart_results.bag": [
-    #
-    # ],
+    "stopnstart_results.bag": [],
     # "san_04_handheld_results.bag": [
     #     (29.0, 83.0)
     # ],
-    "2011_09_26_drive_0022_sync_results.bag": [],
-    "2011_10_03_drive_0042_sync_results.bag": [],
+    # "2011_09_26_drive_0022_sync_results.bag": [],
+    # "2011_10_03_drive_0042_sync_results.bag": [],
 
 }
 
@@ -322,6 +320,7 @@ def numpify_diagnostics(data, hessian=False):
         'abs_linear_vel_err': np.zeros(shape=(len(data)), dtype=np.float64),
         'rel_rot_vel_err': np.zeros(shape=(len(data)), dtype=np.float64),
         'abs_rot_vel_err': np.zeros(shape=(len(data)), dtype=np.float64),
+        'gt_distance': np.zeros(shape=(len(data)), dtype=np.float64),
     }
     odometry = {
         'covariance': np.zeros(shape=(6, 6, len(data)), dtype=np.float64),
@@ -662,26 +661,6 @@ def plot_all_rocs(data):
             'label': "Max Eigen"
         },
         {
-            'func': degen_funcs.d_opt_ratio,
-            'matrix_name': 'hessian',
-            'label': "D-Opt Ratio"
-        },
-        {
-            'func': degen_funcs.a_opt_ratio,
-            'matrix_name': 'hessian',
-            'label': "A-Opt Ratio"
-        },
-        {
-            'func': degen_funcs.e_opt_ratio,
-            'matrix_name': 'hessian',
-            'label': "E-Opt Ratio"
-        },
-        {
-            'func': degen_funcs.max_eigen_ratio,
-            'matrix_name': 'covariance',
-            'label': "Max Eigen Ratio"
-        },
-        {
             'func': degen_funcs.jensen_bregman,
             'matrix_name': 'covariance',
             'label': "JB LogDet Div"
@@ -691,51 +670,66 @@ def plot_all_rocs(data):
             'matrix_name': 'covariance',
             'label': "Corr. Mat. Dist"
         },
-        # {
-        #     'func': degen_funcs.kullback_leibler,
-        #     'matrix_name': 'covariance',
-        #     'label': "Kullback Leibler"
-        # },
+        {
+            'func': degen_funcs.kullback_leibler,
+            'matrix_name': 'covariance',
+            'label': "Kullback Leibler"
+        },
         {
             'func': degen_funcs.norm_1,
             'matrix_name': 'hessian',
-            'label': "1 Norm"
+            'label': "1 Norm Hess."
         },
         {
             'func': degen_funcs.norm_2,
             'matrix_name': 'hessian',
-            'label': "2 Norm"
+            'label': "2 Norm Hess."
         },
         {
             'func': degen_funcs.norm_frobenius,
             'matrix_name': 'hessian',
-            'label': "F Norm"
-        },
-        # {
-        #     'func': degen_funcs.norm_nuclear,
-        #     'matrix_name': 'hessian',
-        #     'label': "N Norm"
-        # },
-        {
-            'func': degen_funcs.norm_1_ratio,
-            'matrix_name': 'hessian',
-            'label': "1 Norm Ratio"
+            'label': "F Norm Hess."
         },
         {
-            'func': degen_funcs.norm_2_ratio,
+            'func': degen_funcs.condition_number,
             'matrix_name': 'hessian',
-            'label': "2 Norm Ratio"
+            'label': 'Cond Hess.'
         },
         {
-            'func': degen_funcs.norm_frobenius_ratio,
-            'matrix_name': 'hessian',
-            'label': "F Norm Ratio"
+            'func': degen_funcs.norm_1,
+            'matrix_name': 'covariance',
+            'label': "1 Norm Cov."
         },
-        # {
-        #     'func': degen_funcs.norm_nuclear_ratio,
-        #     'matrix_name': 'hessian',
-        #     'label': "N Norm Ratio"
-        # },
+        {
+            'func': degen_funcs.norm_2,
+            'matrix_name': 'covariance',
+            'label': "2 Norm Cov."
+        },
+        {
+            'func': degen_funcs.norm_frobenius,
+            'matrix_name': 'covariance',
+            'label': "F Norm Cov."
+        },
+        {
+            'func': degen_funcs.condition_cov,
+            'matrix_name': 'covariance',
+            'label': 'Cond Cov.'
+        },
+        {
+            'func': degen_funcs.jensen_bregman_0,
+            'matrix_name': 'covariance',
+            'label': 'JB 0'
+        },
+        {
+            'func': degen_funcs.kullback_leibler_0pose,
+            'matrix_name': 'covariance',
+            'label': 'KL 0'
+        },
+        {
+            'func': degen_funcs.kullback_leibler_0cov,
+            'matrix_name': 'covariance',
+            'label': 'KL 0cov'
+        }
     ]
 
     for d in trans_scores:
@@ -755,14 +749,14 @@ def plot_all_rocs(data):
 
     fig_rot: plt.Figure
     axeses_rot: List[plt.Axes]
-    fig_rot, axeses_rot = plt.subplots(nrows=4, ncols=4, gridspec_kw={
+    fig_rot, axeses_rot = plt.subplots(nrows=4, ncols=5, gridspec_kw={
         'left': 0.1, 'right': 0.95, 'top': 0.9, 'bottom': 0.1,
         'hspace': 0.4, 'wspace': 0.25
     })
 
     fig_trans: plt.Figure
     axeses_trans: List[plt.Axes]
-    fig_trans, axeses_trans = plt.subplots(nrows=4, ncols=4, gridspec_kw={
+    fig_trans, axeses_trans = plt.subplots(nrows=4, ncols=5, gridspec_kw={
         'left': 0.1, 'right': 0.95, 'top': 0.9, 'bottom': 0.1,
         'hspace': 0.4, 'wspace': 0.25
     })
@@ -844,5 +838,5 @@ if __name__ == "__main__":
 
     data = load_all_bags(BAG_DIR, DEGEN_ROT, DEGEN_TRANS)
     # plot_all_over_time(data, PLOTS)
-    # plot_all_rocs(data)
-    compare_datasets(data)
+    plot_all_rocs(data)
+    # compare_datasets(data)

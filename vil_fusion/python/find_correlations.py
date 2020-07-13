@@ -20,6 +20,7 @@ from scipy.stats import linregress
 import pickle
 import itertools
 import math
+from matplotlib import pyplot as plt
 
 try:
     from .make_prettier_graphs import numpify_diagnostics, load_ros_bag, apply_degen_function
@@ -92,11 +93,15 @@ def merge_data(data):
 
 def p_hack(odometry: Dict[str, np.ndarray], diagnostics: Dict[str, np.ndarray]):
     matrices = list(filter(lambda x: x[0] != "pose", odometry.items()))
+    # matrices = [('covariance', odometry['covariance'])]
     diagnostics = diagnostics.items()
-    # diagnostics = [("rel_linear_vel_err", diagnostics["rel_linear_vel_err"]), ("abs_rot_vel_err", diagnostics["abs_rot_vel_err"])]
+    # dd = np.zeros_like(diagnostics["gt_distance"])
+    # dd[1:] = diagnostics["gt_distance"][1:] - diagnostics["gt_distance"][:-1]
+    # diagnostics = [("gt_distance", dd)]
     matrix_subsets = ["all", "rot", "trans", "x", "y", "z", "roll", "pitch", "yaw"]
     # matrix_subsets = ["rot", "trans"]
     functions = degen_funcs
+    # functions = [degen_funcs[-2], degen_funcs[-8]]
     logs = [True, False]
     # logs = [False]
 
@@ -126,7 +131,7 @@ def p_hack(odometry: Dict[str, np.ndarray], diagnostics: Dict[str, np.ndarray]):
         y = y[1:] - y[:-1]
         diag_array = diag_array[1:]
         nan_filter = np.logical_not(np.logical_or(np.isnan(y), np.isnan(diag_array)))
-        if np.sum(nan_filter):
+        if np.sum(nan_filter) > 0:
             slope, intercept, rvalue, _, _ = linregress(diag_array[nan_filter], y[nan_filter])
             results.append(("d/dx " + label, diag_name, rvalue))
 
@@ -135,11 +140,11 @@ def p_hack(odometry: Dict[str, np.ndarray], diagnostics: Dict[str, np.ndarray]):
 
 if __name__ == "__main__":
     results_cache = os.path.join(CACHE_DIR, "RESULTS.pkl")
-    #
-    # data = read_bags(BAG_DIR, CACHE_DIR)
-    # results = p_hack(data["loam_odometry"], data["loam_diagnostics"])
-    # with open(results_cache, "wb") as fp:
-    #     pickle.dump(results, fp)
+
+    data = read_bags(BAG_DIR, CACHE_DIR)
+    results = p_hack(data["loam_odometry"], data["loam_diagnostics"])
+    with open(results_cache, "wb") as fp:
+        pickle.dump(results, fp)
 
     with open(results_cache, "rb") as fp:
         results = pickle.load(fp)

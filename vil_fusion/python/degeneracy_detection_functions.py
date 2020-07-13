@@ -149,32 +149,47 @@ def kullback_leibler(mat_now, mat_prev, pose_now, pose_prev, **_):
     Kullback-Leibler Divergence
     """
 
-    E1 = mat_prev
-    E2 = mat_now
-    E1i = np.linalg.inv(E1)
-    E2i = np.linalg.inv(E2)
-    u1 = pose_prev
-    u2 = pose_now
-    u_diff = u1 - u2
-    I = np.identity(mat_now.shape[0])
+    try:
+        E1 = mat_prev
+        E2 = mat_now
+        E1i = np.linalg.inv(E1)
+        E2i = np.linalg.inv(E2)
+        u1 = pose_prev
+        u2 = pose_now
+        u_diff = u1 - u2
+        I = np.identity(mat_now.shape[0])
 
-    a = np.trace(
-        np.matmul(E2i, E1) - I
-    )
-    b = np.matmul(
-        np.transpose(u1 - u2),
-        np.matmul(
-            E2i,
-            u1 - u2
+        a = np.trace(
+            np.matmul(E2i, E1) - I
         )
-    )
-    #print("det(E2): {}, det(E1): {}".format( np.linalg.det(E2), np.linalg.det(E1)))
-    c = math.log(
-        abs(np.linalg.det(E2)) / abs(np.linalg.det(E1))
-    )
+        b = np.matmul(
+            np.transpose(u1 - u2),
+            np.matmul(
+                E2i,
+                u1 - u2
+            )
+        )
+        #print("det(E2): {}, det(E1): {}".format( np.linalg.det(E2), np.linalg.det(E1)))
+        c = math.log(
+            abs(np.linalg.det(E2)) / abs(np.linalg.det(E1))
+        )
 
-    score = 0.5 * (a + b + c)
-    return score
+        score = 0.5 * (a + b + c)
+        return score
+    except np.linalg.LinAlgError:
+        return np.nan
+
+
+def jensen_bregman_0(mat_now, mat_prev, **_):
+    return jensen_bregman(mat_now, np.zeros_like(mat_prev))
+
+
+def kullback_leibler_0pose(mat_now, mat_prev, pose_now, pose_prev, **_):
+    return kullback_leibler(mat_now, mat_prev, np.zeros_like(pose_now), np.zeros_like(pose_prev))
+
+
+def kullback_leibler_0cov(mat_now, mat_prev, pose_now, pose_prev, **_):
+    return kullback_leibler(mat_now, np.zeros_like(mat_prev), np.zeros_like(pose_now), np.zeros_like(pose_prev))
 
 
 def norm_frobenius(mat_now, **_):
@@ -211,6 +226,20 @@ def norm_1_ratio(mat_now, mat_prev, **_):
 def norm_2_ratio(mat_now, mat_prev, **_):
     ratio = np.matmul(mat_now, np.linalg.inv(mat_prev))
     return np.linalg.norm(ratio, ord=2)
+
+
+def condition_number(mat_now, **_):
+    try:
+        return -np.linalg.cond(mat_now)
+    except np.linalg.LinAlgError:
+        return np.nan
+
+
+def condition_cov(mat_now, **_):
+    try:
+        return np.linalg.cond(mat_now)
+    except np.linalg.LinAlgError:
+        return np.nan
 
 
 degen_funcs = [
