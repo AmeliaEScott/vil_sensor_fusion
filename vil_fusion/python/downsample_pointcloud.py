@@ -34,22 +34,32 @@ class PointcloudDownsampler:
         self.channels = rospy.get_param("~channels", default=64)
         self.vert_downsample = rospy.get_param("~vert_downsample", default=4)
         self.horiz_downsample = rospy.get_param("~horiz_downsample", default=2)
+        self.time_downsample = rospy.get_param("~time_downsample", default=1)
+        self.transpose = rospy.get_param("~transpose", default=False)
 
         self.input = rospy.Subscriber("~input", PointCloud2, callback=self.callback)
         self.output = rospy.Publisher("~output", PointCloud2, queue_size=1)
 
     def callback(self, msg: PointCloud2):
-        data = np.reshape(np.fromstring(msg.data, dtype=np.float32), [-1, 8])
-        # Truncate data to round to a multiple of 64 points
-        num_points = 64 * (data.shape[0] // 64)
-        data = data[0:num_points, :]
-        data = np.reshape(data, [64, -1, 8])
-        # print("Height: {}, Width: {}, Shape: {}".format(msg.height, msg.width, data.shape))
-        downsampled_data = data[::self.vert_downsample, ::self.horiz_downsample, :]
-        downsampled_data = np.reshape(downsampled_data, [-1, 8])
-        msg.data = downsampled_data.tostring()
-        msg.width = downsampled_data.shape[0]
-        self.output.publish(msg)
+        if msg.header.seq % self.time_downsample == 0:
+            point_length = msg.point_step // 4
+            data = np.reshape(np.fromstring(msg.data, dtype=np.float32), [-1, point_length])
+            # Truncate data to round to a multiple of 64 points
+            num_points = self.channels * (data.shape[0] // self.channels)
+            data = data[0:num_points, :]
+            if self.transpose:
+                data = np.reshape(data, [-1, self.channels, point_length])
+                data = data.transpose((1, 0, 2))
+                # msg.header.stamp = rospy.Time.now()
+            else:
+                data = np.reshape(data, [self.channels, -1, point_length])
+
+            # print("Height: {}, Width: {}, Shape: {}".format(msg.height, msg.width, data.shape))
+            downsampled_data = data[::self.vert_downsample, ::self.horiz_downsample, :]
+            downsampled_data = np.reshape(downsampled_data, [-1, point_length])
+            msg.data = downsampled_data.tostring()
+            msg.width = downsampled_data.shape[0]
+            self.output.publish(msg)
 
 
 if __name__ == "__main__":

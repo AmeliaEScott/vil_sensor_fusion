@@ -67,21 +67,18 @@ BAG_DIR = "/home/timothy/Code/catkin_ws/src/vil_sensor_fusion/sample_bags"
 
 DEGEN_ROT = {
     "Test1_vehicle.tesla.model3_results.bag": [
-        (53.0, 70.0),
+        (53.0, 75.0),
         (115.0, 162.0),
     ],
     "Test2_Denser_vehicle.tesla.model3_results.bag": [
         (45.0, 77.0),
         (165.0, 180.0)
     ],
-    "Test3_vehicle.tesla.model3_results.bag": [
-    ],
+    "Test3_vehicle.tesla.model3_results.bag": [],
     "Test4_vehicle.audi.tt_results.bag": [
     ],
-    "Town03_vehicle.tesla.model3_results.bag": [],
-    "stopnstart_results.bag": [
-
-    ],
+    # "Town03_vehicle.tesla.model3_results.bag": [],
+    "stopnstart_results.bag": [],
     # "san_04_handheld_results.bag": [],
     # "2011_09_26_drive_0022_sync_results.bag": [],
     # "2011_10_03_drive_0042_sync_results.bag": [],
@@ -89,19 +86,18 @@ DEGEN_ROT = {
 
 DEGEN_TRANS = {
     "Test1_vehicle.tesla.model3_results.bag": [
-        (53.0, 70.0),
+        (53.0, 75.0),
         (115.0, 162.0),
     ],
     "Test2_Denser_vehicle.tesla.model3_results.bag": [
         # (45.0, 77.0),
         # (165.0, 180.0)
     ],
-    "Test3_vehicle.tesla.model3_results.bag": [
-    ],
+    "Test3_vehicle.tesla.model3_results.bag": [],
     "Test4_vehicle.audi.tt_results.bag": [
         (106.0, 125.0),
     ],
-    "Town03_vehicle.tesla.model3_results.bag": [],
+    # "Town03_vehicle.tesla.model3_results.bag": [],
     "stopnstart_results.bag": [],
     # "san_04_handheld_results.bag": [
     #     (29.0, 83.0)
@@ -116,15 +112,15 @@ PLOTS = [
         'source': 'loam',
         'title': 'Loam Translation',
         'plots': [
-            # {
-            #     'diagnostic': True,
-            #     'roc': False,
-            #     'metric': 'rel_linear_vel_err',
-            #     'log': False,
-            #     'label': 'GT Vel. Error',
-            #     'matrix_subset': 'trans',
-            #     # 'ylim': 0.5
-            # },
+            {
+                'diagnostic': True,
+                'roc': False,
+                'metric': 'abs_linear_vel_err',
+                'log': False,
+                'label': 'GT Vel. Error',
+                'matrix_subset': 'trans',
+                # 'ylim': 0.5
+            },
             {
                 'diagnostic': False,
                 'roc': True,
@@ -134,31 +130,41 @@ PLOTS = [
                 'matrix': 'hessian',
                 'matrix_subset': 'trans'
             },
-            {
-                'diagnostic': False,
-                'roc': True,
-                'metric': 'e_opt',
-                'log': False,
-                'label': 'E Opt',
-                'matrix': 'hessian',
-                'matrix_subset': 'trans'
-            },
-            {
-                'diagnostic': False,
-                'roc': True,
-                'metric': 'a_opt',
-                'log': False,
-                'label': 'A Opt',
-                'matrix': 'hessian',
-                'matrix_subset': 'trans'
-            },
+            # {
+            #     'diagnostic': False,
+            #     'roc': True,
+            #     'metric': 'e_opt',
+            #     'log': False,
+            #     'label': 'E Opt',
+            #     'matrix': 'hessian',
+            #     'matrix_subset': 'trans'
+            # },
+            # {
+            #     'diagnostic': False,
+            #     'roc': True,
+            #     'metric': 'a_opt',
+            #     'log': False,
+            #     'label': 'A Opt',
+            #     'matrix': 'hessian',
+            #     'matrix_subset': 'trans'
+            # },
             {
                 'diagnostic': False,
                 'roc': True,
                 'metric': 'norm_frobenius',
                 'log': False,
-                'label': 'F. Norm',
-                'matrix': 'hessian',
+                'label': 'Frob Cov',
+                'matrix': 'covariance',
+                'matrix_subset': 'trans',
+                'ylim': 0.0000005
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'kullback_leibler_0pose',
+                'log': False,
+                'label': 'KL',
+                'matrix': 'covariance',
                 'matrix_subset': 'trans'
             },
         ]
@@ -167,14 +173,14 @@ PLOTS = [
         'source': 'loam',
         'title': 'Loam Rotation',
         'plots': [
-            # {
-            #     'diagnostic': True,
-            #     'roc': False,
-            #     'metric': 'abs_rot_vel_err',
-            #     'log': False,
-            #     'label': 'GT Ang. Vel. Err',
-            #     'matrix_subset': 'rot',
-            # },
+            {
+                'diagnostic': True,
+                'roc': False,
+                'metric': 'abs_rot_vel_err',
+                'log': False,
+                'label': 'GT Ang. Vel. Err',
+                'matrix_subset': 'rot',
+            },
             {
                 'diagnostic': False,
                 'roc': True,
@@ -184,32 +190,43 @@ PLOTS = [
                 'matrix': 'hessian',
                 'matrix_subset': 'rot'
             },
-            {
-                'diagnostic': False,
-                'roc': True,
-                'metric': 'e_opt',
-                'log': False,
-                'label': 'E Opt',
-                'matrix': 'hessian',
-                'matrix_subset': 'rot'
-            },
-            {
-                'diagnostic': False,
-                'roc': True,
-                'metric': 'a_opt',
-                'log': False,
-                'label': 'A Opt',
-                'matrix': 'hessian',
-                'matrix_subset': 'rot'
-            },
+            # {
+            #     'diagnostic': False,
+            #     'roc': True,
+            #     'metric': 'e_opt',
+            #     'log': False,
+            #     'label': 'E Opt',
+            #     'matrix': 'hessian',
+            #     'matrix_subset': 'rot'
+            # },
+            # {
+            #     'diagnostic': False,
+            #     'roc': True,
+            #     'metric': 'a_opt',
+            #     'log': False,
+            #     'label': 'A Opt',
+            #     'matrix': 'hessian',
+            #     'matrix_subset': 'rot'
+            # },
             {
                 'diagnostic': False,
                 'roc': True,
                 'metric': 'norm_frobenius',
                 'log': False,
-                'label': 'F. Norm',
-                'matrix': 'hessian',
-                'matrix_subset': 'rot'
+                'label': 'Frob Cov',
+                'matrix': 'covariance',
+                'matrix_subset': 'rot',
+                'ylim': 0.00005,
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'kullback_leibler_0pose',
+                'log': False,
+                'label': 'KL',
+                'matrix': 'covariance',
+                'matrix_subset': 'rot',
+                'ylim': 100
             },
         ]
     },
@@ -643,99 +660,135 @@ def plot_all_rocs(data):
         {
             'func': degen_funcs.d_opt,
             'matrix_name': 'hessian',
-            'label': "D-Opt"
+            'label': "D-Opt Hess.",
+            'inv': False
         },
         {
             'func': degen_funcs.a_opt,
             'matrix_name': 'hessian',
-            'label': "A-Opt"
+            'label': "A-Opt Hess.",
+            'inv': False
         },
         {
             'func': degen_funcs.e_opt,
             'matrix_name': 'hessian',
-            'label': "E-Opt"
+            'label': "E-Opt Hess.",
+            'inv': False
         },
         {
             'func': degen_funcs.max_eigen,
-            'matrix_name': 'covariance',
-            'label': "Max Eigen"
-        },
-        {
-            'func': degen_funcs.jensen_bregman,
-            'matrix_name': 'covariance',
-            'label': "JB LogDet Div"
-        },
-        {
-            'func': degen_funcs.correlation_matrix_distance,
-            'matrix_name': 'covariance',
-            'label': "Corr. Mat. Dist"
-        },
-        {
-            'func': degen_funcs.kullback_leibler,
-            'matrix_name': 'covariance',
-            'label': "Kullback Leibler"
+            'matrix_name': 'hessian',
+            'label': "Max Eig. Hess.",
+            'inv': False
         },
         {
             'func': degen_funcs.norm_1,
             'matrix_name': 'hessian',
-            'label': "1 Norm Hess."
+            'label': "1 Norm Hess.",
+            'inv': False
         },
         {
             'func': degen_funcs.norm_2,
             'matrix_name': 'hessian',
-            'label': "2 Norm Hess."
+            'label': "2 Norm Hess.",
+            'inv': False
         },
         {
             'func': degen_funcs.norm_frobenius,
             'matrix_name': 'hessian',
-            'label': "F Norm Hess."
+            'label': "F Norm Hess.",
+            'inv': False
         },
         {
             'func': degen_funcs.condition_number,
             'matrix_name': 'hessian',
-            'label': 'Cond Hess.'
+            'label': 'Cond Hess.',
+            'inv': False
+        },
+
+        ###################################
+
+        {
+            'func': degen_funcs.d_opt,
+            'matrix_name': 'covariance',
+            'label': "D-Opt Cov.",
+            'inv': True
+        },
+        {
+            'func': degen_funcs.a_opt,
+            'matrix_name': 'covariance',
+            'label': "A-Opt Cov.",
+            'inv': True
+        },
+        {
+            'func': degen_funcs.e_opt,
+            'matrix_name': 'covariance',
+            'label': "E-Opt Cov.",
+            'inv': True
+        },
+        {
+            'func': degen_funcs.max_eigen,
+            'matrix_name': 'covariance',
+            'label': "Max Eigen Cov.",
+            'inv': True
         },
         {
             'func': degen_funcs.norm_1,
             'matrix_name': 'covariance',
-            'label': "1 Norm Cov."
+            'label': "1 Norm Cov.",
+            'inv': True
         },
         {
             'func': degen_funcs.norm_2,
             'matrix_name': 'covariance',
-            'label': "2 Norm Cov."
+            'label': "2 Norm Cov.",
+            'inv': True
         },
         {
             'func': degen_funcs.norm_frobenius,
             'matrix_name': 'covariance',
-            'label': "F Norm Cov."
+            'label': "F Norm Cov.",
+            'inv': True
         },
         {
-            'func': degen_funcs.condition_cov,
+            'func': degen_funcs.condition_number,
             'matrix_name': 'covariance',
-            'label': 'Cond Cov.'
+            'label': 'Cond Cov.',
+            'inv': False
+        },
+
+
+        ############################################
+
+
+        {
+            'func': degen_funcs.jensen_bregman,
+            'matrix_name': 'covariance',
+            'label': "JB Divergence",
+            'inv': True
         },
         {
-            'func': degen_funcs.jensen_bregman_0,
+            'func': degen_funcs.differential_entropy,
             'matrix_name': 'covariance',
-            'label': 'JB 0'
+            'label': 'Diff. Ent.',
+            'inv': True
         },
         {
             'func': degen_funcs.kullback_leibler_0pose,
             'matrix_name': 'covariance',
-            'label': 'KL 0'
+            'label': 'KL Divergence',
+            'inv': True
         },
-        {
-            'func': degen_funcs.kullback_leibler_0cov,
-            'matrix_name': 'covariance',
-            'label': 'KL 0cov'
-        }
+
     ]
 
     for d in trans_scores:
-        d['scores'] = np.array([], dtype=np.float64)
+        if d is not None:
+            d['scores'] = np.array([], dtype=np.float64)
 
     rot_scores = copy.deepcopy(trans_scores)
+
+    # trans_scores[6]['inv'] = False
 
     for bagname, bagdata in data.items():
         all_degen_rot = np.concatenate([all_degen_rot, bagdata['is_degen_rot']])
@@ -743,20 +796,21 @@ def plot_all_rocs(data):
 
         for x, subset in zip([rot_scores, trans_scores], ["rot", "trans"]):
             for d in x:
-                y = apply_degen_function(data[bagname]['loam_odometry'][d['matrix_name']], data[bagname]['loam_odometry']['pose'], subset, d['func'])
-                d['scores'] = np.concatenate([d['scores'], y])
-                # print("+ {} = {}".format(y.shape, d['scores'].shape))
+                if d is not None:
+                    y = apply_degen_function(data[bagname]['loam_odometry'][d['matrix_name']], data[bagname]['loam_odometry']['pose'], subset, d['func'])
+                    d['scores'] = np.concatenate([d['scores'], y])
+                    # print("+ {} = {}".format(y.shape, d['scores'].shape))
 
     fig_rot: plt.Figure
     axeses_rot: List[plt.Axes]
-    fig_rot, axeses_rot = plt.subplots(nrows=4, ncols=5, gridspec_kw={
+    fig_rot, axeses_rot = plt.subplots(nrows=5, ncols=4, gridspec_kw={
         'left': 0.1, 'right': 0.95, 'top': 0.9, 'bottom': 0.1,
         'hspace': 0.4, 'wspace': 0.25
     })
 
     fig_trans: plt.Figure
     axeses_trans: List[plt.Axes]
-    fig_trans, axeses_trans = plt.subplots(nrows=4, ncols=5, gridspec_kw={
+    fig_trans, axeses_trans = plt.subplots(nrows=5, ncols=4, gridspec_kw={
         'left': 0.1, 'right': 0.95, 'top': 0.9, 'bottom': 0.1,
         'hspace': 0.4, 'wspace': 0.25
     })
@@ -781,7 +835,7 @@ def plot_all_rocs(data):
             fpr[-1] = 1.0
             tpr[0] = 0.0
             fpr[0] = 0.0
-            if d['matrix_name'].startswith('cov'):
+            if d['inv']:
                 fpr = 1.0 - fpr
                 tpr = 1.0 - tpr
             axes.plot(fpr, tpr)
@@ -792,7 +846,7 @@ def plot_all_rocs(data):
             axes.set_yticks([])
             axes.set_title(d['label'], size="medium")
             axes.text(0.95, 0.05, s="{:.3f}".format(auc), ha='right', va='bottom')
-        for axes in axeses[3, :]:
+        for axes in axeses[-1, :]:
             axes.set_xticks([0.0, 1.0])
         for axes in axeses[:, 0]:
             axes.set_yticks([0.0, 1.0])

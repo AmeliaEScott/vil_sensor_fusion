@@ -1,0 +1,95 @@
+<launch>
+
+	<arg name="bagfile" />
+    <arg name="rviz" default="false" />
+    <arg name="rate" default="1.0" />
+
+    <arg name="new_bag" default="" />
+
+    <param name="use_sim_time" value="true" />
+
+	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
+         <remap from="/os1_node/points" to="/velodyne_points_raw"/>
+         <!--remap from="/xsensmt_node/rawImu" to="/imu/lidar"/-->
+	</node>
+
+    <node pkg="tf" type="static_transform_publisher" name="tf_map_world" args="
+        0.0 0.0 0.0
+        0.0 0.0 0.0 1.0
+        map world 20"/>
+
+	<node pkg="tf" type="static_transform_publisher" name="tf_world_loam" args="
+        0.0 0.0 0.0
+        0.0 0.0 0.0 1.0
+        world loam_init_ros_convention 20"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="tf_world_os1" args="
+        0.0 0.0 0.0
+        0.0 0.0 0.0 1.0
+        aft_mapped_ros os1 20"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="tf_loam" args="
+        0.0 0.0 0.0
+        0.5 0.5 0.5 0.5
+        loam_init_ros_convention loam_init 20"/>
+
+	<node pkg="vil_fusion" type="downsample_pointcloud.py" name="downsample_pointcloud" output="screen">
+	    <remap from="~input" to="/velodyne_points_raw" />
+	    <remap from="~output" to="/velodyne_points" />
+	    <param name="vert_downsample" value="1" />
+	    <param name="horiz_downsample" value="1" />
+	    <param name="time_downsample" value="2" />
+	    <param name="transpose" value="true" />
+	</node>
+
+    <include file="$(find vil_fusion)/launch/vil_fusion.launch">
+        <arg name="rovio" value="false" />
+        <arg name="loam" value="true" />
+        <arg name="rviz" value="$(arg rviz)" />
+        <arg name="do_fusion" value="false" />
+
+        <arg name="config_dir" value="$(find vil_fusion)/cfg/kitti" />
+    </include>
+
+    <node if="$(eval arg('new_bag') != '')" pkg="rosbag" type="record" name="rosbag_record" args="
+
+    record -O $(arg new_bag)
+    /imu0
+    /tf
+    /rosout
+    /velodyne_points_raw
+    /velodyne_points
+
+    /aft_mapped_to_init
+    /laser_cloud_surround
+    /velodyne_cloud_registered
+    /laser_cloud_corner_last
+    /laser_cloud_surf_last
+    /laser_odom_to_init
+
+    /velodyne_cloud_1
+    /velodyne_cloud_2
+    /velodyne_cloud_3
+    /velodyne_cloud_registered
+
+    /imu_trans
+    /integrated_to_init
+    /laser_cloud_corner_last
+    /laser_cloud_flat
+    /laser_cloud_less_flat
+    /laser_cloud_less_sharp
+    /laser_cloud_sharp
+    /laser_cloud_surf_last
+    /laser_cloud_surround
+    /laser_odom_to_init
+    /loam/frame_transform/odometry/ros
+    /loam/frame_transform/mapping/ros
+
+    /diagnostics/confusion
+    /diagnostics/loam_mapping
+    /diagnostics/loam_odom
+    /diagnostics/rovio
+    " >
+    </node>
+
+</launch>

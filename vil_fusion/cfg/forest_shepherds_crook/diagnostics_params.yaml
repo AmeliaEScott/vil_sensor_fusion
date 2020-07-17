@@ -1,0 +1,12 @@
+
+diagnostics: # For each of the following items, the diagnostics node will track the error over time
+  - name: loam_odom               # Name of this diagnostic (Used only for display, and naming the ROS topic)
+    gt: velodyne                  # Ground truth tf frame_id
+    est: laser_odom_ros           # frame_id of estimated transform from odometry algorithm
+    ref: world                    # Stationary reference frame
+    rate: 10                      # Frequency of odometry publications (Hz)
+  - name: loam_map
+    gt: velodyne
+    est: aft_mapped_ros
+    ref: world
+    rate: 10
