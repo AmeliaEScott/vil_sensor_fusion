@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>gtsam_fusion</name>
+  <version>0.0.0</version>
+  <description>Uses GTSAM to fuse measurements from Visual and Lidar odometry.</description>
+
+  <maintainer email="scottti@student.ethz.ch">Timothy Scott</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+  <author email="scottti@student.ethz.ch">Timothy Scott</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>gtsam</depend>
+
+  <exec_depend>message_runtime</exec_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>
