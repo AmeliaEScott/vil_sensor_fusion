@@ -8,6 +8,7 @@ from vil_fusion.msg import DegeneracyScore
 from nav_msgs.msg import Odometry
 import numpy as np
 import math
+from scipy.stats import linregress
 
 def _demo1(mat_now, mat_prev, pose_now, pose_prev, hessian_now, hessian_prev, msg_now, msg_prev):
     """
@@ -245,6 +246,35 @@ def condition_cov(mat_now, **_):
         return np.linalg.cond(mat_now)
     except np.linalg.LinAlgError:
         return np.nan
+
+
+def _dist_slope(vector, shifts):
+    slope, intercept, rvalue, _, _ = linregress(shifts, vector)
+    return slope
+
+
+def dist_slope_tx(mat_now, shifts_trans, **_):
+    return _dist_slope(mat_now[0, :15], shifts_trans[:15])
+
+
+def dist_slope_ty(mat_now, shifts_trans, **_):
+    return _dist_slope(mat_now[1, :15], shifts_trans[:15])
+
+
+def dist_slope_tz(mat_now, shifts_trans, **_):
+    return _dist_slope(mat_now[2, :15], shifts_trans[:15])
+
+
+def dist_slope_rx(mat_now, shifts_rot, **_):
+    return _dist_slope(mat_now[3, :15], shifts_rot[:15])
+
+
+def dist_slope_ry(mat_now, shifts_rot, **_):
+    return _dist_slope(mat_now[4, :15], shifts_rot[:15])
+
+
+def dist_slope_rz(mat_now, shifts_rot, **_):
+    return _dist_slope(mat_now[5, :15], shifts_rot[:15])
 
 
 degen_funcs = [

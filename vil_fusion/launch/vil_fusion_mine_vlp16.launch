@@ -1,6 +1,7 @@
 <launch>
 
-	<arg name="bagfile" />
+    <!-- bagfiles:="$(echo $(ls -d $(pwd)/02_vlp16/*))" -->
+	<arg name="bagfiles" />
 	<arg name="rovio" default="true" />
     <arg name="loam" default="true" />
     <arg name="rviz" default="false" />
@@ -14,8 +15,11 @@
 
     <param name="use_sim_time" value="true" />
 
-	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
-         <remap from="/camera/image_mono" to="/cam0/image_mono" />
+	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate)
+	    --topics /camera/camera_info /camera/image_raw /velodyne_points /vn100/imu /matrice/imu
+	    --bags $(arg bagfiles)" required="true">
+         <remap from="/camera/image_raw" to="/cam0/image_mono"  />
+         <remap from="/camera/camera_info" to="/cam0/camera_info"  />
          <remap from="/matrice/imu" to="/imu/lidar" />
          <remap from="/vn100/imu" to="/imu/vio"/>
 	</node>
@@ -52,6 +56,7 @@
         <arg name="rviz" value="$(arg rviz)" />
         <arg name="loam_rviz" value="$(arg loam_rviz)" />
         <arg name="do_fusion" value="$(arg do_fusion)" />
+        <arg name="image_proc" value="false" />
 
         <arg name="config_dir" value="$(find vil_fusion)/cfg/san_rafeal" />
         <arg name="diagnostics" value="false" />

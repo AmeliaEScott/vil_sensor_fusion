@@ -29,9 +29,9 @@ import shutil
 
 pkg = rospkg.RosPack()
 
-DATA_HOME = "/media/timothy/1ABED71A5F421E8D/TimothyScott/Good Cool Datasets/kitti/bags"
-RESULTS_DIR = "/media/timothy/1ABED71A5F421E8D/TimothyScott/Good Cool Datasets/kitti/results"
-LAUNCH_FILE = os.path.join(pkg.get_path("vil_fusion"), "launch", "vil_fusion_kitti.launch")
+DATA_HOME = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_v6"
+RESULTS_DIR = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/experiment_results_v6.3"
+LAUNCH_FILE = os.path.join(pkg.get_path("vil_fusion"), "launch", "vil_fusion_bag.launch")
 # LAUNCH_FILE = os.path.join(pkg.get_path("vil_fusion"), "launch", "vil_fusion_euroc.launch")
 
 with tempfile.TemporaryDirectory() as tmpdir:
@@ -46,7 +46,8 @@ with tempfile.TemporaryDirectory() as tmpdir:
 
         uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
         roslaunch.configure_logging(uuid)
-        cli_args = [LAUNCH_FILE, 'new_bag:={}'.format(tmp_results), "bagfile:={}".format(tmpfile), "do_fusion:=false"]
+        cli_args = [LAUNCH_FILE, 'new_bag:={}'.format(tmp_results), "bagfile:={}".format(tmpfile), "do_fusion:=false",
+                    "rate:=0.5"]
         roslaunch_args = cli_args[1:]
         roslaunch_file = [(roslaunch.rlutil.resolve_launch_arguments(cli_args)[0], roslaunch_args)]
         launch = roslaunch.parent.ROSLaunchParent(uuid, roslaunch_file)

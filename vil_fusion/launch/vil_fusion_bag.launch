@@ -10,12 +10,14 @@
 
     <arg name="new_bag" default="" />
 
+    <param name="/loam/multiScanRegistration/lidar" value="VLP-16" /> <!-- options: VLP-16  HDL-32  HDL-64E -->
+
     <param name="use_sim_time" value="true" />
 
 	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
          <remap from="/lidar" to="/velodyne_points" />
-         <remap from="/cam_down/image_raw" to="/cam0/image_raw" />
-         <remap from="/cam_down/camera_info" to="/cam0/camera_info" />
+         <remap from="/cam_forward/image_raw" to="/cam0/image_raw" />
+         <remap from="/cam_forward/camera_info" to="/cam0/camera_info" />
 	</node>
 
 <!-- 	<node pkg="carla_tools" type="carla_frame_transforms.py" name="carla_frame_transforms" output="screen"> -->

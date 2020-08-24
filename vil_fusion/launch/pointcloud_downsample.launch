@@ -1,0 +1,40 @@
+<launch>
+
+    <arg name="scanPeriod" default="1.0" />
+    <arg name="rate" default="1.0" />
+    <arg name="bag_input" />
+    <arg name="bag_output" />
+    <arg name="lidar_topic" />
+
+    <param name="/multiScanRegistration/lidar" value="HDL-32" />
+
+    <node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bag_input)" required="true">
+         <remap from="$(arg lidar_topic)" to="/velodyne_points"/>
+	</node>
+
+<!--     <node pkg="loam_velodyne" type="laserOdometry" name="laserOdometry" output="screen"> -->
+<!--         <param name="scanPeriod" value="$(arg scanPeriod)" /> -->
+<!--     </node> -->
+
+    <include file="$(find loam_velodyne)/launch/loam_velodyne.launch">
+        <arg name="rviz" value="false" />
+        <arg name="scanPeriod" value="$(arg scanPeriod)" />
+    </include>
+
+    <node pkg="vil_fusion" type="loam_downsample_pointcloud.py" name="downsample_pointcloud" output="screen">
+
+    </node>
+
+    <node pkg="rosbag" type="record" name="rosbag_record" args="
+
+    record -O $(arg bag_output)
+    $(arg lidar_topic)_downsampled
+    " >
+        <remap from="$(arg lidar_topic)_downsampled" to="downsample_pointcloud/velodyne_cloud_downsampled" />
+    </node>
+
+<!--     <include file="$(find loam_velodyne)/launch/loam_velodyne.launch"> -->
+<!--         <arg name="rviz" value="false" /> -->
+<!--     </include> -->
+
+</launch>

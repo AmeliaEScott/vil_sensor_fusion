@@ -2,10 +2,13 @@
 
 	<arg name="bagfile" />
     <arg name="rviz" default="false" />
+    <arg name="loam_rviz" default="false" />
     <arg name="rate" default="1.0" />
     <arg name="rovio" default="false" />
 
     <arg name="new_bag" default="" />
+
+    <param name="/loam/multiScanRegistration/lidar" value="HDL-64E" /> <!-- options: VLP-16  HDL-32  HDL-64E -->
 
     <param name="use_sim_time" value="true" />
 
@@ -33,17 +36,19 @@
 	<node pkg="vil_fusion" type="downsample_pointcloud.py" name="downsample_pointcloud" output="screen">
 	    <remap from="~input" to="/velodyne_points_raw" />
 	    <remap from="~output" to="/velodyne_points" />
-	    <param name="vert_downsample" value="4" />
-	    <param name="horiz_downsample" value="2" />
+	    <param name="vert_downsample" value="1" />
+	    <param name="horiz_downsample" value="1" />
 	</node>
 
     <include file="$(find vil_fusion)/launch/vil_fusion.launch">
         <arg name="rovio" value="$(arg rovio)" />
         <arg name="loam" value="true" />
         <arg name="rviz" value="$(arg rviz)" />
+        <arg name="loam_rviz" value="$(arg loam_rviz)" />
         <arg name="do_fusion" value="false" />
 
         <arg name="config_dir" value="$(find vil_fusion)/cfg/kitti" />
+        <arg name="diagnostics" value="false" />
     </include>
 
     <node if="$(eval arg('new_bag') != '')" pkg="rosbag" type="record" name="rosbag_record" args="
@@ -79,11 +84,6 @@
     /laser_odom_to_init
     /loam/frame_transform/odometry/ros
     /loam/frame_transform/mapping/ros
-
-    /diagnostics/confusion
-    /diagnostics/loam_mapping
-    /diagnostics/loam_odom
-    /diagnostics/rovio
     " >
     </node>
 

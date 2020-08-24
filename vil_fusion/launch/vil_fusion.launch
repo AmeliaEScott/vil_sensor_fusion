@@ -6,6 +6,7 @@
     <arg name="do_fusion" default="true" />
     <arg name="diagnostics" default="true" />
     <arg name="loam_rviz" default="false" />
+    <arg name="image_proc" default="true" />
 
     <arg name="config_dir" default="$(find vil_fusion)/cfg/carla" />
 
@@ -30,7 +31,7 @@
     <!-- Everything in this group concerns Rovio -->
     <group if="$(arg rovio)" >
         <!-- image_proc takes in the color image and outputs the mono image that Rovio needs -->
-        <node pkg="image_proc" type="image_proc" name="image_proc" ns="/cam0">
+        <node if="$(arg image_proc)" pkg="image_proc" type="image_proc" name="image_proc" ns="/cam0">
         </node>
 
         <!-- Rovio thinks cam0/image_raw is mono, but here, it's color. The actual mono image is cam0/image_mono -->

@@ -1,7 +1,8 @@
 <launch>
 
-	<arg name="bagfile" />
-	<arg name="rovio" default="true" />
+    <!-- bagfiles:="$(echo $(ls -d $(pwd)/02_vlp16/*))" -->
+	<arg name="bagfiles" />
+	<arg name="rovio" default="false" />
     <arg name="loam" default="true" />
     <arg name="rviz" default="false" />
     <arg name="loam_rviz" default="false" />
@@ -10,13 +11,17 @@
 
     <arg name="new_bag" default="" />
 
-    <param name="/loam/multiScanRegistration/lidar" value="VLP-16" /> <!-- options: VLP-16  HDL-32  HDL-64E -->
+    <param name="/loam/multiScanRegistration/lidar" value="O1-64" /> <!-- options: VLP-16  HDL-32  HDL-64E -->
 
     <param name="use_sim_time" value="true" />
 
-	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
-         <remap from="/camera/image_mono" to="/cam0/image_mono" />
-         <remap from="/matrice/imu" to="/imu/lidar" />
+	<node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate)
+	    --topics /camera/camera_info /camera/image_raw /os1_node/imu_raw /os1_node/points_raw /vn100/imu
+	    --bags $(arg bagfiles)" required="true">
+         <remap from="/camera/image_raw" to="/cam0/image_mono"  />
+         <remap from="/camera/camera_info" to="/cam0/camera_info"  />
+<!--          <remap from="/os1_node/imu_raw" to="/imu/lidar" /> -->
+         <remap from="/os1_node/points_raw" to="/velodyne_points" />
          <remap from="/vn100/imu" to="/imu/vio"/>
 	</node>
 
@@ -52,6 +57,7 @@
         <arg name="rviz" value="$(arg rviz)" />
         <arg name="loam_rviz" value="$(arg loam_rviz)" />
         <arg name="do_fusion" value="$(arg do_fusion)" />
+        <arg name="image_proc" value="false" />
 
         <arg name="config_dir" value="$(find vil_fusion)/cfg/san_rafeal" />
         <arg name="diagnostics" value="false" />

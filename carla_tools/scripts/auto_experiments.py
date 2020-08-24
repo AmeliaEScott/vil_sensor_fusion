@@ -14,7 +14,7 @@ pkg = rospkg.RosPack()
 
 CARLA_PREFIX = "/home/timothy/Code/carla"
 BAG_SOURCE = os.path.join(pkg.get_path("carla_tools"), "rosbags")
-BAG_DEST = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_v6"
+BAG_DEST = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_hdl64e "
 LAUNCH_FILE = os.path.join(pkg.get_path("carla_tools"), "launch", "carla_ros_bridge.launch")
 FIX_ROSBAG_SCRIPT = os.path.join(pkg.get_path("carla_tools"), "scripts", "fix_rosbag_time.py")
 VEHICLE_FILTER = "vehicle.tesla.model3"

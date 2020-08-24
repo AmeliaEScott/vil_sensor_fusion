@@ -6,6 +6,8 @@
     <arg name="rviz" default="false" />
     <arg name="rate" default="1.0" />
 
+    <param name="/loam/multiScanRegistration/lidar" value="VLP-16" /> <!-- options: VLP-16  HDL-32  HDL-64E -->
+
 	<node pkg="rosbag" type="play" name="rosbag_player" args="-r $(arg rate) $(arg bagfile)" >
 	</node>
 
