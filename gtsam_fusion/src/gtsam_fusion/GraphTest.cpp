@@ -3,6 +3,6 @@
 
 GraphTest::GraphTest()
 {
-    auto imuParams = PreintegratedCombinedMeasurements::Params::MakeSharedD();
-    preint = std::make_shared<PreintegratedCombinedMeasurements>(imuParams);
+    auto imuParams = gtsam::PreintegratedCombinedMeasurements::Params::MakeSharedD();
+    preint = gtsam::make_shared<gtsam::PreintegratedCombinedMeasurements>(imuParams);
 }

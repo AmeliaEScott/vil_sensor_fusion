@@ -1,15 +1,13 @@
 #pragma once
-
 #include <gtsam/navigation/CombinedImuFactor.h>
-
-using namespace gtsam;
-
 class GraphTest
 {
 public:
-    GraphTest();
-
-
-private:
-    std::shared_ptr<PreintegratedCombinedMeasurements> preint;
+    GraphTest()
+//    {
+//        auto imuParams = gtsam::PreintegratedCombinedMeasurements::Params::MakeSharedD();
+//        preint = gtsam::make_shared<gtsam::PreintegratedCombinedMeasurements>(imuParams);
+//    }
+    ;
+    boost::shared_ptr<gtsam::PreintegratedCombinedMeasurements> preint;
 };

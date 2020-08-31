@@ -19,6 +19,8 @@
 #include <gtsam/navigation/CombinedImuFactor.h>
 
 #include <mutex>
+#include <atomic>
+#include <tuple>
 
 using namespace gtsam;
 
@@ -32,7 +34,7 @@ namespace VILFusion
 
         GraphManager();
 
-        std::shared_ptr<const GraphType> graph();
+        boost::shared_ptr<const GraphType> graph();
 
         /**
          * Reserves a node in the pose graph at a certain time.
@@ -43,9 +45,20 @@ namespace VILFusion
          * Thread-safe.
          *
          * @param time time, in seconds, at which the sensor measurement was taken.
-         * @return The GTSAM Key at which this node was reserved.
+         * @return The index at which this node was reserved. To convert to a key, use
+         *      one of gtsam::symbol_shorthand::{X, V, B}.
          */
-        Key reserveNode(double time);
+        uint64_t reserveNode(double time);
+
+        /**
+         * Returns the most recent pose node reserved by GraphManager::reserveNode.
+         *
+         * @return Tuple of (time, key):
+         *      - time is in Seconds
+         *      - key is just a raw index. To convert to the appropriate Key for the graph,
+         *        use one of gtsam::symbol_shorthand::{X, V, B}.
+         */
+        std::tuple<double, uint64_t> getMostRecentPoseTime();
 
         /**
          * Adds a between factor, which contains the difference in pose between two points in time.
@@ -60,23 +73,16 @@ namespace VILFusion
          */
         void addBetweenFactor(Key previousKey, Key currentKey, Pose3 betweenPose);
 
-        void addIMUMeasurement(double time, const Vector3 &accelerometer, const Vector3 &gyroscope);
-
+        void addFactor(const CombinedImuFactor &factor);
 
     private:
         using LockGuard = std::lock_guard<std::mutex>;
 
         std::mutex _graphMutex;
-        std::shared_ptr<GraphType> _graph;
-        Key _currentKey = 0;
+        boost::shared_ptr<GraphType> _graph;
+        uint64_t _currentKey = 0;
+        double _lastPoseTime;
 
-        struct {
-            std::shared_ptr<PreintegratedCombinedMeasurements> integrator = nullptr;
-            double lastIMUTime = 0;
-            double lastPoseTime = 0;
-            Vector3 lastAccelerometer = Vector3::Zero();
-            Vector3 lastGyroscope = Vector3::Zero();
-        } _preintegratedIMUData;
 
     }; // class GraphManager
 
