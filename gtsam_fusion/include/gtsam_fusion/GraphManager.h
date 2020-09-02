@@ -82,7 +82,7 @@ namespace VILFusion
         std::mutex _graphMutex;
         boost::shared_ptr<GraphType> _graph;
         uint64_t _currentKey = 0;
-        double _lastPoseTime;
+        double _lastPoseTime = 1e100;
 
 
     }; // class GraphManager

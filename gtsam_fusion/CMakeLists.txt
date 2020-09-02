@@ -45,7 +45,7 @@ find_package(GTSAM REQUIRED)
 
 ## Generate messages in the 'msg' folder
 add_message_files(
-    FILES
+        FILES
         TestMessage.msg
 )
 
@@ -65,7 +65,7 @@ add_message_files(
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
-    DEPENDENCIES
+        DEPENDENCIES
         std_msgs  # Or other packages containing msgs
         sensor_msgs
         nav_msgs
@@ -101,10 +101,10 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES gtsam_fusion
-#  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS system_lib
+        #  INCLUDE_DIRS include
+        #  LIBRARIES gtsam_fusion
+        #  CATKIN_DEPENDS other_catkin_pkg
+        #  DEPENDS system_lib
 )
 
 ###########
@@ -121,31 +121,30 @@ catkin_package(
 #endforeach()
 
 include_directories(
- include
- ${catkin_INCLUDE_DIRS}
- ${EIGEN3_INCLUDE_DIR}
- ${GTSAM_INCLUDE_DIR}
+        include
+        ${catkin_INCLUDE_DIRS}
+        ${EIGEN3_INCLUDE_DIR}
+        ${GTSAM_INCLUDE_DIR}
 )
 
 # Declare a C++ library
 add_library(${PROJECT_NAME}_lib
-   src/${PROJECT_NAME}/GraphManager.cpp
-   src/${PROJECT_NAME}/IMUManager.cpp
-   src/${PROJECT_NAME}/SensorManagerRos.cpp
-   src/${PROJECT_NAME}/GraphTest.cpp
-)
+        src/${PROJECT_NAME}/GraphManager.cpp
+        src/${PROJECT_NAME}/IMUManager.cpp
+        src/${PROJECT_NAME}/SensorManagerRos.cpp
+        src/${PROJECT_NAME}/GraphTest.cpp
+        )
 
 # Add cmake target dependencies of the library
 # as an example, code may need to be generated before libraries
 # either from message generation or dynamic reconfigure
-add_dependencies(${PROJECT_NAME}_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(${PROJECT_NAME}_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_lib gtsam)
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node
-        src/gtsam_fusion_node.cpp
-        )
+add_executable(${PROJECT_NAME}_node src/gtsam_fusion_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -155,28 +154,26 @@ add_executable(${PROJECT_NAME}_node
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
-  ${PROJECT_NAME}_lib
-  ${catkin_LIBRARIES}
-  gtsam
-)
-
-
-add_executable(testtest
-        test/TestTest.cpp
-        )
-add_dependencies(testtest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(testtest
         ${PROJECT_NAME}_lib
         ${catkin_LIBRARIES}
         gtsam
         )
 
 
-add_dependencies(${PROJECT_NAME}_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(testtest test/TestTest.cpp)
+#add_dependencies(testtest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(testtest
+        ${PROJECT_NAME}_lib
+        #${catkin_LIBRARIES}
+        gtsam
+        )
+
+
+#add_dependencies(${PROJECT_NAME}_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##
@@ -195,8 +192,8 @@ add_dependencies(${PROJECT_NAME}_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catki
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
 install(TARGETS ${PROJECT_NAME}_node
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        )
 
 install(TARGETS testtest
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -204,18 +201,18 @@ install(TARGETS testtest
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
- install(TARGETS ${PROJECT_NAME}_lib
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
- )
+install(TARGETS ${PROJECT_NAME}_lib
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+        )
 
 ## Mark cpp header files for installation
- install(DIRECTORY include/${PROJECT_NAME}/
-   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-   FILES_MATCHING PATTERN "*.h"
-   PATTERN ".svn" EXCLUDE
- )
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN ".svn" EXCLUDE
+        )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
@@ -229,14 +226,14 @@ install(TARGETS testtest
 #############
 
 ## Add gtest based cpp test target and link libraries
- catkin_add_gtest(${PROJECT_NAME}-test test/GraphManagerTest.cpp)
- if(TARGET ${PROJECT_NAME}-test)
-   target_link_libraries(${PROJECT_NAME}-test
-           ${PROJECT_NAME}_lib
-           ${catkin_LIBRARIES}
-           gtsam
-           )
- endif()
+catkin_add_gtest(${PROJECT_NAME}-test test/GraphManagerTest.cpp)
+if (TARGET ${PROJECT_NAME}-test)
+    target_link_libraries(${PROJECT_NAME}-test
+            ${PROJECT_NAME}_lib
+            ${catkin_LIBRARIES}
+            gtsam
+            )
+endif ()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)

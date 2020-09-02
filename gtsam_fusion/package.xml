@@ -17,15 +17,15 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>message_generation</build_depend>
-  <build_depend>Eigen3</build_depend>
-  <build_depend>boost</build_depend>
-  <build_depend>tbb</build_depend>
+<!--  <build_depend>Eigen3</build_depend>-->
+<!--  <build_depend>boost</build_depend>-->
+<!--  <build_depend>tbb</build_depend>-->
 
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>nav_msgs</depend>
-  <depend>gtsam</depend>
+<!--  <depend>gtsam</depend>-->
 
   <exec_depend>message_runtime</exec_depend>
 

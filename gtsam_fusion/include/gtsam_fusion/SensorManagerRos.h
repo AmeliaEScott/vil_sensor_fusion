@@ -12,12 +12,13 @@ namespace VILFusion
     public:
         // Implemented in header because it's a template
         template<typename SensorType>
-        static SensorManagerRos Construct(std::shared_ptr<GraphManager> graphManager, ros::NodeHandle &nodeHandle,
+        static SensorManagerRos *New(std::shared_ptr<GraphManager> graphManager, ros::NodeHandle &nodeHandle,
                                   const std::string &sensorTopic, const std::string &odometryTopic)
         {
-            SensorManagerRos manager;
-            manager._sensorSubscriber = nodeHandle.subscribe(sensorTopic, 1, &SensorManagerRos::sensorCallback<SensorType>, &manager);
-            manager._odometrySubscriber = nodeHandle.subscribe(odometryTopic, 1, &SensorManagerRos::odometryCallback, &manager);
+            auto manager = new SensorManagerRos();
+            manager->_sensorSubscriber = nodeHandle.subscribe(sensorTopic, 1, &SensorManagerRos::sensorCallback<SensorType>, manager);
+            manager->_odometrySubscriber = nodeHandle.subscribe(odometryTopic, 1, &SensorManagerRos::odometryCallback, manager);
+            return manager;
         };
 
     protected:
