@@ -15,26 +15,26 @@ namespace VILFusion
     {
         // TODO: Add calibration
         auto imuParams = PreintegratedCombinedMeasurements::Params::MakeSharedD();
-        _integrator = gtsam::make_shared<PreintegratedCombinedMeasurements>(imuParams);
+        _integrator = boost::make_shared<PreintegratedCombinedMeasurements>(imuParams);
     }
 
-    void IMUManager::addIMUMeasurement(const IMUMeasurement &measurement)
+    void IMUManager::addIMUMeasurement(double time, const Vector3 accel, const Vector3 gyro)
     {
         auto lastPose = _graphManager->getMostRecentPoseTime();
         double lastPoseTime = std::get<0>(lastPose);
         Key lastPoseKey = std::get<1>(lastPose);
-        if(_lastMeasurement.time < lastPoseTime && measurement.time > lastPoseTime)
+        if(_lastMeasurementTime < lastPoseTime && time > lastPoseTime)
         {
             // There has been a new pose measurement inserted in the graph between the last IMU measurement and this one.
-            const double interpolationFactor = (lastPoseTime - _lastMeasurement.time) /
-                                               (measurement.time - _lastMeasurement.time);
+            const double interpolationFactor = (lastPoseTime - _lastMeasurementTime) /
+                                               (time - _lastMeasurementTime);
 
-            const Vector3 interpolatedAccel = (interpolationFactor * _lastMeasurement.accel) +
-                                              ((1.0 - interpolationFactor) * measurement.accel);
-            const Vector3 interpolatedGyro = (interpolationFactor * _lastMeasurement.gyro) +
-                                             ((1.0 - interpolationFactor) * measurement.gyro);
+            const Vector3 interpolatedAccel = (interpolationFactor * _lastMeasurementAccel) +
+                                              ((1.0 - interpolationFactor) * accel);
+            const Vector3 interpolatedGyro = (interpolationFactor * _lastMeasurementGyro) +
+                                             ((1.0 - interpolationFactor) * gyro);
 
-            const double dt = lastPoseTime - _lastMeasurement.time;
+            const double dt = lastPoseTime - _lastMeasurementTime;
             _integrator->integrateMeasurement(interpolatedAccel, interpolatedGyro, dt);
 
             CombinedImuFactor factor(
@@ -49,20 +49,20 @@ namespace VILFusion
 
             _integrator->resetIntegration();
 
-            _lastMeasurement = IMUMeasurement(
-                    lastPoseTime,
-                    interpolatedAccel,
-                    interpolatedGyro
-                    );
+            _lastMeasurementTime = lastPoseTime;
+            _lastMeasurementAccel = interpolatedAccel;
+            _lastMeasurementGyro = interpolatedGyro;
         }
 
         _integrator->integrateMeasurement(
-                measurement.accel,
-                measurement.gyro,
-                measurement.time - _lastMeasurement.time
+                accel,
+                gyro,
+                time - _lastMeasurementTime
         );
 
-        _lastMeasurement = measurement;
+        _lastMeasurementTime = time;
+        _lastMeasurementAccel = accel;
+        _lastMeasurementGyro = gyro;
     }
 
 }

@@ -113,7 +113,13 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-message(WARNING "Eigen include dir: ${EIGEN3_INCLUDE_DIR}")
+# message(WARNING "Eigen include dir: ${EIGEN3_INCLUDE_DIR}")
+#get_cmake_property(_variableNames VARIABLES)
+#list (SORT _variableNames)
+#foreach (_variableName ${_variableNames})
+# message(STATUS "${_variableName}=${${_variableName}}")
+#endforeach()
+
 include_directories(
  include
  ${catkin_INCLUDE_DIRS}
@@ -125,6 +131,7 @@ include_directories(
 add_library(${PROJECT_NAME}_lib
    src/${PROJECT_NAME}/GraphManager.cpp
    src/${PROJECT_NAME}/IMUManager.cpp
+   src/${PROJECT_NAME}/SensorManagerRos.cpp
    src/${PROJECT_NAME}/GraphTest.cpp
 )
 
@@ -157,6 +164,20 @@ target_link_libraries(${PROJECT_NAME}_node
   gtsam
 )
 
+
+add_executable(testtest
+        test/TestTest.cpp
+        )
+add_dependencies(testtest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(testtest
+        ${PROJECT_NAME}_lib
+        ${catkin_LIBRARIES}
+        gtsam
+        )
+
+
+add_dependencies(${PROJECT_NAME}_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 #############
 ## Install ##
 #############
@@ -176,6 +197,10 @@ target_link_libraries(${PROJECT_NAME}_node
 install(TARGETS ${PROJECT_NAME}_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+install(TARGETS testtest
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        )
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html

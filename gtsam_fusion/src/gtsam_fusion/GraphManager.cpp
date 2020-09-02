@@ -2,6 +2,7 @@
 #include <gtsam_fusion/GraphManager.h>
 
 #include <gtsam/inference/Symbol.h>
+#include <gtsam/slam/BetweenFactor.h>
 
 namespace VILFusion
 {
@@ -12,7 +13,7 @@ namespace VILFusion
 
     GraphManager::GraphManager()
     {
-        _graph = gtsam::make_shared<GraphType>();
+        _graph = boost::make_shared<GraphType>();
     }
 
     boost::shared_ptr<const GraphManager::GraphType> GraphManager::graph()
@@ -37,10 +38,11 @@ namespace VILFusion
         return std::make_tuple(_lastPoseTime, _currentKey);
     }
 
-    void GraphManager::addBetweenFactor(Key previousKey, Key currentKey, Pose3 betweenPose)
+    void GraphManager::addBetweenFactor(Key previousKey, Key currentKey, const Pose3 &betweenPose, const SharedNoiseModel &noiseModel)
     {
         LockGuard lockGuard(_graphMutex);
-        // TODO
+        BetweenFactor<Pose3> factor(previousKey, currentKey, betweenPose, noiseModel);
+        _graph->add(factor);
     }
 
     void GraphManager::addFactor(const CombinedImuFactor &factor)

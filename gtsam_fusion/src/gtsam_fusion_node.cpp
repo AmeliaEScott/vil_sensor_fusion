@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include <Eigen/Dense>
+#include <Eigen/Core>
 #include <gtsam/geometry/Point3.h>
 
 int main(int argc, char *argv[])

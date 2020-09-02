@@ -70,8 +70,9 @@ namespace VILFusion
          * @param previousKey The Key received from GraphManager::reserveNode
          * @param currentKey The Key received from GraphManager::reserveNode for the most recent sensor reading
          * @param betweenPose The change in pose between the points in time indicated by previousKey and currentKey
+         * @param noiseModel The noise model for this particular pose measurement
          */
-        void addBetweenFactor(Key previousKey, Key currentKey, Pose3 betweenPose);
+        void addBetweenFactor(Key previousKey, Key currentKey, const Pose3 &betweenPose, const SharedNoiseModel &noiseModel);
 
         void addFactor(const CombinedImuFactor &factor);
 

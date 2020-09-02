@@ -4,5 +4,5 @@
 GraphTest::GraphTest()
 {
     auto imuParams = gtsam::PreintegratedCombinedMeasurements::Params::MakeSharedD();
-    preint = gtsam::make_shared<gtsam::PreintegratedCombinedMeasurements>(imuParams);
+    preint = boost::make_shared<gtsam::PreintegratedCombinedMeasurements>(imuParams);
 }
