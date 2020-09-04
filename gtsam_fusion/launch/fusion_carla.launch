@@ -7,7 +7,7 @@
     <arg name="rviz" default="false" />
 
     <node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
-        <remap from="/tf" to="/tf_from_carla" />
+        <!-- <remap from="/tf" to="/tf_from_carla" /> -->
         <remap from="/cam_forward/image_raw" to="/cam0/image_raw" />
         <remap from="/cam_forward/camera_info" to="/cam0/camera_info" />
 

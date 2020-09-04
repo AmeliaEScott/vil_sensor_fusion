@@ -34,13 +34,14 @@
 
     <!-- Rovio -->
     <group if="$(arg rovio)" >
+        <rosparam file="$(arg config_dir)/rovio_params.yaml" command="load"/>
         <!-- Rovio thinks cam0/image_raw is mono, but here, it's color. The actual mono image is cam0/image_mono -->
         <remap from="cam0/image_raw" to="$(arg mono_image_topic)" />
         <!-- imu/vio is the IMU used exclusively by Rovio -->
         <remap from="imu0" to="$(arg raw_imu_vio_topic)" />
         <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
             <param name="filter_config" value="$(arg config_dir)/rovio.cfg"/>
-            <param name="camera0_config" value="$(arg config_dir)/rovio_cam.yaml"/>
+            <param name="camera0_config" value="$(arg config_dir)/rovio_camera.yaml"/>
         </node>
     </group>
 

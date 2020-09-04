@@ -16,7 +16,7 @@
 
     <arg name="centerroot_tf" value="aft_mapped_to_init_CORRECTED"/>
     <node pkg="tf" type="static_transform_publisher" name="world_tf" respawn="true"
-          args="0 0 $(arg z_offset) $(arg yaw_offset) 0 $(arg pitch_offset) /map /camera_init 10 "/>
+          args="0 0 $(arg z_offset) $(arg yaw_offset) 0 $(arg pitch_offset) /loam_init_ros_convention /camera_init 10 "/>
     <node pkg="tf" type="static_transform_publisher" name="world_tf_msfsupplemental" respawn="true"
           args="0 0 0 0 -$(arg half_pi) -$(arg half_pi) /camera_init /camera_init_CORRECTED 10 "/>
     <node pkg="tf" type="static_transform_publisher" name="velodyne_tf" respawn="true"
