@@ -1,0 +1,33 @@
+<launch>
+
+    <arg name="bagfile" />
+    <arg name="rate" default="1.0" />
+    <arg name="rovio" default="true" />
+    <arg name="loam" default="true" />
+    <arg name="rviz" default="false" />
+
+    <node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
+        <remap from="/tf" to="/tf_from_carla" />
+        <remap from="/cam_forward/image_raw" to="/cam0/image_raw" />
+        <remap from="/cam_forward/camera_info" to="/cam0/camera_info" />
+
+        <!-- Commented out because these all match the default topic names from fusion.launch -->
+        <!-- <remap from="/lidar" to="/lidar" />
+        <remap from="/imu/lidar" to="/imu/lidar" />
+        <remap from="/imu/vio" to="/imu/vio" />
+        <remap from="/imu/fusion" to="/imu/fusion" /> -->
+	</node>
+
+    <node pkg="image_proc" type="image_proc" name="image_proc" ns="/cam0">
+
+    </node>
+
+    <include file="$(find gtsam_fusion)/launch/fusion.launch">
+        <arg name="config_dir" value="$(find gtsam_fusion)/config/carla" />
+
+        <arg name="rovio" value="$(arg rovio)" />
+        <arg name="loam" value="$(arg loam)" />
+        <arg name="rviz" value="$(arg rviz)" />
+    </include>
+
+</launch>

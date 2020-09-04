@@ -1,0 +1,60 @@
+<!-- Modified from the cerberus_loam_dev repo -->
+
+<launch>
+    <param name="use_sim_time" value="true"/> #be sure to run --clock
+
+    <arg name="config_dir" default="$(find gtsam_fusion)/config/default" />
+
+    # ARL Coordinate Frame Facilitators
+    <arg name="pi" value="3.141592654"/>
+    <arg name="half_pi" value="1.570796327"/>
+    <arg name="deg2rad" value="0.017453293"/>
+
+    <arg name="z_offset" value="0.0"/>
+    <arg name="pitch_offset" value="$(eval 1.570796327 + 0.0 * 0.017453293)"/> # (90+) 0 [ENU-deg]
+    <arg name="yaw_offset" value="$(eval 1.570796327 + 0.0 * 0.017453293)"/> # (90+) 0 [ENU-deg]
+
+    <arg name="centerroot_tf" value="aft_mapped_to_init_CORRECTED"/>
+    <node pkg="tf" type="static_transform_publisher" name="world_tf" respawn="true"
+          args="0 0 $(arg z_offset) $(arg yaw_offset) 0 $(arg pitch_offset) /map /camera_init 10 "/>
+    <node pkg="tf" type="static_transform_publisher" name="world_tf_msfsupplemental" respawn="true"
+          args="0 0 0 0 -$(arg half_pi) -$(arg half_pi) /camera_init /camera_init_CORRECTED 10 "/>
+    <node pkg="tf" type="static_transform_publisher" name="velodyne_tf" respawn="true"
+          args="0 0 0 0 0 0 /$(arg centerroot_tf) /velodyne 10 "/>
+    # END ARL Coordinate Frame Facilitators
+
+    <!-- Input topics remap -->
+    <arg name="pointcloud_topic_name" default="/velodyne_points"/>
+    <arg name="imu_topic_name" default="/vn100/imu"/>
+
+    <!-- LOAM Nodelet Manager -->
+    <node pkg="nodelet" type="nodelet" name="loam_nodelet_manager" args="manager" output="screen" clear_params="true"/>
+
+    <!-- Laser Multiscan Registration Nodelet -->
+    <node pkg="nodelet" type="nodelet" name="laser_multiscan_registration_nodelet"
+          args="load laser_multiscan_registration_nodelet loam_nodelet_manager" output="screen">
+        <rosparam file="$(arg config_dir)/loam_params.yaml" command="load"/>
+        <remap from="/multi_scan_points" to="$(arg pointcloud_topic_name)"/>
+        <remap from="/imu" to="$(arg imu_topic_name)"/>
+    </node>
+
+    <!-- Laser Odometry Nodelet -->
+    <node pkg="nodelet" type="nodelet" name="laser_odometry_nodelet"
+          args="load laser_odometry_nodelet loam_nodelet_manager" output="screen">
+        <rosparam file="$(arg config_dir)/loam_params.yaml" command="load"/>
+    </node>
+
+    <!-- Laser Mapping Nodelet -->
+    <node pkg="nodelet" type="nodelet" name="laser_mapping_nodelet"
+          args="load laser_mapping_nodelet loam_nodelet_manager" output="screen">
+        <rosparam file="$(arg config_dir)/loam_params.yaml" command="load"/>
+        <param name="saved_submaps_filepath" value="$(find loam)"/>
+    </node>
+
+    <!-- Laser Transform Maintenance Nodelet -->
+    <node pkg="nodelet" type="nodelet" name="laser_transform_maintenance_nodelet"
+          args="load laser_transform_maintenance_nodelet loam_nodelet_manager" output="screen">
+        <rosparam file="$(arg config_dir)/loam_params.yaml" command="load"/>
+    </node>
+
+</launch>

@@ -1,0 +1,54 @@
+<launch>
+
+    <arg name="raw_lidar_topic" default="/lidar"/>
+    <!-- This launch file assumes that the image topic is already monochrome.
+     If it is not, then you need to launch imageproc to create a monochrome image. -->
+    <arg name="mono_image_topic" default="/cam0/image_mono" />
+    <arg name="raw_imu_lidar_topic" default="/imu/lidar" />
+    <arg name="raw_imu_vio_topic" default="/imu/vio" />
+    <arg name="raw_imu_fusion_topic" default="/imu/fusion" />
+
+    <arg name="config_dir" />
+    <arg name="loam_config" default="$(arg config_dir)/loam_params.yaml" />
+    <arg name="rovio_config" default="$(arg config_dir)/rovio.cfg" />
+
+    <arg name="loam" default="true" />
+    <arg name="rovio" default="true" />
+    <arg name="rviz" default="false" />
+
+
+    <!-- RVIZ -->
+    <node if="$(arg rviz)" launch-prefix="nice" pkg="rviz" type="rviz" name="rviz"
+              args="-d $(find gtsam_fusion)/config/rviz_config.rviz" />
+
+
+    <!-- Loam -->
+    <group if="$(arg loam)">
+        <include file="$(find gtsam_fusion)/launch/loam.launch" >
+            <arg name="config_dir" value="$(arg config_dir)" />
+            <arg name="pointcloud_topic_name" value="$(arg raw_lidar_topic)" />
+            <arg name="imu_topic_name" value="$(arg raw_imu_lidar_topic)" />
+        </include>
+    </group>
+
+
+    <!-- Rovio -->
+    <group if="$(arg rovio)" >
+        <!-- Rovio thinks cam0/image_raw is mono, but here, it's color. The actual mono image is cam0/image_mono -->
+        <remap from="cam0/image_raw" to="$(arg mono_image_topic)" />
+        <!-- imu/vio is the IMU used exclusively by Rovio -->
+        <remap from="imu0" to="$(arg raw_imu_vio_topic)" />
+        <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
+            <param name="filter_config" value="$(arg config_dir)/rovio.cfg"/>
+            <param name="camera0_config" value="$(arg config_dir)/rovio_cam.yaml"/>
+        </node>
+    </group>
+
+    <!-- Fusion -->
+    <group if="false">
+        <node pkg="gtsam_fusion" type="gtsam_fusion_node" name="gtsam_fusion_node" output="screen">
+            <rosparam file="$(arg config_dir)/fusion_params.yaml" command="load"/>
+        </node>
+    </group>
+
+</launch>

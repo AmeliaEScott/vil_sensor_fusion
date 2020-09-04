@@ -48,7 +48,9 @@ TEST(GraphManagerTest, test1)
             gtsam::Vector3(0.1, 0.1, 0.1)
     );
 
-    auto key = graphManager->reserveNode(0.15);
+    auto key = graphManager->reserveNode(0.13);
+    auto key2 = graphManager->reserveNode(0.15);
+    std::cerr << "Key1: " << key << ", Key2: " << key2 << std::endl;
 
     imuManager.addIMUMeasurement(
             0.2,
@@ -65,6 +67,13 @@ TEST(GraphManagerTest, test1)
         EXPECT_FLOAT_EQ(actualNavState.pose().translation()[i], expectedDP[i]) << "Pose not equal at index " << i;
         EXPECT_FLOAT_EQ(actualNavState.velocity()[i], expectedDV[i]) << "Velocity not equal at index " << i;
     }
+    std::cerr << "Keys: " <<
+        gtsam::Symbol(firstFactor->key1()) << ", " <<
+        gtsam::Symbol(firstFactor->key2()) << ", " <<
+        gtsam::Symbol(firstFactor->key3()) << ", " <<
+        gtsam::Symbol(firstFactor->key4()) << ", " <<
+        gtsam::Symbol(firstFactor->key5()) << ", " <<
+        gtsam::Symbol(firstFactor->key6()) << ", " << std::endl;
 
     imuManager.addIMUMeasurement(
             0.3,
@@ -77,12 +86,12 @@ TEST(GraphManagerTest, sensorManagerInstantiation)
 {
     ros::NodeHandle nh;
     auto graphManager = std::make_shared<VILFusion::GraphManager>();
-    auto sensorManager1 = std::shared_ptr<VILFusion::SensorManagerRos>(VILFusion::SensorManagerRos::New<sensor_msgs::PointCloud2>(
-            graphManager, nh, "testSensorTopic1", "testOdometryTopic1"
-            ));
-    auto sensorManager2 = std::shared_ptr<VILFusion::SensorManagerRos>(VILFusion::SensorManagerRos::New<sensor_msgs::Image>(
-            graphManager, nh, "testSensorTopic2", "testOdometryTopic2"
-            ));
+    auto sensorManager1 = VILFusion::SensorManagerRos(
+        graphManager, nh, "testSensorTopic1", "testOdometryTopic1", sensor_msgs::PointCloud2()
+    );
+    auto sensorManager2 = VILFusion::SensorManagerRos(
+        graphManager, nh, "testSensorTopic2", "testOdometryTopic2", sensor_msgs::Image()
+    );
 }
 
 int main(int argc, char *argv[])

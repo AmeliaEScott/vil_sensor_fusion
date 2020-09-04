@@ -39,9 +39,9 @@ namespace VILFusion
             _integrator->integrateMeasurement(interpolatedAccel, interpolatedGyro, dt);
 
             CombinedImuFactor factor(
-                    X(lastPoseKey - 1), V(lastPoseKey - 1),
+                    X(_lastPoseKey), V(_lastPoseKey),
                     X(lastPoseKey), V(lastPoseKey),
-                    B(lastPoseKey - 1), B(lastPoseKey),
+                    B(_lastPoseKey), B(lastPoseKey),
                     *_integrator
             );
             _graphManager->addFactor(factor);
@@ -53,6 +53,7 @@ namespace VILFusion
             _lastMeasurementTime = lastPoseTime;
             _lastMeasurementAccel = interpolatedAccel;
             _lastMeasurementGyro = interpolatedGyro;
+            _lastPoseKey = lastPoseKey;
         }
 
         _integrator->integrateMeasurement(
