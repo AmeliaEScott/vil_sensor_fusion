@@ -9,14 +9,15 @@ namespace VILFusion
     {
     public:
 
-        explicit IMUManager(std::shared_ptr<GraphManager> graphManager);
+        explicit IMUManager(std::shared_ptr<GraphManager> graphManager,
+                            boost::shared_ptr<PreintegratedCombinedMeasurements::Params> imuParams);
 
         void addIMUMeasurement(double time, const Vector3 accel, const Vector3 gyro);
     protected:
 
         std::shared_ptr<GraphManager> _graphManager;
 
-        boost::shared_ptr<PreintegratedCombinedMeasurements> _integrator = nullptr;
+        std::shared_ptr<PreintegratedCombinedMeasurements> _integrator = nullptr;
         double _lastMeasurementTime = 0;
         Key _lastPoseKey = 0;
         Vector3 _lastMeasurementAccel = gtsam::Vector3::Zero();

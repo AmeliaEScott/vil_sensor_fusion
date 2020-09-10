@@ -10,12 +10,12 @@ namespace VILFusion
     using gtsam::symbol_shorthand::V;  // Velocity
     using gtsam::symbol_shorthand::B;  // IMU Bias
 
-    IMUManager::IMUManager(std::shared_ptr<GraphManager> graphManager):
+    IMUManager::IMUManager(std::shared_ptr<GraphManager> graphManager,
+                           boost::shared_ptr<PreintegratedCombinedMeasurements::Params> imuParams):
         _graphManager(std::move(graphManager))
     {
         // TODO: Add calibration
-        auto imuParams = PreintegratedCombinedMeasurements::Params::MakeSharedD();
-        _integrator = boost::make_shared<PreintegratedCombinedMeasurements>(imuParams);
+        _integrator = std::make_shared<PreintegratedCombinedMeasurements>(imuParams);
     }
 
     void IMUManager::addIMUMeasurement(double time, const Vector3 accel, const Vector3 gyro)
