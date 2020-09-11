@@ -2,7 +2,7 @@
 #include <gtsam_fusion/GraphManager.h>
 #include <gtsam_fusion/IMUManager.h>
 #include <gtsam_fusion/SensorManagerRos.h>
-#include <gtsam_fusion/GraphTest.h>
+#include <gtsam_fusion/ImuManagerRos.h>
 
 #include <gtest/gtest.h>
 #include <iostream>
@@ -17,6 +17,8 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/Imu.h>
+#include <nav_msgs/Odometry.h>
 
 
 TEST(ImuManagerTest, test1)
@@ -156,11 +158,163 @@ TEST(SensorManagerTest, sensorManagerTest1)
     EXPECT_DOUBLE_EQ(firstFactor->measured().x(), 1.0);
     EXPECT_DOUBLE_EQ(firstFactor->measured().y(), 1.0);
     EXPECT_DOUBLE_EQ(firstFactor->measured().z(), 1.0);
+}
+
+TEST(IntegrationTest, integrationTest1)
+{
+    // This test sends:
+    //  - 4 images
+    //  - 2 lidar point clouds
+    //  - A bunch of IMU messages in between
+    ros::NodeHandle nh;
+    auto graphManager = std::make_shared<VILFusion::GraphManager>();
+
+    VILFusion::ImuManagerRos imuManager(nh, graphManager, "/test/imu");
+    sensor_msgs::Imu imuMsg;
+    auto imuPub = nh.advertise<sensor_msgs::Imu>("/test/imu", 10);
+
+    VILFusion::SensorManagerRos lidarManager(
+            graphManager,
+            nh,
+            "/test/lidar",
+            "/test/lidarOdom",
+            sensor_msgs::PointCloud2());
+    sensor_msgs::PointCloud2 lidarMsg;
+    auto lidarPub = nh.advertise<sensor_msgs::PointCloud2>("/test/lidar", 10);
+    nav_msgs::Odometry lidarOdomMsg;
+    auto lidarOdomPub = nh.advertise<nav_msgs::Odometry>("/test/lidarOdom", 10);
+
+    VILFusion::SensorManagerRos imageManager(
+            graphManager,
+            nh,
+            "/test/image",
+            "/test/imageOdom",
+            sensor_msgs::Image());
+    sensor_msgs::Image imageMsg;
+    auto imagePub = nh.advertise<sensor_msgs::Image>("/test/image", 10);
+    nav_msgs::Odometry imageOdomMsg;
+    auto imageOdomPub = nh.advertise<nav_msgs::Odometry>("/test/imageOdom", 10);
+
+    ros::Duration d(0, 0);
+
+    for(double time : {0.1, 0.15, 0.2, 0.25})
+    {
+        imuMsg.header.stamp = ros::Time(time);
+        imuPub.publish(imuMsg);
+        d.sleep();
+        ros::spinOnce();
+    }
+
+    imageMsg.header.stamp = ros::Time(0.27);
+    imagePub.publish(imageMsg);
+    d.sleep();
+    ros::spinOnce();
+    imageOdomMsg.header.stamp = ros::Time(0.27);
+    imageOdomPub.publish(imageOdomMsg);
+    d.sleep();
+    ros::spinOnce();
+
+    for(double time : {0.3, 0.35, 0.4, 0.45})
+    {
+        imuMsg.header.stamp = ros::Time(time);
+        imuPub.publish(imuMsg);
+        d.sleep();
+        ros::spinOnce();
+    }
+
+    imageMsg.header.stamp = ros::Time(0.47);
+    imagePub.publish(imageMsg);
+    d.sleep();
+    ros::spinOnce();
+    imageOdomMsg.header.stamp = ros::Time(0.47);
+    imageOdomPub.publish(imageOdomMsg);
+    d.sleep();
+    ros::spinOnce();
+
+    for(double time : {0.5, 0.55, 0.6, 0.65})
+    {
+        imuMsg.header.stamp = ros::Time(time);
+        imuPub.publish(imuMsg);
+        d.sleep();
+        ros::spinOnce();
+    }
+
+    lidarMsg.header.stamp = ros::Time(0.67);
+    lidarPub.publish(lidarMsg);
+    d.sleep();
+    ros::spinOnce();
+    lidarOdomMsg.header.stamp = ros::Time(0.67);
+    lidarOdomPub.publish(lidarOdomMsg);
+    d.sleep();
+    ros::spinOnce();
+
+    for(double time : {0.7, 0.75, 0.8, 0.85})
+    {
+        imuMsg.header.stamp = ros::Time(time);
+        imuPub.publish(imuMsg);
+        d.sleep();
+        ros::spinOnce();
+    }
+
+    imageMsg.header.stamp = ros::Time(0.87);
+    imagePub.publish(imageMsg);
+    d.sleep();
+    ros::spinOnce();
+    imageOdomMsg.header.stamp = ros::Time(0.87);
+    imageOdomPub.publish(imageOdomMsg);
+    d.sleep();
+    ros::spinOnce();
+
+    for(double time : {0.9, 0.95, 1.0, 1.05})
+    {
+        imuMsg.header.stamp = ros::Time(time);
+        imuPub.publish(imuMsg);
+        d.sleep();
+        ros::spinOnce();
+    }
+
+    imageMsg.header.stamp = ros::Time(1.07);
+    imagePub.publish(imageMsg);
+    d.sleep();
+    ros::spinOnce();
+    imageOdomMsg.header.stamp = ros::Time(1.07);
+    imageOdomPub.publish(imageOdomMsg);
+    d.sleep();
+    ros::spinOnce();
+
+    for(double time : {1.1, 1.15, 1.2, 1.25})
+    {
+        imuMsg.header.stamp = ros::Time(time);
+        imuPub.publish(imuMsg);
+        d.sleep();
+        ros::spinOnce();
+    }
+
+    lidarMsg.header.stamp = ros::Time(1.27);
+    lidarPub.publish(lidarMsg);
+    d.sleep();
+    ros::spinOnce();
+    lidarOdomMsg.header.stamp = ros::Time(1.27);
+    lidarOdomPub.publish(lidarOdomMsg);
+    d.sleep();
+    ros::spinOnce();
+
+    for(double time : {1.3, 1.35})
+    {
+        imuMsg.header.stamp = ros::Time(time);
+        imuPub.publish(imuMsg);
+        d.sleep();
+        ros::spinOnce();
+    }
+
+    // If IMU manager changes to avoid that first factor (From 0->1), then this should become 9.
+    EXPECT_EQ(graphManager->graph()->size(), 10);
 
     std::ofstream file;
-    file.open("/home/timothy/Code/catkin_ws/GOOD_COOL_GRAPH.pdf", std::ios::out | std::ios::binary);
+    file.open("/home/timothy/Code/catkin_ws/GOOD_COOL_GRAPH.dot", std::ios::out | std::ios::binary | std::ios::trunc);
     graphManager->graph()->saveGraph(file);
     file.close();
+
 }
 
 int main(int argc, char *argv[])

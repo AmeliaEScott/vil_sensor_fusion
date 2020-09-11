@@ -25,7 +25,6 @@ namespace VILFusion
         Key lastPoseKey = std::get<1>(lastPose);
         if(_lastMeasurementTime < lastPoseTime && time > lastPoseTime)
         {
-            std::cerr << "LAST POSE KEY: " << lastPoseKey << ", LAST POSE TIME: " << lastPoseTime << std::endl;
             // There has been a new pose measurement inserted in the graph between the last IMU measurement and this one.
             const double interpolationFactor = (lastPoseTime - _lastMeasurementTime) /
                                                (time - _lastMeasurementTime);

@@ -133,6 +133,7 @@ add_library(${PROJECT_NAME}_lib
         src/${PROJECT_NAME}/IMUManager.cpp
         src/${PROJECT_NAME}/SensorManagerRos.cpp
         src/${PROJECT_NAME}/GraphTest.cpp
+        src/${PROJECT_NAME}/ImuManagerRos.cpp
         )
 
 # Add cmake target dependencies of the library
