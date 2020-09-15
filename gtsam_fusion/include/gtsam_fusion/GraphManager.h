@@ -15,12 +15,14 @@
 #include <gtsam/base/Matrix.h>
 #include <gtsam/inference/Key.h>
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
+#include <gtsam/nonlinear/ISAM2.h>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/navigation/CombinedImuFactor.h>
 
 #include <mutex>
 #include <atomic>
 #include <tuple>
+#include <map>
 
 using namespace gtsam;
 
@@ -31,6 +33,7 @@ namespace VILFusion
     {
     public:
         using GraphType = NonlinearFactorGraph;
+        using OptimizationCallback = std::function<void(Pose3&, Vector3&, imuBias::ConstantBias&)>;
 
         GraphManager();
 
@@ -61,6 +64,12 @@ namespace VILFusion
         std::tuple<double, uint64_t> getMostRecentPoseTime();
 
         /**
+         * TODO document this
+         * @return
+         */
+        NavState getMostRecentEstimate();
+
+        /**
          * Adds a between factor, which contains the difference in pose between two points in time.
          *
          * A sensor manager should call reserveNode every time a raw sensor measurement is received, and keep track
@@ -76,13 +85,23 @@ namespace VILFusion
 
         void addFactor(const CombinedImuFactor &factor);
 
+        void solve();
+
+        void addOptimizationCallback(OptimizationCallback callback);
+
     private:
         using LockGuard = std::lock_guard<std::mutex>;
 
         std::mutex _graphMutex;
+        std::mutex _optimizerMutex;
         boost::shared_ptr<GraphType> _graph;
+        Values _values;
         uint64_t _currentKey = 0;
         double _lastPoseTime = 1e100;
+        NavState _mostRecentEstimate;
+        ISAM2 _isam2;
+
+        std::vector<OptimizationCallback> _callbacks;
 
 
     }; // class GraphManager

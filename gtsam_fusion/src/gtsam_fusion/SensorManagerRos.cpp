@@ -48,9 +48,24 @@ namespace VILFusion
                             )
                     );
 
-            gtsam::Matrix66 cov;
-            std::copy(deltaPose.covariance.data(), deltaPose.covariance.data() + deltaPose.covariance.size(), cov.data());
+
+            Matrix66 cov = Matrix66::Zero();
+            if(_useOdomCovariance)
+            {
+                std::copy(deltaPose.covariance.data(), deltaPose.covariance.data() + deltaPose.covariance.size(), cov.data());
+            }
+            else
+            {
+                cov.diagonal() <<
+                        _linearCovariance,
+                        _linearCovariance,
+                        _linearCovariance,
+                        _angularCovariance,
+                        _angularCovariance,
+                        _angularCovariance;
+            }
             auto noise = gtsam::noiseModel::Gaussian::Covariance(cov);
+
 
             ROS_DEBUG_STREAM("SensorManager: Added between factor: " << pose);
             _graphManager->addBetweenFactor(X(_lastValidKey), X(key), pose, noise);

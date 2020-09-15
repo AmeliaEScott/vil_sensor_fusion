@@ -14,6 +14,9 @@ namespace VILFusion
                            boost::shared_ptr<PreintegratedCombinedMeasurements::Params> imuParams):
         _graphManager(std::move(graphManager))
     {
+        _graphManager->addOptimizationCallback([this](Pose3 &pose, Velocity3 &vel, imuBias::ConstantBias &bias){
+            _bias = bias;
+        });
         // TODO: Add calibration
         _integrator = std::make_shared<PreintegratedCombinedMeasurements>(imuParams);
     }
@@ -47,7 +50,7 @@ namespace VILFusion
 
             // TODO: Do the optimization and possibly change the next line to resetIntegrationAndSetBias()
 
-            _integrator->resetIntegration();
+            _integrator->resetIntegrationAndSetBias(_bias);
 
             _lastMeasurementTime = lastPoseTime;
             _lastMeasurementAccel = interpolatedAccel;
@@ -65,5 +68,4 @@ namespace VILFusion
         _lastMeasurementAccel = accel;
         _lastMeasurementGyro = gyro;
     }
-
 }

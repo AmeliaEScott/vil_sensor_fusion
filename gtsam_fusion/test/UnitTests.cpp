@@ -41,7 +41,7 @@ TEST(ImuManagerTest, test1)
 
     auto key = graphManager->reserveNode(0.13);
     auto key2 = graphManager->reserveNode(0.15);
-    std::cerr << "Key1: " << key << ", Key2: " << key2 << std::endl;
+//    std::cerr << "Key1: " << key << ", Key2: " << key2 << std::endl;
 
     imuManager.addIMUMeasurement(
             0.2,
@@ -49,7 +49,13 @@ TEST(ImuManagerTest, test1)
             gtsam::Vector3(0.2, 0.2, 0.2)
     );
 
-    auto firstFactor = boost::dynamic_pointer_cast<gtsam::CombinedImuFactor>(graphManager->graph()->at(0));
+//    std::cerr << "NUM FACTORS: " << graphManager->graph()->nrFactors() << std::endl;
+
+//    testing::internal::CaptureStdout();
+//    graphManager->graph()->print();
+//    std::string output = testing::internal::GetCapturedStdout();
+//    std::cerr << output;
+    auto firstFactor = boost::dynamic_pointer_cast<gtsam::CombinedImuFactor>(graphManager->graph()->at(3));
 
     auto actualNavState = firstFactor->preintegratedMeasurements().deltaXij();
     auto expectedDV = gtsam::Vector3(0.0175, 0.0175, 0.0175);
@@ -58,13 +64,13 @@ TEST(ImuManagerTest, test1)
         EXPECT_FLOAT_EQ(actualNavState.pose().translation()[i], expectedDP[i]) << "Pose not equal at index " << i;
         EXPECT_FLOAT_EQ(actualNavState.velocity()[i], expectedDV[i]) << "Velocity not equal at index " << i;
     }
-    std::cerr << "Keys: " <<
-        gtsam::Symbol(firstFactor->key1()) << ", " <<
-        gtsam::Symbol(firstFactor->key2()) << ", " <<
-        gtsam::Symbol(firstFactor->key3()) << ", " <<
-        gtsam::Symbol(firstFactor->key4()) << ", " <<
-        gtsam::Symbol(firstFactor->key5()) << ", " <<
-        gtsam::Symbol(firstFactor->key6()) << ", " << std::endl;
+//    std::cerr << "Keys: " <<
+//        gtsam::Symbol(firstFactor->key1()) << ", " <<
+//        gtsam::Symbol(firstFactor->key2()) << ", " <<
+//        gtsam::Symbol(firstFactor->key3()) << ", " <<
+//        gtsam::Symbol(firstFactor->key4()) << ", " <<
+//        gtsam::Symbol(firstFactor->key5()) << ", " <<
+//        gtsam::Symbol(firstFactor->key6()) << ", " << std::endl;
 
     imuManager.addIMUMeasurement(
             0.3,
@@ -73,26 +79,92 @@ TEST(ImuManagerTest, test1)
     );
 }
 
+TEST(ImuManagerTest, test2)
+{
+    auto graphManager = std::make_shared<VILFusion::GraphManager>();
+    auto imuParams = gtsam::PreintegratedCombinedMeasurements::Params::MakeSharedD();
+    VILFusion::IMUManager imuManager(graphManager, imuParams);
+
+    imuManager.addIMUMeasurement(
+            0.0,
+            gtsam::Vector3(0.0, 0.0, 0.0),
+            gtsam::Vector3(0.0, 0.0, 0.0)
+    );
+
+    imuManager.addIMUMeasurement(
+            0.1,
+            gtsam::Vector3(0.1, 0.1, 0.1),
+            gtsam::Vector3(0.1, 0.1, 0.1)
+    );
+
+    auto key = graphManager->reserveNode(0.13);
+
+    imuManager.addIMUMeasurement(
+            0.2,
+            gtsam::Vector3(0.2, 0.2, 0.2),
+            gtsam::Vector3(0.2, 0.2, 0.2)
+    );
+
+    imuManager.addIMUMeasurement(
+            0.3,
+            gtsam::Vector3(0.2, 0.2, 0.2),
+            gtsam::Vector3(0.2, 0.2, 0.2)
+    );
+
+    key = graphManager->reserveNode(0.35);
+
+    imuManager.addIMUMeasurement(
+            0.4,
+            gtsam::Vector3(0.2, 0.2, 0.2),
+            gtsam::Vector3(0.2, 0.2, 0.2)
+    );
+    imuManager.addIMUMeasurement(
+            0.5,
+            gtsam::Vector3(0.2, 0.2, 0.2),
+            gtsam::Vector3(0.2, 0.2, 0.2)
+    );
+
+    key = graphManager->reserveNode(0.55);
+
+    imuManager.addIMUMeasurement(
+            0.6,
+            gtsam::Vector3(0.2, 0.2, 0.2),
+            gtsam::Vector3(0.2, 0.2, 0.2)
+    );
+
+//    std::cerr << "NUM FACTORS: " << graphManager->graph()->nrFactors() << std::endl;
+
+//    testing::internal::CaptureStdout();
+//    graphManager->graph()->print();
+//    std::string output = testing::internal::GetCapturedStdout();
+//    std::cerr << output;
+
+    // This does not work because the system is underdetermined.
+    // graphManager->solve();
+}
+
 TEST(SensorManagerTest, sensorManagerInstantiation)
 {
-    ros::NodeHandle nh;
+    ros::NodeHandle nh1("/gtsam_fusion/sensors/lidar");
+    ros::NodeHandle nh2("/gtsam_fusion/sensors/vio");
     auto graphManager = std::make_shared<VILFusion::GraphManager>();
     auto sensorManager1 = VILFusion::SensorManagerRos(
-        graphManager, nh, "testSensorTopic1", "testOdometryTopic1", sensor_msgs::PointCloud2()
+            graphManager, nh1, sensor_msgs::PointCloud2()
     );
     auto sensorManager2 = VILFusion::SensorManagerRos(
-        graphManager, nh, "testSensorTopic2", "testOdometryTopic2", sensor_msgs::Image()
+            graphManager, nh2, sensor_msgs::Image()
     );
 }
 
 TEST(SensorManagerTest, sensorManagerTest1)
 {
     ros::NodeHandle nh;
-    auto sensorPub = nh.advertise<sensor_msgs::PointCloud2>("/test/pointcloud", 5);
-    auto odomPub = nh.advertise<nav_msgs::Odometry>("/test/odom", 5);
+    ros::NodeHandle nhLidar("/gtsam_fusion/sensors/lidar");
+    auto sensorPub = nh.advertise<sensor_msgs::PointCloud2>("/test/lidar", 5);
+    auto odomPub = nh.advertise<nav_msgs::Odometry>("/test/lidarOdom", 5);
 
     auto graphManager = std::make_shared<VILFusion::GraphManager>();
-    VILFusion::SensorManagerRos sensorManager(graphManager, nh, "/test/pointcloud", "/test/odom", sensor_msgs::PointCloud2());
+    VILFusion::SensorManagerRos sensorManager(graphManager, nhLidar, sensor_msgs::PointCloud2());
 
     // For some reason, spinOnce() is not doing what I expect (Send messages and run the callbacks).
     // But when I sleep for 0 duration, it does do that.
@@ -124,7 +196,8 @@ TEST(SensorManagerTest, sensorManagerTest1)
     ros::spinOnce();
 
     // Only one Odometry has been published, so SensorManager should still not have added a between factor.
-    EXPECT_EQ(graphManager->graph()->nrFactors(), 0);
+    // The only factors are the prior factors.
+    EXPECT_EQ(graphManager->graph()->nrFactors(), 3);
 
     pointCloud.header.stamp.sec = 0;
     pointCloud.header.stamp.nsec = 500000000;
@@ -146,13 +219,13 @@ TEST(SensorManagerTest, sensorManagerTest1)
     ros::spinOnce();
 
     // Now there should be one factor, between two keys.
-    EXPECT_EQ(graphManager->graph()->nrFactors(), 1);
+    EXPECT_EQ(graphManager->graph()->nrFactors(), 4);
 
     std::tuple<double, uint64_t> lastPose = graphManager->getMostRecentPoseTime();
     EXPECT_DOUBLE_EQ(std::get<0>(lastPose), 0.5);
     EXPECT_EQ(std::get<1>(lastPose), 2);
 
-    auto firstFactor = boost::dynamic_pointer_cast<gtsam::BetweenFactor<gtsam::Pose3>>(graphManager->graph()->at(0));
+    auto firstFactor = boost::dynamic_pointer_cast<gtsam::BetweenFactor<gtsam::Pose3>>(graphManager->graph()->at(3));
     EXPECT_EQ(firstFactor->key1(), gtsam::symbol_shorthand::X(1));
     EXPECT_EQ(firstFactor->key2(), gtsam::symbol_shorthand::X(2));
     EXPECT_DOUBLE_EQ(firstFactor->measured().x(), 1.0);
@@ -167,6 +240,8 @@ TEST(IntegrationTest, integrationTest1)
     //  - 2 lidar point clouds
     //  - A bunch of IMU messages in between
     ros::NodeHandle nh;
+    ros::NodeHandle nhLidar("/gtsam_fusion/sensors/lidar");
+    ros::NodeHandle nhImage("/gtsam_fusion/sensors/vio");
     auto graphManager = std::make_shared<VILFusion::GraphManager>();
 
     VILFusion::ImuManagerRos imuManager(nh, graphManager, "/test/imu");
@@ -175,9 +250,7 @@ TEST(IntegrationTest, integrationTest1)
 
     VILFusion::SensorManagerRos lidarManager(
             graphManager,
-            nh,
-            "/test/lidar",
-            "/test/lidarOdom",
+            nhLidar,
             sensor_msgs::PointCloud2());
     sensor_msgs::PointCloud2 lidarMsg;
     auto lidarPub = nh.advertise<sensor_msgs::PointCloud2>("/test/lidar", 10);
@@ -186,9 +259,7 @@ TEST(IntegrationTest, integrationTest1)
 
     VILFusion::SensorManagerRos imageManager(
             graphManager,
-            nh,
-            "/test/image",
-            "/test/imageOdom",
+            nhImage,
             sensor_msgs::Image());
     sensor_msgs::Image imageMsg;
     auto imagePub = nh.advertise<sensor_msgs::Image>("/test/image", 10);
@@ -307,8 +378,12 @@ TEST(IntegrationTest, integrationTest1)
         ros::spinOnce();
     }
 
-    // If IMU manager changes to avoid that first factor (From 0->1), then this should become 9.
-    EXPECT_EQ(graphManager->graph()->size(), 10);
+    // If IMU manager changes to avoid that first factor (From 0->1), then this should become 12.
+    EXPECT_EQ(graphManager->graph()->size(), 13);
+
+    graphManager->solve();
+
+    EXPECT_EQ(graphManager->graph()->size(), 0);
 
     std::ofstream file;
     file.open("/home/timothy/Code/catkin_ws/GOOD_COOL_GRAPH.dot", std::ios::out | std::ios::binary | std::ios::trunc);
@@ -322,5 +397,17 @@ int main(int argc, char *argv[])
     testing::InitGoogleTest(&argc, argv);
     ros::init(argc, argv, "tester");
     ros::NodeHandle nh;
+    // Is it a bad idea to use ROS params in unit tests? Probably.
+    // Do I have time to do this better? Absolutely not!
+    ros::param::set("/gtsam_fusion/sensors/lidar/sensor_topic", "/test/lidar");
+    ros::param::set("/gtsam_fusion/sensors/lidar/odom_topic", "/test/lidarOdom");
+    ros::param::set("/gtsam_fusion/sensors/lidar/use_odom_covariance", false);
+    ros::param::set("/gtsam_fusion/sensors/lidar/covariance_linear", 0.1);
+    ros::param::set("/gtsam_fusion/sensors/lidar/covariance_angular", 0.01);
+    ros::param::set("/gtsam_fusion/sensors/vio/sensor_topic", "/test/image");
+    ros::param::set("/gtsam_fusion/sensors/vio/odom_topic", "/test/imageOdom");
+    ros::param::set("/gtsam_fusion/sensors/vio/use_odom_covariance", false);
+    ros::param::set("/gtsam_fusion/sensors/vio/covariance_linear", 0.1);
+    ros::param::set("/gtsam_fusion/sensors/vio/covariance_angular", 0.01);
     return RUN_ALL_TESTS();
 }
