@@ -69,23 +69,42 @@ namespace VILFusion
         return _mostRecentEstimate;
     }
 
-    void GraphManager::addBetweenFactor(Key previousKey, Key currentKey, const Pose3 &betweenPose, const SharedNoiseModel &noiseModel)
+    void GraphManager::addBetweenFactor(Key previousKey, Key currentKey, const Pose3 &betweenPose, const Pose3 &poseEstimate, const SharedNoiseModel &noiseModel)
     {
         LockGuard lockGuard(_graphMutex);
         BetweenFactor<Pose3> factor(previousKey, currentKey, betweenPose, noiseModel);
         _graph->add(factor);
+//        if(_values.exists(currentKey))
+//        {
+//            _values.update(currentKey, poseEstimate);
+//        }
+//        else
+//        {
+//            _values.insert(currentKey, poseEstimate);
+//        }
+//
+////        if(!_values.exists(previousKey))
+////        {
+////            std::cout << "######################## CHEATING #####################################";
+////            _values.insert(previousKey, _lastOptimized.pose);
+////        }
     }
 
     void GraphManager::addFactor(const CombinedImuFactor &factor)
     {
         LockGuard lockGuard(_graphMutex);
-        _graph->add(factor);
-        // TODO: Make this better!
-        _mostRecentEstimate = factor.preintegratedMeasurements().predict(
-                _mostRecentEstimate, imuBias::ConstantBias(Vector6::Zero()));
-        _values.insert(X(_currentKey), _mostRecentEstimate.pose());
-        _values.insert(V(_currentKey), _mostRecentEstimate.velocity());
-        _values.insert(B(_currentKey), imuBias::ConstantBias(Vector6::Zero()));
+        _imuQueue.push_back(factor);
+//        _graph->add(factor);
+//        // TODO: Make this better!
+//
+//        auto currentState = NavState(_currentState.pose, _currentState.vel);
+//        auto nextState = factor.preintegratedMeasurements().predict(currentState, _currentState.bias);
+//        _currentState.pose = nextState.pose();
+//        _currentState.vel = nextState.velocity();
+//
+//        _values.insert(X(_currentKey), _currentState.pose);
+//        _values.insert(V(_currentKey), _currentState.vel);
+//        _values.insert(B(_currentKey), _currentState.bias);
     }
 
     void GraphManager::addOptimizationCallback(OptimizationCallback callback)
@@ -95,7 +114,10 @@ namespace VILFusion
 
     void GraphManager::solve()
     {
+        std::cout << "############################# OPTIMIZING!!!! #####################################" << std::endl;
         _graphMutex.lock();
+        emptyImuQueue();
+
         auto graph = _graph->clone();
         Values values(_values);
 
@@ -106,18 +128,64 @@ namespace VILFusion
         _values.clear();
         _graphMutex.unlock();
 
-        LockGuard lockGuard(_optimizerMutex);
+        LockGuard lockGuard(_stateMutex);
+
+        std::cout << "\n\n\n###################### GRAPH: ############################\n";
+        graph.print();
+        std::cout << "\n\n ######################### VALUES: ############################\n";
+        values.print();
+        std::cout << "\n\n########################################\n";
+
+
         _isam2.update(graph, values);
         auto result = _isam2.calculateEstimate();
 
-        auto lastPose = result.at<Pose3>(X(lastKeyIndex));
-        auto lastVelocity = result.at<Velocity3>(V(lastKeyIndex));
-        auto lastBias = result.at<imuBias::ConstantBias>(B(lastKeyIndex));
+        _currentState.pose = result.at<Pose3>(X(lastKeyIndex));
+        _currentState.vel = result.at<Velocity3>(V(lastKeyIndex));
+        _currentState.bias = result.at<imuBias::ConstantBias>(B(lastKeyIndex));
 
         for(auto &callback : _callbacks)
         {
-            callback(lastPose, lastVelocity, lastBias);
+            callback(lastPoseTime, _currentState.pose, _currentState.vel, _currentState.bias);
         }
 
+        std::cout << "\n\n########################OPTIMIZED!!!#########################\n";
+    }
+
+    void GraphManager::emptyImuQueue()
+    {
+        while(!_imuQueue.empty())
+        {
+            auto factor = _imuQueue.front();
+            _imuQueue.pop_front();
+
+            _graph->add(factor);
+
+            auto currentState = NavState(_currentState.pose, _currentState.vel);
+            auto nextState = factor.preintegratedMeasurements().predict(currentState, _currentState.bias);
+            _currentState.pose = nextState.pose();
+            _currentState.vel = nextState.velocity();
+
+            std::cerr << "CLEARING IMU QUEUE: Adding " << Symbol(factor.key3()) << ", " << Symbol(factor.key4()) << ", " << Symbol(factor.key6()) << std::endl;
+            _values.insert(factor.key3(), _currentState.pose);
+            _values.insert(factor.key4(), _currentState.vel);
+            _values.insert(factor.key6(), _currentState.bias);
+        }
+    }
+
+    std::tuple<Pose3, Velocity3, imuBias::ConstantBias> GraphManager::getState()
+    {
+        LockGuard guard(_stateMutex);
+        return std::make_tuple(
+                _currentState.pose,
+                _currentState.vel,
+                _currentState.bias
+                );
+    }
+
+    imuBias::ConstantBias GraphManager::getBias()
+    {
+        LockGuard guard(_stateMutex);
+        return _currentState.bias;
     }
 }

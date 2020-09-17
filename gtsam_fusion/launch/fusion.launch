@@ -46,7 +46,9 @@
     </group>
 
     <!-- Fusion -->
-    <group>
+    <group if="true">
+        <!-- launch-prefix="gdb DASHDASHargs" -->
+        <!-- Why can I not include dashes in comments in XML -->
         <node pkg="gtsam_fusion" type="gtsam_fusion_node" name="gtsam_fusion_node" output="screen">
             <rosparam file="$(arg config_dir)/fusion_params.yaml" command="load"/>
         </node>

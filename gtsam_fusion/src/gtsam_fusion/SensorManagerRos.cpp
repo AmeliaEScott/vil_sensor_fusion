@@ -10,6 +10,8 @@ namespace VILFusion
 
     void SensorManagerRos::odometryCallback(const nav_msgs::Odometry::ConstPtr &msg)
     {
+        ROS_INFO_STREAM("Odometry msg from " << _odometrySubscriber.getTopic() << " at time " << msg->header.stamp.toSec());
+        _hasReceivedOdometry = true;
         auto time = msg->header.stamp;
         std::tuple<ros::Time, Key> timeAndKey;
         bool found = false;
@@ -48,6 +50,19 @@ namespace VILFusion
                             )
                     );
 
+            gtsam::Pose3 absPose(
+                    gtsam::Rot3(
+                            msg->pose.pose.orientation.w,
+                            msg->pose.pose.orientation.x,
+                            msg->pose.pose.orientation.y,
+                            msg->pose.pose.orientation.z
+                            ),
+                    gtsam::Point3(
+                            msg->pose.pose.position.x,
+                            msg->pose.pose.position.y,
+                            msg->pose.pose.position.z
+                            )
+                    );
 
             Matrix66 cov = Matrix66::Zero();
             if(_useOdomCovariance)
@@ -67,8 +82,14 @@ namespace VILFusion
             auto noise = gtsam::noiseModel::Gaussian::Covariance(cov);
 
 
-            ROS_DEBUG_STREAM("SensorManager: Added between factor: " << pose);
-            _graphManager->addBetweenFactor(X(_lastValidKey), X(key), pose, noise);
+            ROS_INFO_STREAM("SensorManager for " << _odometrySubscriber.getTopic() << ": Added factor between x" << _lastValidKey << " and x" << key);
+            _graphManager->addBetweenFactor(X(_lastValidKey), X(key), pose, absPose, noise);
+
+            if(_optimizeAfterOdom)
+            {
+                ROS_DEBUG_STREAM("SensorManager for " << _odometrySubscriber.getTopic() << " optimizing...");
+                _graphManager->solve();
+            }
         }
         else
         {

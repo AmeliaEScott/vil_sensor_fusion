@@ -33,7 +33,7 @@ namespace VILFusion
     {
     public:
         using GraphType = NonlinearFactorGraph;
-        using OptimizationCallback = std::function<void(Pose3&, Vector3&, imuBias::ConstantBias&)>;
+        using OptimizationCallback = std::function<void(double, Pose3&, Vector3&, imuBias::ConstantBias&)>;
 
         GraphManager();
 
@@ -81,7 +81,7 @@ namespace VILFusion
          * @param betweenPose The change in pose between the points in time indicated by previousKey and currentKey
          * @param noiseModel The noise model for this particular pose measurement
          */
-        void addBetweenFactor(Key previousKey, Key currentKey, const Pose3 &betweenPose, const SharedNoiseModel &noiseModel);
+        void addBetweenFactor(Key previousKey, Key currentKey, const Pose3 &betweenPose, const Pose3 &poseEstimate, const SharedNoiseModel &noiseModel);
 
         void addFactor(const CombinedImuFactor &factor);
 
@@ -89,11 +89,15 @@ namespace VILFusion
 
         void addOptimizationCallback(OptimizationCallback callback);
 
+        std::tuple<Pose3, Velocity3, imuBias::ConstantBias> getState();
+
+        imuBias::ConstantBias getBias();
+
     private:
         using LockGuard = std::lock_guard<std::mutex>;
 
         std::mutex _graphMutex;
-        std::mutex _optimizerMutex;
+        std::mutex _stateMutex;
         boost::shared_ptr<GraphType> _graph;
         Values _values;
         uint64_t _currentKey = 0;
@@ -101,7 +105,17 @@ namespace VILFusion
         NavState _mostRecentEstimate;
         ISAM2 _isam2;
 
+        std::deque<CombinedImuFactor> _imuQueue;
+
+        struct {
+            Pose3 pose = Pose3(Rot3(1, 0, 0, 0), Point3::Zero());
+            Velocity3 vel = Velocity3::Zero();
+            imuBias::ConstantBias bias = imuBias::ConstantBias(Vector6::Zero());
+        } _currentState;
+
         std::vector<OptimizationCallback> _callbacks;
+
+        void emptyImuQueue();
 
 
     }; // class GraphManager

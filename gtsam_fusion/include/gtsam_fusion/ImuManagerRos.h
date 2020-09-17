@@ -9,7 +9,7 @@ namespace VILFusion
     class ImuManagerRos : public IMUManager
     {
     public:
-        ImuManagerRos(ros::NodeHandle &nh, std::shared_ptr<GraphManager> graphManager, const std::string imuTopic);
+        ImuManagerRos(ros::NodeHandle &nh, std::shared_ptr<GraphManager> graphManager);
 
     private:
 

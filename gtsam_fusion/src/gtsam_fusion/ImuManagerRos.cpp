@@ -3,15 +3,17 @@
 
 namespace VILFusion
 {
-    ImuManagerRos::ImuManagerRos(ros::NodeHandle &nh, std::shared_ptr<GraphManager> graphManager, const std::string imuTopic) :
+    ImuManagerRos::ImuManagerRos(ros::NodeHandle &nh, std::shared_ptr<GraphManager> graphManager) :
         IMUManager(graphManager, getImuParams(nh))
     {
+        std::string imuTopic;
+        nh.getParam("topic", imuTopic);
         _imuSub = nh.subscribe(imuTopic, 100, &ImuManagerRos::imuCallback, this);
     }
 
     boost::shared_ptr<PreintegratedCombinedMeasurements::Params> ImuManagerRos::getImuParams(ros::NodeHandle &nh)
     {
-        auto params = PreintegratedCombinedMeasurements::Params::MakeSharedD();
+        auto params = PreintegratedCombinedMeasurements::Params::MakeSharedU();
         // TODO: Read ROS params for covariance
         double biasAcc, biasOmega, accel, gyro, integration;
 
