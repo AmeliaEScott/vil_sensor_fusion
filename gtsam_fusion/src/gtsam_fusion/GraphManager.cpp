@@ -11,7 +11,7 @@ namespace VILFusion
     using symbol_shorthand::V;  // Velocity
     using symbol_shorthand::B;  // IMU Bias
 
-    GraphManager::GraphManager()
+    GraphManager::GraphManager(std::shared_ptr<ImuManagerRos> imuManager) : _imuManager(imuManager)
     {
         _graph = boost::make_shared<GraphType>();
         _values.clear();
@@ -19,9 +19,9 @@ namespace VILFusion
         auto pose = Pose3(Rot3(1.0, 0.0, 0.0, 0.0), Point3(0, 0, 0));
         Velocity3 vel = Velocity3::Zero();
 
-        _values.insert(X(0), pose);
-        _values.insert(V(0), vel);
-        _values.insert(B(0), imuBias::ConstantBias(Vector6::Zero()));
+        _values.insert(X(1), pose);
+        _values.insert(V(1), vel);
+        _values.insert(B(1), imuBias::ConstantBias(Vector6::Zero()));
 
         auto pose_noise_model = noiseModel::Diagonal::Sigmas(
                 (Vector(6) << 0.01, 0.01, 0.01, 0.5, 0.5, 0.5)
@@ -29,9 +29,9 @@ namespace VILFusion
         auto velocity_noise_model = noiseModel::Isotropic::Sigma(3, 0.1);  // m/s
         auto bias_noise_model = noiseModel::Isotropic::Sigma(6, 1e-3);
 
-        _graph->addPrior(X(0), pose, pose_noise_model);
-        _graph->addPrior(V(0), vel, velocity_noise_model);
-        _graph->addPrior(B(0), imuBias::ConstantBias(Vector6::Zero()), bias_noise_model);
+        _graph->addPrior(X(1), pose, pose_noise_model);
+        _graph->addPrior(V(1), vel, velocity_noise_model);
+        _graph->addPrior(B(1), imuBias::ConstantBias(Vector6::Zero()), bias_noise_model);
 
         // Set ISAM2 parameters and create ISAM2 solver object
         ISAM2Params isam_params;
@@ -52,8 +52,12 @@ namespace VILFusion
         LockGuard lockGuard(_graphMutex);
 
         _currentKey++;
+        if(_currentKey > 1)
+        {
+            auto imuFactor = _imuManager->getFactor(_lastPoseTime, time, _currentKey, getBias());
+            _imuQueue.push_back(imuFactor);
+        }
         _lastPoseTime = time;
-
         return _currentKey;
     }
 

@@ -3,8 +3,8 @@
 
 namespace VILFusion
 {
-    ImuManagerRos::ImuManagerRos(ros::NodeHandle &nh, std::shared_ptr<GraphManager> graphManager) :
-        IMUManager(graphManager, getImuParams(nh))
+    ImuManagerRos::ImuManagerRos(ros::NodeHandle &nh) :
+        IMUManager(getImuParams(nh))
     {
         std::string imuTopic;
         nh.getParam("topic", imuTopic);

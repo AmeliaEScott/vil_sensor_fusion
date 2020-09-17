@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <gtsam_fusion/ImuManagerRos.h>
+
 #include <gtsam/base/Matrix.h>
 #include <gtsam/inference/Key.h>
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
@@ -35,7 +37,7 @@ namespace VILFusion
         using GraphType = NonlinearFactorGraph;
         using OptimizationCallback = std::function<void(double, Pose3&, Vector3&, imuBias::ConstantBias&)>;
 
-        GraphManager();
+        GraphManager(std::shared_ptr<ImuManagerRos> imuManager);
 
         boost::shared_ptr<const GraphType> graph();
 
@@ -96,12 +98,14 @@ namespace VILFusion
     private:
         using LockGuard = std::lock_guard<std::mutex>;
 
+        std::shared_ptr<ImuManagerRos> _imuManager;
+
         std::mutex _graphMutex;
         std::mutex _stateMutex;
         boost::shared_ptr<GraphType> _graph;
         Values _values;
         uint64_t _currentKey = 0;
-        double _lastPoseTime = 1e100;
+        double _lastPoseTime = -1;
         NavState _mostRecentEstimate;
         ISAM2 _isam2;
 

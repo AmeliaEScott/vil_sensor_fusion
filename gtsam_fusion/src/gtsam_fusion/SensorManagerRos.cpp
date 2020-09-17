@@ -11,14 +11,24 @@ namespace VILFusion
     void SensorManagerRos::odometryCallback(const nav_msgs::Odometry::ConstPtr &msg)
     {
         ROS_INFO_STREAM("Odometry msg from " << _odometrySubscriber.getTopic() << " at time " << msg->header.stamp.toSec());
-        _hasReceivedOdometry = true;
+        if(!_hasReceivedOdometry)
+        {
+            _hasReceivedOdometry = true;
+            return;
+        }
         auto time = msg->header.stamp;
         std::tuple<ros::Time, Key> timeAndKey;
         bool found = false;
         while(!_keysAndTimes.empty() && !found)
         {
             std::tuple<ros::Time, Key> t = _keysAndTimes.front();
+            if(std::get<0>(t) > time)
+            {
+                break;
+            }
             _keysAndTimes.pop_front();
+            ROS_INFO_STREAM("Searching for t=" << time.toSec() << ", found " << std::get<0>(t).toSec());
+
             if(std::get<0>(t) == time)
             {
                 timeAndKey = t;
@@ -34,6 +44,10 @@ namespace VILFusion
         if(_lastValidOdom != nullptr)
         {
             auto deltaPose = poseDiff(_lastValidOdom, msg);
+
+            auto dt = (msg->header.stamp.toSec() - _lastValidOdom->header.stamp.toSec());
+            auto dx = msg->pose.pose.position.x - _lastValidOdom->pose.pose.position.x;
+            std::cout << "SensorManager for " << _odometrySubscriber.getTopic() << ": Moved " << dx << "m in " << dt << "s (" << dx / dt << "m/s)\n";
 
             auto key = std::get<1>(timeAndKey);
             gtsam::Pose3 pose(

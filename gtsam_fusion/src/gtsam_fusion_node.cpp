@@ -13,12 +13,17 @@ using namespace VILFusion;
 int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "gtsam_fusion");
+
     ros::NodeHandle nh(ros::this_node::getName());
     ros::NodeHandle imuHandle(nh, "imu");
 
-    auto graphManager = std::make_shared<GraphManager>();
+//    ros::Duration d(5.0);
+//    d.sleep();
+
+    auto imuManager = std::make_shared<ImuManagerRos>(imuHandle);
+    auto graphManager = std::make_shared<GraphManager>(imuManager);
     std::vector<std::shared_ptr<SensorManagerRos>> sensorManagers;
-    auto imuManager = std::make_shared<ImuManagerRos>(imuHandle, graphManager);
+
 
     XmlRpc::XmlRpcValue sensorsList;
     nh.getParam("sensors", sensorsList);

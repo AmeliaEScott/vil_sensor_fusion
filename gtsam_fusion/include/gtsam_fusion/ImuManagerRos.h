@@ -1,6 +1,9 @@
 #pragma once
 
 #include <gtsam_fusion/IMUManager.h>
+
+#include <gtsam/navigation/ImuFactor.h>
+
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 
@@ -9,7 +12,7 @@ namespace VILFusion
     class ImuManagerRos : public IMUManager
     {
     public:
-        ImuManagerRos(ros::NodeHandle &nh, std::shared_ptr<GraphManager> graphManager);
+        ImuManagerRos(ros::NodeHandle &nh);
 
     private:
 

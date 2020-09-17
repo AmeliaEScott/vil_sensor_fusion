@@ -88,8 +88,8 @@ namespace VILFusion
         template<class SensorType>
         void sensorCallback(const boost::shared_ptr<SensorType> &msg)
         {
-//            if(_hasReceivedOdometry)
-//            {
+            if(_hasReceivedOdometry)
+            {
                 ROS_INFO_STREAM("Sensor message " << _sensorSubscriber.getTopic() << " received at time "
                                                   << msg->header.stamp.toSec());
                 double time = msg->header.stamp.toSec();
@@ -97,7 +97,7 @@ namespace VILFusion
 //            _keysAndTimes.emplace_back(std::make_tuple(msg->header.stamp, key));
                 _keysAndTimes.push_back(std::make_tuple(msg->header.stamp, key));
                 ROS_INFO_STREAM("Got key " << key << ", inserted at size " << _keysAndTimes.size());
-//            }
+            }
         };
         void odometryCallback(const nav_msgs::Odometry::ConstPtr &ms);
 
