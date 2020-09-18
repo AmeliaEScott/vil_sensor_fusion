@@ -118,11 +118,8 @@ namespace VILFusion
     {
         geometry_msgs::PoseWithCovariance out;
 
-        // Both odometry messages are in the same fixed global frame. Therefore, position difference doesn't worry
-        // about rotation.
-        out.pose.position.x = after->pose.pose.position.x - before->pose.pose.position.x;
-        out.pose.position.y = after->pose.pose.position.y - before->pose.pose.position.y;
-        out.pose.position.z = after->pose.pose.position.z - before->pose.pose.position.z;
+        Eigen::Vector3d x1(before->pose.pose.position.x, before->pose.pose.position.y, before->pose.pose.position.z);
+        Eigen::Vector3d x2(after->pose.pose.position.x, after->pose.pose.position.y, after->pose.pose.position.z);
 
         Eigen::Quaterniond q1(
                 before->pose.pose.orientation.w,
@@ -136,6 +133,12 @@ namespace VILFusion
                 after->pose.pose.orientation.y,
                 after->pose.pose.orientation.z
         );
+
+        auto dx = x2 - x1;
+        auto dxr = q1.inverse() * dx;
+        out.pose.position.x = dxr.x();
+        out.pose.position.y = dxr.y();
+        out.pose.position.z = dxr.z();
 
         auto qr = q2 * q1.inverse();
         out.pose.orientation.w = qr.w();
