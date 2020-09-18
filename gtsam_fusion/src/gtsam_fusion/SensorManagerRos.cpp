@@ -10,7 +10,7 @@ namespace VILFusion
 
     void SensorManagerRos::odometryCallback(const nav_msgs::Odometry::ConstPtr &msg)
     {
-        ROS_INFO_STREAM("Odometry msg from " << _odometrySubscriber.getTopic() << " at time " << msg->header.stamp.toSec());
+//        ROS_INFO_STREAM("Odometry msg from " << _odometrySubscriber.getTopic() << " at time " << msg->header.stamp.toSec());
         if(!_hasReceivedOdometry)
         {
             _hasReceivedOdometry = true;
@@ -27,7 +27,7 @@ namespace VILFusion
                 break;
             }
             _keysAndTimes.pop_front();
-            ROS_INFO_STREAM("Searching for t=" << time.toSec() << ", found " << std::get<0>(t).toSec());
+//            ROS_INFO_STREAM("Searching for t=" << time.toSec() << ", found " << std::get<0>(t).toSec());
 
             if(std::get<0>(t) == time)
             {
@@ -47,7 +47,7 @@ namespace VILFusion
 
             auto dt = (msg->header.stamp.toSec() - _lastValidOdom->header.stamp.toSec());
             auto dx = msg->pose.pose.position.x - _lastValidOdom->pose.pose.position.x;
-            std::cout << "SensorManager for " << _odometrySubscriber.getTopic() << ": Moved " << dx << "m in " << dt << "s (" << dx / dt << "m/s)\n";
+//            std::cout << "SensorManager for " << _odometrySubscriber.getTopic() << ": Moved " << dx << "m in " << dt << "s (" << dx / dt << "m/s)\n";
 
             auto key = std::get<1>(timeAndKey);
             gtsam::Pose3 pose(
@@ -96,12 +96,12 @@ namespace VILFusion
             auto noise = gtsam::noiseModel::Gaussian::Covariance(cov);
 
 
-            ROS_INFO_STREAM("SensorManager for " << _odometrySubscriber.getTopic() << ": Added factor between x" << _lastValidKey << " and x" << key);
+//            ROS_INFO_STREAM("SensorManager for " << _odometrySubscriber.getTopic() << ": Added factor between x" << _lastValidKey << " and x" << key);
             _graphManager->addBetweenFactor(X(_lastValidKey), X(key), pose, absPose, noise);
 
             if(_optimizeAfterOdom)
             {
-                ROS_DEBUG_STREAM("SensorManager for " << _odometrySubscriber.getTopic() << " optimizing...");
+//                ROS_DEBUG_STREAM("SensorManager for " << _odometrySubscriber.getTopic() << " optimizing...");
                 _graphManager->solve();
             }
         }

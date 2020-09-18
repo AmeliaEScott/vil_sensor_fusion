@@ -7,7 +7,7 @@ project(gtsam_fusion)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs sensor_msgs nav_msgs)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs sensor_msgs nav_msgs tf)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -140,9 +140,9 @@ add_library(${PROJECT_NAME}_lib
 # as an example, code may need to be generated before libraries
 # either from message generation or dynamic reconfigure
 add_dependencies(${PROJECT_NAME}_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-message(WARNING "PROJECT EXPORTED TARGETS: ${${PROJECT_NAME}_EXPORTED_TARGETS}" )
-message(WARNING "CATKIN EXPORTED TARGETS: ${catkin_EXPORTED_TARGETS}" )
-message(WARNING "CATKIN LIBS: ${catkin_LIBRARIES}")
+#message(WARNING "PROJECT EXPORTED TARGETS: ${${PROJECT_NAME}_EXPORTED_TARGETS}" )
+#message(WARNING "CATKIN EXPORTED TARGETS: ${catkin_EXPORTED_TARGETS}" )
+#message(WARNING "CATKIN LIBS: ${catkin_LIBRARIES}")
 target_link_libraries(${PROJECT_NAME}_lib
         # ${catkin_LIBRARIES}  # Right now, I am preferring to link this to the executables, rather than to the library
         gtsam

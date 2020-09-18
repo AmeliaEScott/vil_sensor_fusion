@@ -10,9 +10,10 @@ namespace VILFusion
     using gtsam::symbol_shorthand::V;  // Velocity
     using gtsam::symbol_shorthand::B;  // IMU Bias
 
-    IMUManager::IMUManager(boost::shared_ptr<PreintegratedCombinedMeasurements::Params> imuParams)
+    IMUManager::IMUManager(boost::shared_ptr<PreintegratedCombinedMeasurements::Params> imuParams) :
+        _integrator(imuParams, imuBias::ConstantBias(Vector6::Zero()))
     {
-        _integrator = std::make_shared<PreintegratedCombinedMeasurements>(imuParams);
+        _integrator.resetIntegration();
     }
 
     void IMUManager::addIMUMeasurement(double time, const Vector3 accel, const Vector3 gyro)
@@ -27,7 +28,7 @@ namespace VILFusion
     {
         LockGuard _lockGuard(_bufferMutex);
 
-        std::cout << "######## IMU retrieving factor between " << startTime << " and " << endTime << " for index " << currentIndex << std::endl;
+//        std::cout << "######## IMU retrieving factor between " << startTime << " and " << endTime << " for index " << currentIndex << std::endl;
 
         Measurement prevMeas;
         // Get rid of any old measurements. Should be only 1, in theory.
@@ -38,7 +39,7 @@ namespace VILFusion
             _buffer.pop_front();
         }
 
-        _integrator->resetIntegrationAndSetBias(bias);
+        _integrator.resetIntegrationAndSetBias(bias);
 
         prevMeas.time = startTime;
         // Integrate all of the easy measurements (that don't require interpolation).
@@ -46,7 +47,7 @@ namespace VILFusion
         {
             auto newMeas = _buffer.front();
             _buffer.pop_front();
-            _integrator->integrateMeasurement(
+            _integrator.integrateMeasurement(
                     newMeas.accel, newMeas.gyro, newMeas.time - prevMeas.time
                     );
             prevMeas = newMeas;
@@ -60,14 +61,20 @@ namespace VILFusion
             const Vector3 interpAccel = (interpolationFactor * finalMeas.accel) + ((1.0 - interpolationFactor) * prevMeas.accel);
             const Vector3 interpGyro = (interpolationFactor * finalMeas.gyro) + ((1.0 - interpolationFactor) * prevMeas.gyro);
 
-            _integrator->integrateMeasurement(interpAccel, interpGyro, endTime - prevMeas.time);
+            _integrator.integrateMeasurement(interpAccel, interpGyro, endTime - prevMeas.time);
+
         }
 
         return CombinedImuFactor(
                 X(currentIndex - 1), V(currentIndex - 1),
                 X(currentIndex), V(currentIndex),
                 B(currentIndex - 1), B(currentIndex),
-                *_integrator
+                _integrator
                 );
+    }
+
+    CombinedImuFactor IMUManager::getFactor(double endTime, uint64_t currentIndex, imuBias::ConstantBias bias)
+    {
+        return getFactor(_buffer.front().time, endTime, currentIndex, bias);
     }
 }

@@ -15,13 +15,14 @@ namespace VILFusion
     {
         auto params = PreintegratedCombinedMeasurements::Params::MakeSharedU();
         // TODO: Read ROS params for covariance
-        double biasAcc, biasOmega, accel, gyro, integration;
+        double biasAcc, biasOmega, accel, gyro, integration, biasAccInt;
 
         nh.getParam("cov_bias_acc", biasAcc);
         nh.getParam("cov_bias_omega", biasOmega);
         nh.getParam("cov_accel", accel);
         nh.getParam("cov_gyro", gyro);
         nh.getParam("cov_integration", integration);
+        nh.getParam("cov_bias_acc_omega_int", biasAccInt);
 
         Matrix3 ident = Matrix3::Identity();
         params->setBiasAccCovariance(ident * biasAcc);
@@ -29,6 +30,7 @@ namespace VILFusion
         params->setAccelerometerCovariance(ident * accel);
         params->setGyroscopeCovariance(ident * gyro);
         params->setIntegrationCovariance(ident * integration);
+        params->setBiasAccOmegaInt(Matrix6::Identity() * biasAccInt);
 
         return params;
     }

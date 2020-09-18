@@ -1,9 +1,13 @@
 
-#include <ros/ros.h>
+
 #include <gtsam_fusion/GraphManager.h>
 #include <gtsam_fusion/SensorManagerRos.h>
 #include <gtsam_fusion/ImuManagerRos.h>
 
+#include <ros/ros.h>
+#include <tf/tf.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
 #include <nav_msgs/Odometry.h>
@@ -52,11 +56,17 @@ int main(int argc, char *argv[])
     }
 
     auto odomPub = nh.advertise<nav_msgs::Odometry>("odometry", 1);
-    graphManager->addOptimizationCallback([&odomPub](double time, gtsam::Pose3 &pose, gtsam::Velocity3 &vel, gtsam::imuBias::ConstantBias &bias){
+    tf2_ros::TransformBroadcaster broadcaster;
+    std::string staticFrame, odomFrame;
+    nh.getParam("tf/static_frame", staticFrame);
+    nh.getParam("tf/odom_frame", odomFrame);
+
+    graphManager->addOptimizationCallback(
+    [&odomPub, &broadcaster, &staticFrame, &odomFrame](double time, gtsam::Pose3 &pose, gtsam::Velocity3 &vel, gtsam::imuBias::ConstantBias &bias){
         nav_msgs::Odometry odom;
         odom.header.stamp = ros::Time(time);
-        odom.header.frame_id = "gtsam_world_frame";
-        odom.child_frame_id = "gtsam_odom_frame";
+        odom.header.frame_id = staticFrame;
+        odom.child_frame_id = odomFrame;
 
         odom.pose.pose.position.x = pose.translation().x();
         odom.pose.pose.position.y = pose.translation().y();
@@ -71,6 +81,20 @@ int main(int argc, char *argv[])
         odom.twist.twist.linear.z = vel.z();
 
         odomPub.publish(odom);
+
+        geometry_msgs::TransformStamped transform;
+        transform.header.frame_id = staticFrame;
+        transform.header.stamp = ros::Time(time);
+        transform.child_frame_id = odomFrame;
+
+        transform.transform.translation.x = pose.translation().x();
+        transform.transform.translation.y = pose.translation().y();
+        transform.transform.translation.z = pose.translation().z();
+        transform.transform.rotation.x = pose.rotation().toQuaternion().x();
+        transform.transform.rotation.y = pose.rotation().toQuaternion().y();
+        transform.transform.rotation.z = pose.rotation().toQuaternion().z();
+        transform.transform.rotation.w = pose.rotation().toQuaternion().w();
+        broadcaster.sendTransform(transform);
     });
 
     ROS_INFO("Done constructing stuff!");

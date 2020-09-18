@@ -22,6 +22,7 @@
 <!--  <build_depend>tbb</build_depend>-->
 
   <depend>roscpp</depend>
+  <depend>tf</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>nav_msgs</depend>

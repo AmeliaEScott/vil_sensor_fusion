@@ -90,13 +90,13 @@ namespace VILFusion
         {
             if(_hasReceivedOdometry)
             {
-                ROS_INFO_STREAM("Sensor message " << _sensorSubscriber.getTopic() << " received at time "
-                                                  << msg->header.stamp.toSec());
+//                ROS_INFO_STREAM("Sensor message " << _sensorSubscriber.getTopic() << " received at time "
+//                                                  << msg->header.stamp.toSec());
                 double time = msg->header.stamp.toSec();
                 Key key = _graphManager->reserveNode(time);
 //            _keysAndTimes.emplace_back(std::make_tuple(msg->header.stamp, key));
                 _keysAndTimes.push_back(std::make_tuple(msg->header.stamp, key));
-                ROS_INFO_STREAM("Got key " << key << ", inserted at size " << _keysAndTimes.size());
+//                ROS_INFO_STREAM("Got key " << key << ", inserted at size " << _keysAndTimes.size());
             }
         };
         void odometryCallback(const nav_msgs::Odometry::ConstPtr &ms);

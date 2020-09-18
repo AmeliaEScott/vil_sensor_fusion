@@ -24,12 +24,13 @@ namespace VILFusion
         void addIMUMeasurement(double time, const Vector3 accel, const Vector3 gyro);
 
         CombinedImuFactor getFactor(double startTime, double endTime, uint64_t currentIndex, imuBias::ConstantBias bias);
+        CombinedImuFactor getFactor(double endTime, uint64_t currentIndex, imuBias::ConstantBias bias);
     protected:
         using LockGuard = std::lock_guard<std::mutex>;
 
         std::mutex _bufferMutex;
         std::deque<Measurement> _buffer;
-        std::shared_ptr<PreintegratedCombinedMeasurements> _integrator = nullptr;
+        PreintegratedCombinedMeasurements _integrator;
     }; // class IMUManager
 
 } // namespace VILFusion
