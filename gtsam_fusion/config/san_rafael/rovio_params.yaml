@@ -1,0 +1,5 @@
+
+rovio:
+  world_frame: rovio_world
+  camera_frame: rovio_camera
+  imu_frame: rovio_imu

@@ -1,0 +1,28 @@
+sensors:
+  lidar:
+    sensor_topic: "/lidar"
+    sensor_type: "PointCloud2"
+    odom_topic: "/aft_mapped_to_init_CORRECTED"
+    optimize_after_odom: true
+    use_odom_covariance: false
+    covariance_linear: 0.000001
+    covariance_angular: 0.0000001
+  vio:
+    sensor_topic: "/cam0/image_mono"
+    sensor_type: "Image"
+    odom_topic: "/rovio/odometry"
+    optimize_after_odom: true
+    use_odom_covariance: false
+    covariance_linear: 0.001
+    covariance_angular: 0.0001
+imu:
+  topic: "/imu/lidar"
+  cov_bias_acc: 0.001
+  cov_bias_omega: 0.000001
+  cov_accel: 0.000001
+  cov_gyro: 0.000001
+  cov_integration: 0.00000001
+  cov_bias_acc_omega_int: 0.00001
+tf:
+  static_frame: "/rovio_world"
+  odom_frame: "/gtsam_odom"

@@ -1,0 +1,56 @@
+#Common
+loamVerbosity: 0                         #Debug Output, 0-disable, higher for more verbose output
+scanPeriod: 0.1                          #Expected scan period for input pointcloud in seconds. Used of Distortion correction
+rotateInputCloud: false                  #Flag to rotate input cloud before estimating odometry/map so produced resuts are ROS frame aligned irrespective of LiDAR mounting orientation
+inputCloudRotation: [0.0, 0.0, 0.0]      #Rotation applied to input cloud - ORDER YPR(radians) #90 deg = 1.5707963268 rad
+
+#External Prior/Transform Input
+forceExtPriorUseMapping : false          #Flag to force use of FULL external prior instead of LaserOdometry TRANSLATION Only Estimate     
+lidarFrame: velodyne                     #LiDAR frame name - used to lookup LiDAR-to-ExternalSensor Frame
+extPriorAvailable: false                 #Flag to check if 'Primary' external prior is available
+extOdomFrame: vio_imu                    #External Prior odometry frame name
+extFixedFrame: vio_world #vio_imu_init   #External Prior fixed frame name
+extSensorFrame: imu                      #External Prior sensor frame name
+extOdomTimeOffset : -0.1 #seconds        #Timeoffset between LiDAR pointcloud and external source
+fallbackExtPriorAvailable: false         #Flag to check if 'Fallback ' external prior is available
+fallbackExtOdomFrame: base #base_subt    #Fallback External Prior odometry frame name
+fallbackExtFixedFrame: odom              #Fallback External Prior fixed frame name
+fallbackExtSensorFrame: base #base_subt  #Fallback External Prior sensor frame name
+fallbackExtOdomTimeOffset: 0.0 #seconds  #Timeoffset between LiDAR pointcloud and Fallbackexternal source
+
+#MultiScanRegistration
+lidar: VLP-16                            #Choose LiDAR type - options: VLP-16  HDL-32  HDL-64E  O1-16 O1-64 Bperl-32
+useCloudIntensityandRingFields : false   #Flag to use input pointcloud intensity or ring fields. Converts to custom PointXYZIR instead of PointXYZ. True for Bpearl
+imuHistorySize: 200                      #IMU Message Buffer Size , default: 200 
+featureRegions: 6                        #Number of Azimuth Regions Pointcloud is divided, default:6
+curvatureRegion: 5                       #Number of neigboring points on a scan line on each side of a point used for calculating curvature of that point, default 5
+maxCornerSharp: 2                        #Number of Sharp Features per scan line in each curvatureRegion, default:2
+maxCornerLessSharp: 20                   #Number of Less Sharp Features per scan line in each curvatureRegion, default:10*maxCornerLessSharp
+maxSurfaceFlat: 4                        #Number of FlatFeatures per scan line in each curvatureRegion, default:4
+surfaceCurvatureThreshold: 0.1           #Threshold above which feature is categorized Sharp, default 0.1
+lessFlatFilterSize: 0.2                  #Leaf Size for downsampling remaing pointcloud after feature selection, default 0.2 
+
+#LaserOdometry
+undistortInputCloud: true                #If true External Prior or Motion Model will be used for LiDAR Ego Motion Compensation of input cloud
+ioRatio: 2                               #Ratio of publish rate of LaserOdometry w.r.t input PCL rate. LO is calculated for each PCL but published at slower rate to Mapping, default 2
+odomMaxIterations: 25                    #Number of LO optimization iterations, default 25
+odomDeltaTAbort: 0.05                    #Translation threshold for optimization convergence, deafult 0.1 (m) 
+odomDeltaRAbort: 0.05                    #Rotation threshold for optimization convergence, deafult 0.1 (deg)
+odomDegenEigVal: 30                      #Minimum eignevalue threshold for determining degeneracy of LO optimization, default 30
+odomRelativeTranslationMax: 0.2          #Max translation threshold between two pointclouds for external odometry to be considered valid input. Determined w.r.t set max robot movement speed
+odomRelativeRotationMax: 0.1             #Max rotation threshold between two pointclouds from external odometry to be considered valid input. Determined w.r.t set max robot movement speed
+  
+#LaserMapping
+mapMaxIterations: 10                     #Number of LM optimization iterations, default 10
+mapDeltaTAbort: 0.05                     #Translation threshold for optimization convergence, deafult 0.05 (m) 
+mapDeltaRAbort: 0.05                     #Rotation threshold for optimization convergence, deafult 0.05 (deg)
+cornerFilterSize: 0.2                    #Leaf Size for downsampling current CORNER pointcloud before merging in map, default 0.2 
+surfaceFilterSize: 0.4                   #Leaf Size for downsampling current FLAT/SURFACE pointcloud before merging in map, default 0.4
+mapCubeSize: 10.0                        #Size of Cube/Voxel used for saving internal map (meters), default 50
+mapDimensionsInCubes: [101,51,101]       #WxHxD of internal map in CUBE UNITS, default:[21,11,21] #Width,Height,Depth
+mapStartLocationInCubes: [50,25,50]      #Robot start position in internal map in CUBE UNITS, default:[10,5,10] #Width,Height,Depth
+numNeighborSubmapCubes: 5                #Number of Neigboring cubes in +/- direction along each axis to build submap for matching 
+mapDegenEigVal: 40                       #Minimum eignevalue threshold for determining degeneracy of LM optimization, default 30
+mapPriorNormThresh: 0.4                  #Max translation threshold between two pointclouds from external odometry to be considered valid input. Determined w.r.t set max robot movement speed
+useSavedSubmapsForInitialization: false  #Use saved submap on disc for initialization
+submapLocalizationInitGuess: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0] #Initialization guess of robot location in submap - ORDER: XYZ(meters) - YPR(radians)

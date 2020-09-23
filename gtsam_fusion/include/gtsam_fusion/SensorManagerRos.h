@@ -46,6 +46,7 @@ namespace VILFusion
             nodeHandle.getParam("odom_topic", odometryTopic);
             nodeHandle.getParam("use_odom_covariance", _useOdomCovariance);
             nodeHandle.getParam("optimize_after_odom", _optimizeAfterOdom);
+            nodeHandle.getParam("max_time_skip", _maxTimeSkip);
             if(!_useOdomCovariance)
             {
                 nodeHandle.getParam("covariance_linear", _linearCovariance);
@@ -81,6 +82,7 @@ namespace VILFusion
         bool _useOdomCovariance;
         double _linearCovariance;
         double _angularCovariance;
+        double _maxTimeSkip;
 
         void readParameters(ros::NodeHandle &nh);
 

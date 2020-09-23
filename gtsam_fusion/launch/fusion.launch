@@ -47,6 +47,15 @@
 
     <!-- Fusion -->
     <group if="true">
+        <node pkg="gtsam_fusion" type="gtsam_fusion_filter" name="gtsam_fusion_filter" output="screen">
+            <rosparam file="$(arg config_dir)/fusion_params.yaml" command="load"/>
+<!--            <remap from="~laser_odom_input" to="/aft_mapped_to_init_CORRECTED" />-->
+<!--            <remap from="~laser_opt_status" to="/laser_mapping_optimization_status" />-->
+            <remap from="~laser_odom_input" to="/laser_odom_to_init_CORRECTED" />
+            <remap from="~laser_opt_status" to="/laser_odom_optimization_status" />
+
+        </node>
+
         <!-- launch-prefix="gdb DASHDASHargs" -->
         <!-- Why can I not include dashes in comments in XML -->
         <node pkg="gtsam_fusion" type="gtsam_fusion_node" name="gtsam_fusion_node" output="screen">

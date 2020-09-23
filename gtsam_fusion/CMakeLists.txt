@@ -7,7 +7,7 @@ project(gtsam_fusion)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs sensor_msgs nav_msgs tf)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp message_filters loam std_msgs sensor_msgs nav_msgs tf)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -152,6 +152,7 @@ target_link_libraries(${PROJECT_NAME}_lib
 # With catkin_make all packages are built within a single CMake context
 # The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/gtsam_fusion_node.cpp)
+add_executable(${PROJECT_NAME}_filter src/degerate_odometry_filter.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -169,6 +170,10 @@ target_link_libraries(${PROJECT_NAME}_node
         ${PROJECT_NAME}_lib
         ${catkin_LIBRARIES}
         gtsam
+        )
+
+target_link_libraries(${PROJECT_NAME}_filter
+        ${catkin_LIBRARIES}
         )
 
 

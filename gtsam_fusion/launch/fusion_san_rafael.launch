@@ -1,0 +1,24 @@
+<launch>
+
+    <arg name="bagfile" />
+    <arg name="rate" default="1.0" />
+    <arg name="rovio" default="true" />
+    <arg name="loam" default="true" />
+    <arg name="rviz" default="false" />
+
+    <node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
+        <remap from="/velodyne_points" to="/lidar" />
+        <remap from="/camera/image_mono" to="/cam0/image_mono" />
+        <remap from="/matrice/imu" to="/imu/lidar" />
+        <remap from="/vn100/imu" to="/imu/vio"/>
+	</node>
+
+    <include file="$(find gtsam_fusion)/launch/fusion.launch">
+        <arg name="config_dir" value="$(find gtsam_fusion)/config/san_rafael" />
+
+        <arg name="rovio" value="$(arg rovio)" />
+        <arg name="loam" value="$(arg loam)" />
+        <arg name="rviz" value="$(arg rviz)" />
+    </include>
+
+</launch>

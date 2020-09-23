@@ -29,24 +29,27 @@ namespace VILFusion
             _keysAndTimes.pop_front();
 //            ROS_INFO_STREAM("Searching for t=" << time.toSec() << ", found " << std::get<0>(t).toSec());
 
-            if(std::get<0>(t) == time)
+            //if(std::get<0>(t) == time)
+//            ROS_INFO_STREAM("Manager for " << _odometrySubscriber.getTopic() << " Searching for image from " << time.sec << "." << time.nsec << ". Diff: " << std::abs((std::get<0>(t) - time).toNSec()));
+            if(std::abs((std::get<0>(t) - time).toNSec()) < 1000000)
             {
                 timeAndKey = t;
                 found = true;
+//                ROS_INFO_STREAM("FOUND!");
             }
         }
         if(!found)
         {
-            ROS_WARN_STREAM("SensorManager: Received odometry at time " << msg->header.stamp.toSec() << ", but found no corresponding key.");
+            ROS_WARN_STREAM("SensorManager for " << _odometrySubscriber.getTopic() << ": Received odometry at time " << msg->header.stamp.toSec() << ", but found no corresponding key.");
             return;
         }
 
-        if(_lastValidOdom != nullptr)
+        if(_lastValidOdom != nullptr && (msg->header.stamp - _lastValidOdom->header.stamp).toSec() < _maxTimeSkip)
         {
             auto deltaPose = poseDiff(_lastValidOdom, msg);
 
-            auto dt = (msg->header.stamp.toSec() - _lastValidOdom->header.stamp.toSec());
-            auto dx = msg->pose.pose.position.x - _lastValidOdom->pose.pose.position.x;
+//            auto dt = (msg->header.stamp.toSec() - _lastValidOdom->header.stamp.toSec());
+//            auto dx = msg->pose.pose.position.x - _lastValidOdom->pose.pose.position.x;
 //            std::cout << "SensorManager for " << _odometrySubscriber.getTopic() << ": Moved " << dx << "m in " << dt << "s (" << dx / dt << "m/s)\n";
 
             auto key = std::get<1>(timeAndKey);

@@ -22,6 +22,8 @@
 <!--  <build_depend>tbb</build_depend>-->
 
   <depend>roscpp</depend>
+  <depend>message_filters</depend>
+  <depend>loam</depend>
   <depend>tf</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
