@@ -3,6 +3,7 @@
 
 #include <gtsam/inference/Symbol.h>
 #include <gtsam/slam/BetweenFactor.h>
+#include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
 
 namespace VILFusion
 {
@@ -35,8 +36,9 @@ namespace VILFusion
 
         // Set ISAM2 parameters and create ISAM2 solver object
         ISAM2Params isam_params;
-        isam_params.factorization = ISAM2Params::CHOLESKY;
-        isam_params.relinearizeSkip = 10;
+        isam_params.factorization = ISAM2Params::QR;
+        isam_params.relinearizeThreshold = 0.0001;
+        isam_params.relinearizeSkip = 1;
 
         _isam2 = ISAM2(isam_params);
     }
@@ -123,6 +125,8 @@ namespace VILFusion
 
         _isam2.update(graph, values);
         auto result = _isam2.calculateEstimate();
+//        gtsam::LevenbergMarquardtOptimizer optimizer(graph, values);
+//        auto result = optimizer.optimize();
 
         _currentState.pose = result.at<Pose3>(X(lastKeyIndex));
         _currentState.vel = result.at<Velocity3>(V(lastKeyIndex));

@@ -44,12 +44,12 @@
         <rosparam file="$(arg config_dir)/loam_params.yaml" command="load"/>
     </node>
 
-    <!-- Laser Mapping Nodelet -->
-    <node pkg="nodelet" type="nodelet" name="laser_mapping_nodelet"
-          args="load laser_mapping_nodelet loam_nodelet_manager" output="screen">
-        <rosparam file="$(arg config_dir)/loam_params.yaml" command="load"/>
-        <param name="saved_submaps_filepath" value="$(find loam)"/>
-    </node>
+<!--    &lt;!&ndash; Laser Mapping Nodelet &ndash;&gt;-->
+<!--    <node pkg="nodelet" type="nodelet" name="laser_mapping_nodelet"-->
+<!--          args="load laser_mapping_nodelet loam_nodelet_manager" output="screen">-->
+<!--        <rosparam file="$(arg config_dir)/loam_params.yaml" command="load"/>-->
+<!--        <param name="saved_submaps_filepath" value="$(find loam)"/>-->
+<!--    </node>-->
 
     <!-- Laser Transform Maintenance Nodelet -->
     <node pkg="nodelet" type="nodelet" name="laser_transform_maintenance_nodelet"
