@@ -10,7 +10,7 @@ set(PACKAGE_DEPENDENCIES
         geometry_msgs
         sensor_msgs
         tf
-        confusion
+        # confusion
         )
 
 ## Find catkin macros and libraries
@@ -21,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS ${PACKAGE_DEPENDENCIES} message_generati
 find_package(Boost REQUIRED COMPONENTS system)
 
 find_package(Eigen3 REQUIRED)
-find_package(Ceres REQUIRED)
+# find_package(Ceres REQUIRED)
 find_package(OpenCV REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -137,15 +137,15 @@ include_directories(
  ${catkin_INCLUDE_DIRS}
  #${confusion_INCLUDE_DIRS}
  ${Boost_INCLUDE_DIRS}
- ${ceres_INCLUDE_DIRS}
+ # ${ceres_INCLUDE_DIRS}
  ${Eigen3_INCLUDE_DIRS}
  #${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
- add_library(ImuState
-   src/ImuState.cpp
- )
+ # add_library(ImuState
+ #   src/ImuState.cpp
+ # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -155,9 +155,9 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node
-        src/VILConfusorNode.cpp
-        )
+# add_executable(${PROJECT_NAME}_node
+#         src/VILConfusorNode.cpp
+#         )
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -167,17 +167,17 @@ add_executable(${PROJECT_NAME}_node
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(${PROJECT_NAME}_node
-   ${catkin_LIBRARIES}
-   #${confusion_LIBRARIES}
-   ${Boost_LIBRARIES}
-   ${Eigen3_LIBRARIES}
-   ${Ceres_LIBRARIES}
-   #${OpenCV_LIBRARIES}
- )
+#  target_link_libraries(${PROJECT_NAME}_node
+#    ${catkin_LIBRARIES}
+#    #${confusion_LIBRARIES}
+#    ${Boost_LIBRARIES}
+#    ${Eigen3_LIBRARIES}
+#    ${Ceres_LIBRARIES}
+#    #${OpenCV_LIBRARIES}
+#  )
 
 #############
 ## Install ##
@@ -195,9 +195,9 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
- install(TARGETS ${PROJECT_NAME}_node
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
+#  install(TARGETS ${PROJECT_NAME}_node
+#    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#  )
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html

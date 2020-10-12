@@ -1,5 +1,8 @@
 <launch>
 
+    <!-- You should probably not launch this file directly, but rather rely on
+     fusion_carla.launch, which handles most of the configuration automatically. -->
+
     <arg name="raw_lidar_topic" default="/lidar"/>
     <!-- This launch file assumes that the image topic is already monochrome.
      If it is not, then you need to launch imageproc to create a monochrome image. -->
@@ -14,6 +17,7 @@
 
     <arg name="loam" default="true" />
     <arg name="rovio" default="true" />
+    <arg name="fusion" default="true" />
     <arg name="rviz" default="false" />
 
 
@@ -39,14 +43,19 @@
         <remap from="cam0/image_raw" to="$(arg mono_image_topic)" />
         <!-- imu/vio is the IMU used exclusively by Rovio -->
         <remap from="imu0" to="$(arg raw_imu_vio_topic)" />
+
+        <remap from="/lidar/pcl" to="$(arg raw_lidar_topic)" />
+
         <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
             <param name="filter_config" value="$(arg config_dir)/rovio.cfg"/>
             <param name="camera0_config" value="$(arg config_dir)/rovio_camera.yaml"/>
+            <param name="camera_frame_name" value="ego_vehicle/camera/rgb/front" />
+            <param name="lidar_frame_name" value="ego_vehicle/lidar/lidar1" />
         </node>
     </group>
 
     <!-- Fusion -->
-    <group if="true">
+    <group if="$(arg fusion)">
         <node pkg="gtsam_fusion" type="gtsam_fusion_filter" name="gtsam_fusion_filter" output="screen">
             <rosparam file="$(arg config_dir)/fusion_params.yaml" command="load"/>
 <!--            <remap from="~laser_odom_input" to="/aft_mapped_to_init_CORRECTED" />-->

@@ -24,7 +24,7 @@
   <depend>sensor_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>tf</depend>
-  <depend>confusion</depend>
+  <!-- <depend>confusion</depend> -->
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

@@ -1,9 +1,14 @@
 <launch>
 
+    <!-- This launch file should be configured for the underpass dataset from Khattak et al. "Complementary Multi-Modal Sensor
+    Fusion for Resilient Robot Pose Estimation in Subterranean Environments". However, due to time
+    constraints, I did not get it consistently working. -->
+
     <arg name="bagfile" />
     <arg name="rate" default="1.0" />
     <arg name="rovio" default="true" />
     <arg name="loam" default="true" />
+    <arg name="fusion" default="true" />
     <arg name="rviz" default="false" />
 
     <node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
@@ -13,12 +18,64 @@
         <remap from="/vn100/imu" to="/imu/vio"/>
 	</node>
 
+    <node pkg="tf" type="static_transform_publisher" name="tf_lidar_cam_bagframes" args="
+        0.143373033912513   0.001844679769965  -0.152734883569140
+        -1.563483662924555  -0.001122948541060  -1.755796784911929
+        /velodyne /cam_blackfly 100"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="tf_lidar_cam_carlaframes" args="
+        0.143373033912513   0.001844679769965  -0.152734883569140
+        -1.563483662924555  -0.001122948541060  -1.755796784911929
+        /ego_vehicle/lidar/lidar1 /ego_vehicle/camera/rgb/front 100"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="tf_loam_init_transform" args="
+        0.0 0.0 0.0
+        0.0 0.0 0.0
+        map loam_init_ros_convention 100"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="tf_map_rovio_world" args="
+       0.0 0.0 0.0
+       0.0 0.0 0.0 1.0
+       map rovio_world 100"/>
+
     <include file="$(find gtsam_fusion)/launch/fusion.launch">
         <arg name="config_dir" value="$(find gtsam_fusion)/config/san_rafael" />
 
         <arg name="rovio" value="$(arg rovio)" />
         <arg name="loam" value="$(arg loam)" />
+        <arg name="fusion" value="$(arg fusion)" />
         <arg name="rviz" value="$(arg rviz)" />
     </include>
+
+    <node if="$(eval arg('newbag') != '')" pkg="rosbag" type="record" name="rosbag_record" args="
+
+    record -O $(arg newbag)
+    /tf
+    /rosout
+
+    /rovio/T_G_W
+    /rovio/extrinsics0
+    /rovio/imu_biases
+    /rovio/odometry
+    /rovio/pose_with_covariance_stamped
+    /rovio/transform
+
+    /aft_mapped_to_init_CORRECTED
+    /aft_mapped_to_init
+    /laser_odom_to_init_CORRECTED
+    /laser_odom_to_init
+    /integrated_to_init_CORRECTED
+    /integrated_to_init
+
+    /laser_mapping_optimization_status
+    /laser_odom_optimization_status
+    /laser_odom_status
+
+    /imu_trans
+
+    /gtsam_fusion_filter/output
+    /gtsam_fusion_node/odometry
+    " >
+    </node>
 
 </launch>

@@ -1,0 +1,22 @@
+
+diagnostics: # For each of the following items, the diagnostics node will track the error over time
+  - name: rovio                   # Name of this diagnostic (Used only for display, and naming the ROS topic)
+    gt: /ego_vehicle/imu/imu_vio  # Ground truth tf frame_id
+    est: rovio_imu                # frame_id of estimated transform from odometry algorithm
+    ref: rovio_world              # Stationary reference frame
+    rate: 20                      # Frequency of odometry publications (Hz)
+  - name: loam_mapping
+    gt: /ego_vehicle/lidar/lidar1
+    est: aft_mapped_to_init_CORRECTED
+    ref: camera_init_CORRECTED
+    rate: 10
+  - name: loam_odom
+    gt: /ego_vehicle/imu/imu_lidar
+    est: laser_odom_CORRECTED
+    ref: camera_init_CORRECTED
+    rate: 10
+  - name: fusion
+    gt: /ego_vehicle/imu/imu_fusion
+    est: gtsam_odom
+    ref: rovio_world
+    rate: 20

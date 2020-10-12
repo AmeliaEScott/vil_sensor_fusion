@@ -1,10 +1,14 @@
 <launch>
 
     <arg name="bagfile" />
+    <arg name="newbag" default="" />
     <arg name="rate" default="1.0" />
     <arg name="rovio" default="true" />
     <arg name="loam" default="true" />
+    <arg name="fusion" default="true" />
     <arg name="rviz" default="false" />
+
+    <param name="/loam/multiScanRegistration/lidar" value="HDL-32" /> <!-- options: VLP-16  HDL-32  HDL-64E O1-64 O1-16 -->
 
     <node pkg="rosbag" type="play" name="rosbag_player" args="--clock -r $(arg rate) $(arg bagfile)" required="true">
         <!-- <remap from="/tf" to="/tf_from_carla" /> -->
@@ -27,7 +31,57 @@
 
         <arg name="rovio" value="$(arg rovio)" />
         <arg name="loam" value="$(arg loam)" />
+        <arg name="fusion" value="$(arg fusion)" />
         <arg name="rviz" value="$(arg rviz)" />
     </include>
+
+    <group if="true">
+        <node pkg="gtsam_fusion" type="diagnostics.py" name="diagnostics" output="screen">
+            <rosparam command="load" file="$(find gtsam_fusion)/config/carla/diagnostics_params.yaml" />
+        </node>
+    </group>
+
+    <node if="$(eval arg('newbag') != '')" pkg="rosbag" type="record" name="rosbag_record" args="
+
+    record -O $(arg newbag)
+    /carla/ego_vehicle/vehicle_info
+    /carla/ego_vehicle/vehicle_status
+    /tf
+    /rosout
+
+    /rovio/T_G_W
+    /rovio/extrinsics0
+    /rovio/imu_biases
+    /rovio/odometry
+    /rovio/pose_with_covariance_stamped
+    /rovio/transform
+
+    /aft_mapped_to_init_CORRECTED
+    /aft_mapped_to_init
+    /laser_odom_to_init_CORRECTED
+    /laser_odom_to_init
+    /integrated_to_init_CORRECTED
+    /integrated_to_init
+
+    /laser_mapping_optimization_status
+    /laser_odom_optimization_status
+    /laser_odom_status
+
+    /velodyne_cloud_1
+    /velodyne_cloud_2
+    /velodyne_cloud_3
+    /velodyne_cloud_registered
+
+    /imu_trans
+
+    /gtsam_fusion_filter/output
+    /gtsam_fusion_node/odometry
+
+    /diagnostics/fusion
+    /diagnostics/loam_mapping
+    /diagnostics/loam_odom
+    /diagnostics/rovio
+    " >
+    </node>
 
 </launch>

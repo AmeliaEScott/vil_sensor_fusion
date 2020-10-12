@@ -23,49 +23,39 @@ import rospy
 import copy
 import itertools
 
+
+class OdomWithHessian:
+    def __init__(self, odom):
+        self.odom = odom
+        self.hessian = np.zeros((6, 6), dtype=np.float64)
+
+
 LOAM_DIAGNOSTIC_TOPIC = "/diagnostics/loam_odom"
 ROVIO_DIAGNOSTIC_TOPIC = "/diagnostics/rovio"
+FUSION_DIAGNOSTIC_TOPIC = "/diagnostics/fusion"
 
-LOAM_ODOM_TOPIC = "/loam/frame_transform/odometry/ros"
+LOAM_ODOM_TOPIC = "/laser_odom_to_init_CORRECTED"
+# LOAM_ODOM_TOPIC = "/laser_odom_to_init"
+LOAM_STATUS_TOPIC = "/laser_odom_optimization_status"
 ROVIO_ODOM_TOPIC = "/rovio/odometry"
+FUSION_ODOM_TOPIC = "/gtsam_fusion_node/odometry"
 
 BAG_DIR = "/home/timothy/Code/catkin_ws/src/vil_sensor_fusion/sample_bags"
 
-# DEGEN_REGIONS = {
-#     # "Test1_vehicle.audi.tt_results.bag": [  # LOAM failed in this run
-#     #     (505.0, 535.0),
-#     #     (625.0, 665.0),
-#     #     (745.0, 783.0),
-#     # ],
-#     "Test1_vehicle.tesla.model3_results.bag": [
-#         (58.0, 85.0),
-#         (125.0, 175.0),
-#
-#     ],
-#     "Test2_Denser_vehicle.tesla.model3_results.bag": [
-#         (65.0, 100.0),
-#         (185.0, 195.0)
-#     ],
-#     "Test3_vehicle.tesla.model3_results.bag": [
-#     ],
-#     "Test4_vehicle.audi.tt_results.bag": [
-#         (607.0, 625.0),
-#     ],
-#     # "Town03_vehicle.audi.tt_results.bag": [
-#     #     (170.0, 217.0)
-#     # ],
-#     # "V1_01_easy_results.bag": [
-#     #
-#     # ],
-#     # "V1_03_difficult_results.bag": [
-#     #
-#     # ],
-#     # "san_rafeal_tunnel_2019-06-24-14-17-04_0_results.bag": [
-#     #     (1561411065.0, 1561411103.0)
-#     # ]
-# }
 
 DEGEN_ROT = {
+    # "Results_Tunnel.bag": [
+    #     (25.0, 35.0)
+    # ],
+    # "Results_Plane2.bag": [
+    #     (35.0, 78.0)
+    # ],
+    "Results_SanRafael.bag": [
+        (35.0, 85.0)
+    ],
+    # "Results_Town.bag": [
+    #     (39.0, 59.0)
+    # ],
     # "Test1_vehicle.tesla.model3_results.bag": [
     #     (53.0, 75.0),
     #     # (115.0, 162.0),
@@ -75,19 +65,32 @@ DEGEN_ROT = {
     #     (165.0, 180.0)
     # ],
     # "Test3_vehicle.tesla.model3_results.bag": [],
+    # "Test3_vehicle.tesla.model3_results2.bag": [],
     # "Test4_vehicle.tesla.model3_results.bag": [],
     # "Test4_vehicle.audi.tt_hdl64e_results.bag": [],
     # "Town03_vehicle.tesla.model3_results.bag": [],
     # "san_04_handheld_results.bag": [],
     # "anymal_arche_results.bag": [],
-    "forest_shepherds_crook_results.bag": [],
+    # "forest_shepherds_crook_results.bag": [],
     # "2011_09_26_drive_0022_sync_results.bag": [],
     # "2011_10_03_drive_0042_sync_results.bag": [],
     # "02_vlp16_results.bag": [],
-    "06_os64_results.bag": [],
+    # "06_os64_results.bag": [],
 }
 
 DEGEN_TRANS = {
+    "Results_Tunnel.bag": [
+        (25.0, 35.0)
+    ],
+    "Results_Plane2.bag": [
+        (35.0, 78.0)
+    ],
+    "Results_SanRafael.bag": [
+        (35.0, 85.0)
+    ],
+    "Results_Town.bag": [
+        (13.0, 64.0)
+    ],
     # "Test1_vehicle.tesla.model3_results.bag": [
     #     (53.0, 75.0),
     #     # (115.0, 162.0),
@@ -97,6 +100,7 @@ DEGEN_TRANS = {
     #     # (165.0, 180.0)
     # ],
     # "Test3_vehicle.tesla.model3_results.bag": [],
+    # "Test3_vehicle.tesla.model3_results2.bag": [],
     # "Test4_vehicle.tesla.model3_results.bag": [
     #     (106.0, 125.0),
     # ],
@@ -108,27 +112,64 @@ DEGEN_TRANS = {
     #     (29.0, 83.0)
     # ],
     # "anymal_arche_results.bag": [(110.0, 400.0)],
-    "forest_shepherds_crook_results.bag": [],
+    # "forest_shepherds_crook_results.bag": [],
     # "2011_09_26_drive_0022_sync_results.bag": [],
     # "2011_10_03_drive_0042_sync_results.bag": [],
     # "02_vlp16_results.bag": [],
-    "06_os64_results.bag": [],
+    # "06_os64_results.bag": [],
 }
 
 PLOTS = [
     {
         'source': 'loam',
-        'title': 'Loam Translation',
+        'title': 'Translation',
+        'include_bagname': False,
         'plots': [
             # {
             #     'diagnostic': True,
             #     'roc': False,
             #     'metric': 'abs_linear_vel_err',
             #     'log': False,
-            #     'label': 'GT Vel. Error',
+            #     'label': 'GT Vel Err',
             #     'matrix_subset': 'trans',
             #     # 'ylim': 0.5
             # },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'd_opt',
+                'log': False,
+                'label': 'D Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'trans'
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'e_opt',
+                'log': False,
+                'label': 'E Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'trans'
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'a_opt',
+                'log': False,
+                'label': 'A Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'trans'
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'norm_frobenius',
+                'log': False,
+                'label': 'F Norm',
+                'matrix': 'hessian',
+                'matrix_subset': 'trans'
+            },
             # {
             #     'diagnostic': False,
             #     'roc': True,
@@ -161,54 +202,91 @@ PLOTS = [
             #     'roc': True,
             #     'metric': 'norm_frobenius',
             #     'log': False,
-            #     'label': 'F Norm Hess.',
+            #     'label': 'F Norm',
             #     'matrix': 'hessian',
             #     'matrix_subset': 'trans'
             # },
-            {
-                'diagnostic': False,
-                'roc': True,
-                'metric': 'dist_slope_tx',
-                'log': False,
-                'label': 'X',
-                'matrix': 'dists_corner',
-                'matrix_subset': 'trans',
-                # 'ylim': 0.02
-            },
-            {
-                'diagnostic': False,
-                'roc': True,
-                'metric': 'dist_slope_tx',
-                'log': False,
-                'label': 'Y',
-                'matrix': 'dists_corner',
-                'matrix_subset': 'trans',
-                # 'ylim': 0.02
-            },
-            {
-                'diagnostic': False,
-                'roc': True,
-                'metric': 'dist_slope_tx',
-                'log': False,
-                'label': 'Z',
-                'matrix': 'dists_corner',
-                'matrix_subset': 'trans',
-                # 'ylim': 0.02
-            },
+            # {
+            #     'diagnostic': False,
+            #     'roc': True,
+            #     'metric': 'dist_slope_tx',
+            #     'log': False,
+            #     'label': 'X',
+            #     'matrix': 'dists_corner',
+            #     'matrix_subset': 'trans',
+            #     # 'ylim': 0.02
+            # },
+            # {
+            #     'diagnostic': False,
+            #     'roc': True,
+            #     'metric': 'dist_slope_tx',
+            #     'log': False,
+            #     'label': 'Y',
+            #     'matrix': 'dists_corner',
+            #     'matrix_subset': 'trans',
+            #     # 'ylim': 0.02
+            # },
+            # {
+            #     'diagnostic': False,
+            #     'roc': True,
+            #     'metric': 'dist_slope_tx',
+            #     'log': False,
+            #     'label': 'Z',
+            #     'matrix': 'dists_corner',
+            #     'matrix_subset': 'trans',
+            #     # 'ylim': 0.02
+            # },
         ]
     },
     {
         'source': 'loam',
-        'title': 'Loam Rotation',
+        'title': 'Rotation',
+        'include_bagname': False,
         'plots': [
             # {
             #     'diagnostic': True,
             #     'roc': False,
             #     'metric': 'abs_rot_vel_err',
             #     'log': False,
-            #     'label': 'GT Ang. Vel. Err',
+            #     'label': 'GT Ang Err',
             #     'matrix_subset': 'rot',
             # },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'd_opt',
+                'log': False,
+                'label': 'D Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'rot'
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'e_opt',
+                'log': False,
+                'label': 'E Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'rot'
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'a_opt',
+                'log': False,
+                'label': 'A Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'rot'
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'norm_frobenius',
+                'log': False,
+                'label': 'F Norm',
+                'matrix': 'hessian',
+                'matrix_subset': 'rot'
+            },
             # {
             #     'diagnostic': False,
             #     'roc': True,
@@ -241,37 +319,89 @@ PLOTS = [
             #     'roc': True,
             #     'metric': 'norm_frobenius',
             #     'log': False,
-            #     'label': 'F Norm Hess.',
+            #     'label': 'F Norm',
             #     'matrix': 'hessian',
             #     'matrix_subset': 'rot'
             # },
 
+            # {
+            #     'diagnostic': False,
+            #     'roc': True,
+            #     'metric': 'dist_slope_rx',
+            #     'log': False,
+            #     'label': 'RX',
+            #     'matrix': 'dists_corner',
+            #     'matrix_subset': 'rot',
+            # },
+            # {
+            #     'diagnostic': False,
+            #     'roc': True,
+            #     'metric': 'dist_slope_ry',
+            #     'log': False,
+            #     'label': 'RY',
+            #     'matrix': 'dists_corner',
+            #     'matrix_subset': 'rot',
+            # },
+            # {
+            #     'diagnostic': False,
+            #     'roc': True,
+            #     'metric': 'dist_slope_rz',
+            #     'log': False,
+            #     'label': 'RZ',
+            #     'matrix': 'dists_corner',
+            #     'matrix_subset': 'rot',
+            # },
+        ]
+    },
+    {
+        'source': 'loam',
+        'title': 'Combined',
+        'include_bagname': False,
+        'plots': [
+            # {
+            #     'diagnostic': True,
+            #     'roc': False,
+            #     'metric': 'abs_linear_vel_err',
+            #     'log': False,
+            #     'label': 'GT Vel Err',
+            #     'matrix_subset': 'all',
+            #     # 'ylim': 0.5
+            # },
             {
                 'diagnostic': False,
                 'roc': True,
-                'metric': 'dist_slope_rx',
+                'metric': 'd_opt',
                 'log': False,
-                'label': 'RX',
-                'matrix': 'dists_corner',
-                'matrix_subset': 'rot',
+                'label': 'D Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'all'
             },
             {
                 'diagnostic': False,
                 'roc': True,
-                'metric': 'dist_slope_ry',
+                'metric': 'e_opt',
                 'log': False,
-                'label': 'RY',
-                'matrix': 'dists_corner',
-                'matrix_subset': 'rot',
+                'label': 'E Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'all'
             },
             {
                 'diagnostic': False,
                 'roc': True,
-                'metric': 'dist_slope_rz',
+                'metric': 'a_opt',
                 'log': False,
-                'label': 'RZ',
-                'matrix': 'dists_corner',
-                'matrix_subset': 'rot',
+                'label': 'A Opt',
+                'matrix': 'hessian',
+                'matrix_subset': 'all'
+            },
+            {
+                'diagnostic': False,
+                'roc': True,
+                'metric': 'norm_frobenius',
+                'log': False,
+                'label': 'F Norm',
+                'matrix': 'hessian',
+                'matrix_subset': 'all'
             },
         ]
     },
@@ -283,6 +413,7 @@ def numpify_diagnostics(data, hessian=False):
     diagnostics = {
         'relative_dist_err': np.zeros(shape=(len(data)), dtype=np.float64),
         'abs_rot_err': np.zeros(shape=(len(data)), dtype=np.float64),
+        'abs_dist_err': np.zeros(shape=(len(data)), dtype=np.float64),
         'rel_linear_vel_err': np.zeros(shape=(len(data)), dtype=np.float64),
         'abs_linear_vel_err': np.zeros(shape=(len(data)), dtype=np.float64),
         'rel_rot_vel_err': np.zeros(shape=(len(data)), dtype=np.float64),
@@ -300,8 +431,7 @@ def numpify_diagnostics(data, hessian=False):
         odometry['dists_corner'] = np.zeros_like(odometry['dists'])
         odometry['shifts_trans'] = np.zeros(shape=(15, len(data)))
         odometry['shifts_rot'] = np.zeros_like(odometry['shifts_trans'])
-    else:
-        odometry['cov_twist'] = np.zeros(shape=(6, 6, len(data)), dtype=np.float64)
+    odometry['cov_twist'] = np.zeros(shape=(6, 6, len(data)), dtype=np.float64)
     for i, (odom, diag) in enumerate(data):
         for field in diagnostics.keys():
             diagnostics[field][i] = getattr(diag, field)
@@ -317,11 +447,12 @@ def numpify_diagnostics(data, hessian=False):
             else:
                 print("Could not find 'dists' in OdometryWithHessian")
             covariance = np.array(odom.odom.pose.covariance, dtype=np.float64)
+            covariance_twist = np.array(odom.odom.twist.covariance, dtype=np.float64)
             position = odom.odom.pose.pose.position
             orientation = odom.odom.pose.pose.orientation
         else:
             covariance = np.array(odom.pose.covariance, dtype=np.float64)
-            odometry['cov_twist'][:, :, i] = np.reshape(np.array(odom.twist.covariance, dtype=np.float64), (6, 6))
+            covariance_twist = np.array(odom.twist.covariance, dtype=np.float64)
             position = odom.pose.pose.position
             orientation = odom.pose.pose.orientation
         orientation = np.array([
@@ -338,6 +469,7 @@ def numpify_diagnostics(data, hessian=False):
         ], dtype=np.float64)
         pose = np.concatenate([position, orientation.as_euler("XYZ")])
         odometry['covariance'][:, :, i] = np.reshape(covariance, (6, 6))
+        odometry['cov_twist'][:, :, i] = np.reshape(np.array(covariance_twist, dtype=np.float64), (6, 6))
         odometry['pose'][:, :, i] = np.reshape(pose, (6, 1))
     return times, diagnostics, odometry
 
@@ -346,28 +478,44 @@ def load_ros_bag(bag_abs_path):
     bag_name = os.path.basename(bag_abs_path)
     loam_odoms = {}
     rovio_odoms = {}
+    fusion_odoms = {}
 
     loam_data = []
     rovio_data = []
+    fusion_data = []
 
     with rosbag.Bag(bag_abs_path) as bag:
         print("Reading odometry data for {}...".format(bag_name))
-        for topic, msg, _ in bag.read_messages(topics=[LOAM_ODOM_TOPIC, ROVIO_ODOM_TOPIC]):
+        for topic, msg, _ in bag.read_messages(topics=[LOAM_ODOM_TOPIC, ROVIO_ODOM_TOPIC, FUSION_ODOM_TOPIC]):
             if topic == LOAM_ODOM_TOPIC:
-                t = msg.odom.header.stamp
-                loam_odoms[t] = msg
+                if hasattr(msg, "odom"):
+                    t = msg.odom.header.stamp
+                    loam_odoms[t] = msg
+                else:
+                    t = msg.header.stamp
+                    loam_odoms[t] = OdomWithHessian(msg)
+            elif topic == FUSION_ODOM_TOPIC:
+                t = msg.header.stamp
+                fusion_odoms[t] = msg
             else:
                 t = msg.header.stamp
                 rovio_odoms[t] = msg
 
-        print("Read {} loam, {} rovio".format(len(loam_odoms), len(rovio_odoms)))
+        for topic, msg, _ in bag.read_messages(topics=[LOAM_STATUS_TOPIC]):
+            t = msg.header.stamp
+            if t in loam_odoms:
+                loam_odoms[t].hessian = msg.hessian
+
+        print("Read {} loam, {} rovio, {} fusion".format(len(loam_odoms), len(rovio_odoms), len(fusion_odoms)))
         print("Reading diagnostic data...")
-        for topic, msg, _ in bag.read_messages(topics=[LOAM_DIAGNOSTIC_TOPIC, ROVIO_DIAGNOSTIC_TOPIC]):
+        for topic, msg, _ in bag.read_messages(topics=[LOAM_DIAGNOSTIC_TOPIC, ROVIO_DIAGNOSTIC_TOPIC, FUSION_DIAGNOSTIC_TOPIC]):
             t = msg.header.stamp
             if topic == LOAM_DIAGNOSTIC_TOPIC and t in loam_odoms:
                 loam_data.append((loam_odoms[t], msg))
             elif topic == ROVIO_DIAGNOSTIC_TOPIC and t in rovio_odoms:
                 rovio_data.append((rovio_odoms[t], msg))
+            elif topic == FUSION_DIAGNOSTIC_TOPIC and t in fusion_odoms:
+                fusion_data.append((fusion_odoms[t], msg))
 
         if len(rovio_data) == 0:
             print("No rovio diagnostics, adding fake diagnostics.")
@@ -384,7 +532,7 @@ def load_ros_bag(bag_abs_path):
 
         print("Total count so far: {} loam, {} rovio".format(len(loam_data), len(rovio_data)))
 
-    return loam_data, rovio_data
+    return loam_data, rovio_data, fusion_data
 
 
 def shade_degen_regions(axes: plt.Axes, yrange: Tuple, regions: List[Tuple]):
@@ -398,10 +546,10 @@ def shade_degen_regions(axes: plt.Axes, yrange: Tuple, regions: List[Tuple]):
 
 def apply_degen_function(matrix, pose, matrix_subset, func, shifts_trans=None, shifts_rot=None):
     if matrix.shape[0:2] == (6, 6):
-        if matrix_subset == "trans":
+        if matrix_subset == "rot":
             matrix = matrix[3:6, 3:6, :]
             pose = pose[3:6, :, :]
-        elif matrix_subset == "rot":
+        elif matrix_subset == "trans":
             matrix = matrix[0:3, 0:3, :]
             pose = pose[0:3, :, :]
         elif matrix_subset in ["x", "y", "z", "roll", "pitch", "yaw"]:
@@ -447,6 +595,7 @@ def plot_roc(axes: plt.Axes, is_degen, times, metric, invert=False):
     tpr, fpr = calc_roc(is_degen, metric)
     if invert:
         tpr = 1.0 - tpr
+        fpr = 1.0 - fpr
     axes.plot(fpr, tpr)
     axes.set_ylabel("TPR")
     axes.set_xlabel("FPR")
@@ -546,7 +695,11 @@ def plot(
             roc_ax.axis('off')
 
     ax.set_xlabel("Time (s)")
-    fig.suptitle("{} - {}".format(plots['title'], title), y=0.99)
+    if plots['include_bagname']:
+        suptitle = "{} - {}".format(plots['title'], title)
+    else:
+        suptitle = plots['title']
+    fig.suptitle(suptitle, y=0.997)
     fig.show()
 
 
@@ -584,9 +737,10 @@ def load_all_bags(bag_dir: str, degen_regions_rot: Dict, degen_regions_trans: Di
 
         if not os.path.isfile(pkl_abs_path):
 
-            loam_data, rovio_data = load_ros_bag(bag_abs_path)
+            loam_data, rovio_data, fusion_data = load_ros_bag(bag_abs_path)
             loam_times, loam_diagnostics, loam_odometry = numpify_diagnostics(loam_data, hessian=True)
-            # rovio_times, rovio_diagnostics, rovio_odometry = numpify_diagnostics(rovio_data, hessian=False)
+            rovio_times, rovio_diagnostics, rovio_odometry = numpify_diagnostics(rovio_data, hessian=False)
+            fusion_times, fusion_diagnostics, fusion_odometry = numpify_diagnostics(fusion_data, hessian=False)
 
             loam_times -= loam_times[0]
 
@@ -595,9 +749,12 @@ def load_all_bags(bag_dir: str, degen_regions_rot: Dict, degen_regions_trans: Di
                 'loam_times': loam_times,
                 'loam_diagnostics': loam_diagnostics,
                 'loam_odometry': loam_odometry,
-                # 'rovio_times': rovio_times,
-                # 'rovio_diagnostics': rovio_diagnostics,
-                # 'rovio_odometry': rovio_odometry
+                'rovio_times': rovio_times,
+                'rovio_diagnostics': rovio_diagnostics,
+                'rovio_odometry': rovio_odometry,
+                'fusion_times': fusion_times,
+                'fusion_diagnostics': fusion_diagnostics,
+                'fusion_odometry': fusion_odometry,
             }
 
             print("Dumping data...")
@@ -609,8 +766,11 @@ def load_all_bags(bag_dir: str, degen_regions_rot: Dict, degen_regions_trans: Di
 
         tmp_data['degen_regions_rot'] = degen_regions_rot[bag_name]
         tmp_data['degen_regions_trans'] = degen_regions_trans[bag_name]
+        tmp_data['degen_regions_all'] = degen_regions_rot[bag_name] + degen_regions_trans[bag_name]
 
-        for label, regions in zip(['is_degen_rot', 'is_degen_trans'], [degen_regions_rot[bag_name], degen_regions_trans[bag_name]]):
+        for label, regions in zip(['is_degen_rot', 'is_degen_trans', 'is_degen_all'], [
+            degen_regions_rot[bag_name], degen_regions_trans[bag_name], degen_regions_rot[bag_name] + degen_regions_trans[bag_name]
+        ]):
             is_degen = np.zeros_like(tmp_data['loam_times'], dtype=np.bool)
             for degen_region in regions:
                 is_degen = np.logical_or(is_degen, np.logical_and(
@@ -627,6 +787,7 @@ def load_all_bags(bag_dir: str, degen_regions_rot: Dict, degen_regions_trans: Di
 def plot_all_rocs(data):
     all_degen_rot = np.array([], dtype=np.bool)
     all_degen_trans = np.array([], dtype=np.bool)
+    all_degen_all = np.array([], dtype=np.bool)
 
     trans_scores = [
         {
@@ -682,49 +843,49 @@ def plot_all_rocs(data):
 
         {
             'func': degen_funcs.d_opt,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': "D-Opt Cov.",
             'inv': True
         },
         {
             'func': degen_funcs.a_opt,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': "A-Opt Cov.",
             'inv': True
         },
         {
             'func': degen_funcs.e_opt,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': "E-Opt Cov.",
             'inv': True
         },
         {
             'func': degen_funcs.max_eigen,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': "Max Eigen Cov.",
             'inv': True
         },
         {
             'func': degen_funcs.norm_1,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': "1 Norm Cov.",
             'inv': True
         },
         {
             'func': degen_funcs.norm_2,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': "2 Norm Cov.",
             'inv': True
         },
         {
             'func': degen_funcs.norm_frobenius,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': "F Norm Cov.",
             'inv': True
         },
         {
             'func': degen_funcs.condition_number,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': 'Cond Cov.',
             'inv': False
         },
@@ -735,19 +896,19 @@ def plot_all_rocs(data):
 
         {
             'func': degen_funcs.jensen_bregman,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': "JB Divergence",
             'inv': True
         },
         {
             'func': degen_funcs.differential_entropy,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': 'Diff. Ent.',
             'inv': True
         },
         {
             'func': degen_funcs.kullback_leibler_0pose,
-            'matrix_name': 'covariance',
+            'matrix_name': 'cov_twist',
             'label': 'KL Divergence',
             'inv': True
         },
@@ -759,14 +920,16 @@ def plot_all_rocs(data):
             d['scores'] = np.array([], dtype=np.float64)
 
     rot_scores = copy.deepcopy(trans_scores)
+    all_scores = copy.deepcopy(trans_scores)
 
     # trans_scores[6]['inv'] = False
 
     for bagname, bagdata in data.items():
         all_degen_rot = np.concatenate([all_degen_rot, bagdata['is_degen_rot']])
         all_degen_trans = np.concatenate([all_degen_trans, bagdata['is_degen_trans']])
+        all_degen_all = np.concatenate([all_degen_all, bagdata['is_degen_all']])
 
-        for x, subset in zip([rot_scores, trans_scores], ["rot", "trans"]):
+        for x, subset in zip([rot_scores, trans_scores, all_scores], ["rot", "trans", "all"]):
             for d in x:
                 if d is not None:
                     y = apply_degen_function(
@@ -780,28 +943,33 @@ def plot_all_rocs(data):
                     d['scores'] = np.concatenate([d['scores'], y])
                     # print("+ {} = {}".format(y.shape, d['scores'].shape))
 
-    fig_rot: plt.Figure
-    axeses_rot: List[plt.Axes]
-    fig_rot, axeses_rot = plt.subplots(nrows=5, ncols=4, gridspec_kw={
+    nrows = 5
+    ncols = 4
+    gridspec_kw = {
         'left': 0.1, 'right': 0.95, 'top': 0.9, 'bottom': 0.1,
         'hspace': 0.4, 'wspace': 0.25
-    })
+    }
+
+    fig_rot: plt.Figure
+    axeses_rot: List[plt.Axes]
+    fig_rot, axeses_rot = plt.subplots(nrows=nrows, ncols=ncols, gridspec_kw=gridspec_kw)
 
     fig_trans: plt.Figure
     axeses_trans: List[plt.Axes]
-    fig_trans, axeses_trans = plt.subplots(nrows=5, ncols=4, gridspec_kw={
-        'left': 0.1, 'right': 0.95, 'top': 0.9, 'bottom': 0.1,
-        'hspace': 0.4, 'wspace': 0.25
-    })
+    fig_trans, axeses_trans = plt.subplots(nrows=nrows, ncols=ncols, gridspec_kw=gridspec_kw)
+
+    fig_all: plt.Figure
+    axeses_all: List[plt.Axes]
+    fig_all, axeses_all = plt.subplots(nrows=nrows, ncols=ncols, gridspec_kw=gridspec_kw)
 
     fig: plt.Figure
     for x, subset, axeses, is_degen, label, fig in zip(
-            [rot_scores, trans_scores],
-            ["rot", "trans"],
-            [axeses_rot, axeses_trans],
-            [all_degen_rot, all_degen_trans],
-            ["Rotation", "Translation"],
-            [fig_rot, fig_trans]
+            [rot_scores, trans_scores, all_scores],
+            ["rot", "trans", "all"],
+            [axeses_rot, axeses_trans, axeses_all],
+            [all_degen_rot, all_degen_trans, all_degen_all],
+            ["Rotation", "Translation", "Combined"],
+            [fig_rot, fig_trans, fig_all]
     ):
         fig.suptitle(label, y=0.996, size='large')
         axes: plt.Axes
@@ -842,6 +1010,14 @@ def plot_all_rocs(data):
 
 def compare_datasets(data):
 
+    title_map = {
+        "Results_SanRafael.bag": "Real-life underpass",
+        "Results_Town.bag": "Town",
+        "Results_Tunnel.bag": "Tunnel",
+        "Results_Plane.bag": "Plane",
+        "Results_Plane2.bag": "Plane",
+    }
+
     for plot in PLOTS:
         fig: plt.Figure
         axeses: List[List[plt.Axes]]
@@ -850,9 +1026,10 @@ def compare_datasets(data):
         for i, axes_row, plot_metadata in zip(range(0, 1000), axeses, plot['plots']):
             if type(axes_row) != np.ndarray:
                 axes_row = [axes_row]
-            for j, axes, (bagname, bagdata) in zip(range(0, 1000), axes_row, data.items()):
+            axes: plt.Axes
+            for j, axes, (bagname, bagdata) in zip(range(0, 1000), itertools.cycle(axes_row), data.items()):
                 if i == 0:
-                    axes.set_title(bagname[:-12][:15])
+                    axes.set_title(title_map[bagname])
                 if plot_metadata['matrix_subset'] == 'rot':
                     degen_regions = bagdata['degen_regions_rot']
                 else:
@@ -867,9 +1044,122 @@ def compare_datasets(data):
         fig.show()
 
 
+def compare_datasets_on_same_plot(data):
+
+    title_map = {
+        "Results_SanRafael.bag": "Real-life underpass",
+        "Results_Town.bag": "Simulated Town"
+    }
+
+    for plot in PLOTS:
+        fig: plt.Figure
+        axeses: List[List[plt.Axes]]
+        # fig, axeses = plt.subplots(nrows=len(plot['plots']), ncols=len(data), sharex='col', sharey='row')
+        fig, axeses = plt.subplots(nrows=len(plot['plots']), ncols=1, sharex='col', sharey='row')
+
+        for i, axes_row, plot_metadata in zip(range(0, 1000), axeses, plot['plots']):
+            if type(axes_row) != np.ndarray:
+                axes_row = [axes_row]
+            axes: plt.Axes
+            for j, axes, (bagname, bagdata) in zip(range(0, 1000), itertools.cycle(axes_row), data.items()):
+                # if i == 0:
+                #     axes.set_title(title_map[bagname])
+                if plot_metadata['matrix_subset'] == 'rot':
+                    degen_regions = bagdata['degen_regions_rot']
+                else:
+                    degen_regions = bagdata['degen_regions_trans']
+                plot_single_axes(axes, plot['source'], bagdata, degen_regions, plot_metadata)
+                # if j != 0:
+                #     axes.set_ylabel(None)
+                if i == axeses.shape[0] - 1:
+                    axes.set_xlabel("Time (s)")
+                axes.set_ylim(auto=True)
+                axes.set_yscale("log")
+                axes.legend(["Real Underpass", "Simulated Town"], loc='lower right')
+        fig.suptitle(plot['title'], y=0.997)
+        fig.show()
+
+
+def plot_err_over_time(data):
+
+    ylabel = 'Global Pose Error (m)'
+    # ylabel = 'Linear Velocity Error (m/s)'
+    metric = 'abs_dist_err'
+    # metric = 'abs_linear_vel_err'
+    plots = [
+        {
+            'source': 'loam',
+            'label': 'LOAM',
+            'color': '#1010FF',
+            'smooth': 15,
+            'start': 50,
+            'end': -1,
+        },
+        {
+            'source': 'rovio',
+            'label': 'ROVIO',
+            'color': '#D0B000',
+            'offset': 50,
+            'smooth': 15,
+            'start': 0,
+            'end': -1,
+        },
+        {
+            'source': 'fusion',
+            'label': 'Fusion',
+            'color': '#FF0000',
+            'smooth': 15,
+            'start': 0,
+            'end': -1,
+        },
+    ]
+
+    title_map = {
+        'Results_Tunnel.bag': "Tunnel",
+        'Results_Town.bag': "Town",
+        'Results_Plane.bag': "Plane",
+        'Results_Plane2.bag': "Plane",
+    }
+
+    for bag_name in data:
+        fig: plt.Figure = plt.figure()
+        for plot in plots:
+            print(list(data[bag_name][plot['source'] + '_diagnostics'].keys()))
+
+            x = data[bag_name][plot['source'] + '_times']
+            y = data[bag_name][plot['source'] + '_diagnostics'][metric]
+
+            x = x[plot['start']:plot['end']]
+            y = y[plot['start']:plot['end']]
+
+            if plot['smooth'] > 1:
+                filter = np.ones([plot['smooth']], dtype=np.float32) / plot['smooth']
+                time_filter = np.zeros_like(filter)
+                time_filter[-1] = 1.0
+                x = np.convolve(x, time_filter, mode="valid")
+                y = np.convolve(y, filter, mode="valid")
+
+            plt.plot(x, y, label=plot['label'], color=plot['color'])
+        plt.legend(loc='upper right')
+        plt.title(title_map[bag_name])
+        plt.xlabel("Time (s)")
+        plt.ylabel(ylabel)
+        shade_degen_regions(fig.get_axes()[0], yrange=(0, 105), regions=DEGEN_TRANS[bag_name])
+        # plt.ylim(top=0.3, bottom=-0.05)
+        plt.show()
+
+
+def comp_log(data):
+    print(list(data.keys()))
+    for bagname in data:
+        pass
+
+
 if __name__ == "__main__":
 
     data = load_all_bags(BAG_DIR, DEGEN_ROT, DEGEN_TRANS)
-    # plot_all_over_time(data, PLOTS)
+    plot_all_over_time(data, PLOTS)
     # plot_all_rocs(data)
-    compare_datasets(data)
+    # compare_datasets(data)
+    # plot_err_over_time(data)
+    # comp_log(data)

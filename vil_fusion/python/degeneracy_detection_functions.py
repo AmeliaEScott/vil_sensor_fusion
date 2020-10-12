@@ -194,8 +194,11 @@ def kullback_leibler_0cov(mat_now, mat_prev, pose_now, pose_prev, **_):
 
 
 def differential_entropy(mat_now, **_):
-    x = (2 * math.pi * math.e) ** mat_now.shape[0]
-    return 0.5 * math.log(x * np.linalg.det(mat_now))
+    try:
+        x = (2 * math.pi * math.e) ** mat_now.shape[0]
+        return 0.5 * math.log(x * np.linalg.det(mat_now))
+    except ValueError:
+        return np.nan
 
 
 def norm_frobenius(mat_now, **_):

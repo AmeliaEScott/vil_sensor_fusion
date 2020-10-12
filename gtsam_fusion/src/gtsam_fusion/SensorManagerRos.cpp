@@ -99,9 +99,9 @@ namespace VILFusion
             auto noise = gtsam::noiseModel::Gaussian::Covariance(cov);
 
 
-            ROS_INFO_STREAM("SensorManager for " << _odometrySubscriber.getTopic() <<
-            ": Added factor between x" << _lastValidKey << "(Time " << _lastValidOdom->header.stamp.toSec() << ") and x"
-            << key << " (" << msg->header.stamp.toSec() << "): " << pose.translation() << ", " << pose.rotation());
+//            ROS_INFO_STREAM("SensorManager for " << _odometrySubscriber.getTopic() <<
+//            ": Added factor between x" << _lastValidKey << "(Time " << _lastValidOdom->header.stamp.toSec() << ") and x"
+//            << key << " (" << msg->header.stamp.toSec() << "): " << pose.translation() << ", " << pose.rotation());
             _graphManager->addBetweenFactor(X(_lastValidKey), X(key), pose, absPose, noise);
 
             if(_optimizeAfterOdom)

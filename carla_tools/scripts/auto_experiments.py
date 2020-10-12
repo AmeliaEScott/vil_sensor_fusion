@@ -10,23 +10,42 @@ import os
 import subprocess
 import time
 
+"""
+This script automates the process of running multiple Carla simulation runs.
+To configure, adjust the constants (variables named in ALL_CAPS) at the top of this file.
+
+This script will perform the following steps, for every given combination of vehicle and map:
+ - Tell the Carla simulator to load the map
+ - Launch the ROS bridge using launch/carla_ros_bridge.launch.
+    - This automatically spawns a vehicle, with sensors, and records a ROS bag
+ - Enable the vehicle autopilot
+ - Wait SIM_TIME_SECS seconds while the simulation runs (Usually on the order of hours, because
+   the simulation runs so slowly on my laptop)
+ - Stop the simulation
+ - Use scripts/fix_rosbag_time.py to fix the timing in the bag
+ - Move the bag to BAG_DEST folder
+    - BAG_DEST was always on my external hard drive, because my laptop's internal hard drive kept
+      filling up with bags
+This results in a series of bags of real-time simulation data, named after the vehicle and map used.
+"""
+
 pkg = rospkg.RosPack()
 
 CARLA_PREFIX = "/home/timothy/Code/carla"
-BAG_SOURCE = os.path.join(pkg.get_path("carla_tools"), "rosbags")
-BAG_DEST = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_v7.2"
-LAUNCH_FILE = os.path.join(pkg.get_path("carla_tools"), "launch", "carla_ros_bridge.launch")
-FIX_ROSBAG_SCRIPT = os.path.join(pkg.get_path("carla_tools"), "scripts", "fix_rosbag_time.py")
-VEHICLE_FILTER = "vehicle.tesla.model3"
+BAG_SOURCE = os.path.join(pkg.get_path("carla_tools"), "rosbags")  # Where does the carla_ros_bridge.launch file store the bags? (Don't change this unless you have changed the launch file)
+BAG_DEST = "/media/timothy/1ABED71A5F421E8D/TimothyScott/rawdata/autoexperiments_v7.3"  # Where to move the bags after recording?
+LAUNCH_FILE = os.path.join(pkg.get_path("carla_tools"), "launch", "carla_ros_bridge.launch")  # Launch file to launch the simulator ROS bridge and spawn a vehicle
+FIX_ROSBAG_SCRIPT = os.path.join(pkg.get_path("carla_tools"), "scripts", "fix_rosbag_time.py")  # Script to fix timings in bag so that it plays in real-time
+VEHICLE_FILTER = "vehicle.tesla.model3"  # Unused, I think
 
-SIM_TIME_SECS = int(60 * 60 * 1)  # 1 Hours
+SIM_TIME_SECS = int(60 * 60 * 1)  # How long to run the simulation (In real-life wall time, not simulated time)
 
-maps = [
+maps = [  # List of Carla maps to run
     # "TestTown",
-    "Test4",
+    # "Test4",
     "Test5",
 ]
-vehicles = ["vehicle.tesla.model3", "vehicle.audi.tt", "vehicle.harley-davidson.low_rider", "vehicle.bmw.grandtourer"]
+vehicles = ["vehicle.tesla.model3", "vehicle.audi.tt", "vehicle.harley-davidson.low_rider", "vehicle.bmw.grandtourer"]  # List of vehicles to test
 # vehicles = ["vehicle.tesla.model3"]
 client = carla.Client("localhost", 2000)
 
@@ -46,7 +65,7 @@ for map in maps:
 
         node = rospy.init_node("auto_experiment_runner")
 
-        rospy.sleep(rospy.Duration.from_sec(15))
+        rospy.sleep(rospy.Duration.from_sec(30))
 
         manual_control_override = rospy.Publisher("/carla/ego_vehicle/vehicle_control_manual_override",
                                                   Bool, queue_size=10, latch=True)

@@ -47,6 +47,7 @@ find_package(GTSAM REQUIRED)
 add_message_files(
         FILES
         TestMessage.msg
+        DiagnosticMessage.msg
 )
 
 ## Generate services in the 'srv' folder

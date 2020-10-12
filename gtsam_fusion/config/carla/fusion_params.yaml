@@ -1,37 +1,36 @@
-sensors:
-  lidar:
-    sensor_topic: "/lidar"
-    sensor_type: "PointCloud2"
-#    odom_topic: "/aft_mapped_to_init_CORRECTED"
-#    odom_topic: "/laser_odom_to_init_CORRECTED"
-    odom_topic: "/gtsam_fusion_filter/laser_odom_output"
-    optimize_after_odom: false
-    use_odom_covariance: false
-    covariance_linear: 0.1
-    covariance_angular: 0.01
-    max_time_skip: 0.1
-  vio:
+sensors:  # One entry for each odometry source
+  lidar:  # This name can be anything
+    sensor_topic: "/lidar"  # Topic for raw sensor data (Point cloud or image)
+    sensor_type: "PointCloud2"  # Must be either PointCloud2 or Image.
+    odom_topic: "/gtsam_fusion_filter/laser_odom_output"  # Odometry topic. Configured here to be the output of the degeneracy detection node, which removes degenerate odometry estimates.
+    optimize_after_odom: false  # Automatically perform graph optimization every time an odometry message is received
+    use_odom_covariance: false  # Use the twist covariance from the odometry message. If false, then the next two parameters are used instead.
+    covariance_linear: 0.2  # Constant covariance for linear component of pose estimate. Used only if !use_odom_covariance
+    covariance_angular: 0.2 # Constant covariance for angular component of pose estimate. Used only if !use_odom_covariance
+    max_time_skip: 0.1  # If the gap between two consecutive odometry messages is longer than this many seconds, then assume one has been missed
+  vio:  # Each entry must contain all of the above parameters
     sensor_topic: /cam0/image_mono
     sensor_type: "Image"
     odom_topic: /rovio/odometry
     optimize_after_odom: true
     use_odom_covariance: false
-    covariance_linear: 1
+    covariance_linear: 0.1
     covariance_angular: 0.1
     max_time_skip: 0.1
-imu:
-  topic: "/imu/fusion"
+imu:  # IMU is configured separately from the sensors above
+  topic: "/imu/fusion"  # Topic for raw IMU measurements
   cov_bias_acc: 0.0001
   cov_bias_omega: 0.000001
-  cov_accel: 0.0000001
-  cov_gyro: 0.0000001
-  cov_integration: 0.0000001
+  cov_accel: 0.000001
+  cov_gyro: 0.000001
+  cov_integration: 0.00000001
   cov_bias_acc_omega_int: 0.0001
 tf:
-  static_frame: "/rovio_world"
-  odom_frame: "/gtsam_odom"
+  static_frame: "/rovio_world"  # Name of static frame for publication of fused odometry
+  odom_frame: "/gtsam_odom"  # Name of moving fused odometry frame
 filter:
-  rot_degen_threshold: 11.0
-  trans_degen_threshold: 27.0
-#  rot_degen_threshold: 11.0
-#  trans_degen_threshold: 28.4
+# Note that in the current implementation, D-Optimality is used. But because of constant matrix size,
+# it is not scaled by the size of the matrix. Thus the absolute magnitude of the degeneracy metric is
+# different from that shown in the graphs in the report.
+  rot_degen_threshold: 11.5  # If degen metric is below this threshold, then it is considered degenerate
+  trans_degen_threshold: 28.9  # No units. Abstract "degeneracy metric"

@@ -1,4 +1,8 @@
-### See the README files in `carla_tools` and `vil_fusion` for more information.
+### See the README files in `carla_tools`, `vil_fusion`, and `gtsam_fusion` for more information.
+
+The final implementation of the thesis, with sensor fusion and degeneracy detection, is included in
+the `gtsam_fusion` package. The `vil_fusion` package was used only for experimentation. The `carla_tools`
+package is used for gathering simulation data from Carla.
 
 # Dependencies
 
